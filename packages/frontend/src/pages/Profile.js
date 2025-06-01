@@ -1,400 +1,259 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Typography,
   Box,
-  Tab,
-  Tabs,
-  Switch,
-  FormControl,
-  FormControlLabel,
-  Select,
-  MenuItem,
-  Checkbox,
-  Button
+  Button,
+  TextField,
+  Divider,
+  Alert,
+  IconButton,
+  Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
-import LanguageIcon from '@mui/icons-material/Language';
+import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from '@mui/icons-material/Check';
+import DeleteIcon from '@mui/icons-material/Delete';
+import axios from 'axios';
+
+axios.defaults.baseURL = 'http://localhost:3001';
 
 function Profile() {
-  const [activeTab, setActiveTab] = useState('notifications');
-  const [notificationSettings, setNotificationSettings] = useState({
-    pushNotifications: false,
-    pullNotifications: true,
-    promotionNotifications: false
-  });
-  const [language, setLanguage] = useState('tr');
-  const [theme, setTheme] = useState('original');
-  const [useDeviceTheme, setUseDeviceTheme] = useState(false);
+  const [user, setUser] = useState({ name: '', email: '', phone: '' });
+  const [editField, setEditField] = useState(null); // 'name', 'email', 'phone' veya null
+  const [editValue, setEditValue] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState('');
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  const [deleteSuccess, setDeleteSuccess] = useState('');
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
+  // Token'ı localStorage'dan al
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get('/api/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUser(res.data.user);
+      } catch (err) {
+        setErrorMsg('Kullanıcı bilgileri alınamadı.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+    // eslint-disable-next-line
+  }, []);
+
+  // Inline edit işlemleri
+  const handleEditClick = (field) => {
+    setEditField(field);
+    setEditValue(user[field] || '');
+    setSuccessMsg('');
+    setErrorMsg('');
+  };
+  const handleEditChange = (e) => setEditValue(e.target.value);
+  const handleEditCancel = () => {
+    setEditField(null);
+    setEditValue('');
+  };
+  const handleEditSave = async () => {
+    setSuccessMsg('');
+    setErrorMsg('');
+    try {
+      const res = await axios.put('/api/auth/updatedetails', { [editField]: editValue }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser(res.data.user);
+      setSuccessMsg('Bilgi güncellendi.');
+      setEditField(null);
+      setEditValue('');
+    } catch (err) {
+      setErrorMsg(err.response?.data?.message || 'Güncelleme başarısız.');
+    }
   };
 
-  const handleNotificationChange = (name) => (event) => {
-    setNotificationSettings({
-      ...notificationSettings,
-      [name]: event.target.checked
-    });
+  // Şifre değiştirme işlemleri
+  const handlePwInput = (e) => {
+    setPwForm({ ...pwForm, [e.target.name]: e.target.value });
+  };
+  const handleChangePassword = async () => {
+    setPwError('');
+    setPwSuccess('');
+    setPwLoading(true);
+    try {
+      await axios.put('/api/auth/updatepassword', pwForm, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPwSuccess('Şifre başarıyla değiştirildi.');
+      setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      setPwError(err.response?.data?.message || 'Şifre değiştirilemedi.');
+    } finally {
+      setPwLoading(false);
+    }
   };
 
-  const handleLanguageChange = (event) => {
-    setLanguage(event.target.value);
+  // Hesap silme işlemleri
+  const handleDeleteAccount = async () => {
+    setDeleteError('');
+    setDeleteSuccess('');
+    try {
+      await axios.delete('/api/auth/delete', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDeleteSuccess('Hesabınız silindi. Oturum kapatılıyor...');
+      setTimeout(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }, 2000);
+    } catch (err) {
+      setDeleteError(err.response?.data?.message || 'Hesap silinemedi.');
+    }
   };
 
-  const handleThemeChange = (event) => {
-    setTheme(event.target.value);
-  };
-
-  const handleDeviceThemeChange = (event) => {
-    setUseDeviceTheme(event.target.checked);
-  };
+  if (loading) return <Box sx={{ p: 6, textAlign: 'center' }}>Yükleniyor...</Box>;
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', px: 2, pt: 4, pb: 6 }}>
-      <Tabs
-        value={activeTab}
-        onChange={handleTabChange}
-        variant="fullWidth"
-        aria-label="Settings tabs"
-        sx={{
-          '& .MuiTab-root': { 
-            color: '#666',
-            fontFamily: '"Alata", sans-serif',
-            fontSize: '1.1rem'
-          },
-          '& .Mui-selected': { 
-            color: '#222', 
-            fontWeight: 'bold' 
-          },
-          '& .MuiTabs-indicator': { 
-            backgroundColor: '#ff8800'
-          },
-          mb: 5
-        }}
-      >
-        <Tab value="account" label="Account" />
-        <Tab value="notifications" label="Notifications" />
-        <Tab value="language" label="Language" />
-        <Tab value="theme" label="Theme" />
-      </Tabs>      {/* Account Tab */}
-      {activeTab === 'account' && (
-        <Box sx={{ py: 2 }}>
-          <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
-            Account
-          </Typography>
+    <Box sx={{ width: '100%', maxWidth: 500, mx: 'auto', px: 2, pt: 4, pb: 6 }}>
+      <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
+        Account Details
+      </Typography>
 
-          <Box sx={{ maxWidth: 600, mx: 'auto', mt: 3 }}>
-            {/* Personal Information Section */}
-            <Box sx={{ mb: 5 }}>
-              <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, fontFamily: 'Alata, sans-serif' }}>
-                Personal Information
-              </Typography>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
-                  Full Name:
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
-                  Alp Yılmaz
-                </Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
-                  Email:
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
-                  alp.yilmaz@example.com
-                </Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
-                  Phone:
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
-                  +90 555 123 4567
-                </Typography>
-              </Box>
-            </Box>
-            
-            {/* Security Section */}
-            <Box sx={{ mb: 5 }}>
-              <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, fontFamily: 'Alata, sans-serif' }}>
-                Security
-              </Typography>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
-                  Password:
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
-                  ••••••••
-                </Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
-                  Two-factor Authentication:
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem', color: '#ff8800', fontWeight: 'bold' }}>
-                  Disabled
-                </Typography>
-              </Box>
-            </Box>
-            
-            {/* Account Settings */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, fontFamily: 'Alata, sans-serif' }}>
-                Account Settings
-              </Typography>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
-                  Account Type:
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
-                  Standard User
-                </Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
-                  Membership Since:
-                </Typography>
-                <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
-                  January 15, 2024
-                </Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-                <Button 
-                  variant="contained" 
-                  sx={{ 
-                    bgcolor: '#ff8800', 
-                    '&:hover': { bgcolor: '#ff6600' },
-                    px: 4,
-                    py: 1,
-                    fontSize: '1.1rem',
-                    fontWeight: 'bold',
-                    borderRadius: 2
-                  }}
-                >
-                  Sign Out
-                </Button>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-      )}
+      {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}
+      {errorMsg && <Alert severity="error" sx={{ mb: 2 }}>{errorMsg}</Alert>}
 
-      {/* Notifications Tab */}
-      {activeTab === 'notifications' && (
-        <Box sx={{ py: 2 }}>
-          <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
-            Notifications
-          </Typography>
-          
-          <Box sx={{ maxWidth: 600, mx: 'auto' }}>
-            <Box sx={{ my: 2 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={notificationSettings.pushNotifications}
-                    onChange={handleNotificationChange('pushNotifications')}
-                    sx={{
-                      '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: '#ff8800',
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: '#ff8800',
-                      },
-                    }}
-                  />
-                }
-                label={
-                  <Typography sx={{ fontWeight: 500, fontSize: '1.1rem' }}>
-                    Allow push notifications
-                  </Typography>
-                }
-              />
-            </Box>
-            
-            <Box sx={{ my: 2 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={notificationSettings.pullNotifications}
-                    onChange={handleNotificationChange('pullNotifications')}
-                    sx={{
-                      '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: '#ff8800',
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: '#ff8800',
-                      },
-                    }}
-                  />
-                }
-                label={
-                  <Typography sx={{ fontWeight: 500, fontSize: '1.1rem' }}>
-                    Allow pull notifications
-                  </Typography>
-                }
-              />
-            </Box>
-            
-            <Box sx={{ my: 2 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={notificationSettings.promotionNotifications}
-                    onChange={handleNotificationChange('promotionNotifications')}
-                    sx={{
-                      '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: '#ff8800',
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: '#ff8800',
-                      },
-                    }}
-                  />
-                }
-                label={
-                  <Typography sx={{ fontWeight: 500, fontSize: '1.1rem' }}>
-                    Allow promotion notifications
-                  </Typography>
-                }
-              />
-            </Box>
-          </Box>
+      <Stack spacing={3} mb={4}>
+        {/* Name */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>Full Name:</Typography>
+          {editField === 'name' ? (
+            <>
+              <TextField size="small" value={editValue} onChange={handleEditChange} autoFocus />
+              <IconButton color="success" onClick={handleEditSave}><CheckIcon /></IconButton>
+              <IconButton color="error" onClick={handleEditCancel}><CloseIcon /></IconButton>
+            </>
+          ) : (
+            <>
+              <Typography sx={{ flex: 1 }}>{user.name}</Typography>
+              <IconButton onClick={() => handleEditClick('name')}><EditIcon /></IconButton>
+            </>
+          )}
         </Box>
-      )}
+        {/* Email */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>Email:</Typography>
+          {editField === 'email' ? (
+            <>
+              <TextField size="small" value={editValue} onChange={handleEditChange} autoFocus />
+              <IconButton color="success" onClick={handleEditSave}><CheckIcon /></IconButton>
+              <IconButton color="error" onClick={handleEditCancel}><CloseIcon /></IconButton>
+            </>
+          ) : (
+            <>
+              <Typography sx={{ flex: 1 }}>{user.email}</Typography>
+              <IconButton onClick={() => handleEditClick('email')}><EditIcon /></IconButton>
+            </>
+          )}
+        </Box>
+        {/* Phone */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>Phone:</Typography>
+          {editField === 'phone' ? (
+            <>
+              <TextField size="small" value={editValue} onChange={handleEditChange} autoFocus />
+              <IconButton color="success" onClick={handleEditSave}><CheckIcon /></IconButton>
+              <IconButton color="error" onClick={handleEditCancel}><CloseIcon /></IconButton>
+            </>
+          ) : (
+            <>
+              <Typography sx={{ flex: 1 }}>{user.phone}</Typography>
+              <IconButton onClick={() => handleEditClick('phone')}><EditIcon /></IconButton>
+            </>
+          )}
+        </Box>
+      </Stack>
 
-      {/* Language Tab */}
-      {activeTab === 'language' && (
-        <Box sx={{ py: 2 }}>
-          <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
-            Language
-          </Typography>
-          
-          <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, display: 'flex', alignItems: 'center' }}>
-            <LanguageIcon sx={{ mr: 2, fontSize: 28 }} />
-            
-            <FormControl sx={{ minWidth: 200 }}>
-              <Select
-                value={language}
-                onChange={handleLanguageChange}
-                displayEmpty
-                sx={{ 
-                  height: 48,
-                  '&.MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: '#ccc' },
-                    '&:hover fieldset': { borderColor: '#ff8800' },
-                    '&.Mui-focused fieldset': { borderColor: '#ff8800' }
-                  }
-                }}
-                IconComponent={(props) => (
-                  <Box
-                    component="div"
-                    sx={{
-                      ml: '0 !important',
-                      mr: 1,
-                      fontSize: '1.2rem',
-                      color: '#666',
-                      transform: 'none !important',
-                      transition: 'none !important'
-                    }}
-                    {...props}
-                  >
-                    ▼
-                  </Box>
-                )}
-              >
-                <MenuItem value="en">English</MenuItem>
-                <MenuItem value="tr">Türkçe</MenuItem>
-                <MenuItem value="de">Deutsch</MenuItem>
-                <MenuItem value="fr">Français</MenuItem>
-                <MenuItem value="es">Español</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </Box>
-      )}
+      <Divider sx={{ my: 4 }} />
 
-      {/* Theme Tab */}
-      {activeTab === 'theme' && (
-        <Box sx={{ py: 2 }}>
-          <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
-            Theme
-          </Typography>
-          
-          <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-              <Box 
-                sx={{ 
-                  width: 40, 
-                  height: 40, 
-                  borderRadius: '50%', 
-                  background: 'linear-gradient(135deg, #ff8800 0%, #ff6611 100%)',
-                  mr: 2 
-                }} 
-              />
-              
-              <FormControl sx={{ minWidth: 200 }}>
-                <Select
-                  value={theme}
-                  onChange={handleThemeChange}
-                  displayEmpty
-                  sx={{ 
-                    height: 48,
-                    '&.MuiOutlinedInput-root': {
-                      '& fieldset': { borderColor: '#ccc' },
-                      '&:hover fieldset': { borderColor: '#ff8800' },
-                      '&.Mui-focused fieldset': { borderColor: '#ff8800' }
-                    }
-                  }}
-                  IconComponent={(props) => (
-                    <Box
-                      component="div"
-                      sx={{
-                        ml: '0 !important',
-                        mr: 1,
-                        fontSize: '1.2rem',
-                        color: '#666',
-                        transform: 'none !important',
-                        transition: 'none !important'
-                      }}
-                      {...props}
-                    >
-                      ▼
-                    </Box>
-                  )}
-                >
-                  <MenuItem value="original">Original</MenuItem>
-                  <MenuItem value="dark">Dark</MenuItem>
-                  <MenuItem value="light">Light</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-            
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={useDeviceTheme}
-                  onChange={handleDeviceThemeChange}
-                  sx={{
-                    color: '#ccc',
-                    '&.Mui-checked': {
-                      color: '#ff8800',
-                    },
-                  }}
-                />
-              }
-              label="Use Device Theme"
-            />
-          </Box>
-        </Box>
-      )}
+      {/* Şifre değiştirme alanı */}
+      <Typography variant="h5" fontWeight="bold" sx={{ mb: 2, fontFamily: 'Alata, sans-serif' }}>
+        Change Password
+      </Typography>
+      {pwSuccess && <Alert severity="success" sx={{ mb: 2 }}>{pwSuccess}</Alert>}
+      {pwError && <Alert severity="error" sx={{ mb: 2 }}>{pwError}</Alert>}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
+        <TextField
+          label="Current Password"
+          name="currentPassword"
+          type="password"
+          value={pwForm.currentPassword}
+          onChange={handlePwInput}
+          fullWidth
+        />
+        <TextField
+          label="New Password"
+          name="newPassword"
+          type="password"
+          value={pwForm.newPassword}
+          onChange={handlePwInput}
+          fullWidth
+        />
+        <TextField
+          label="Confirm New Password"
+          name="confirmPassword"
+          type="password"
+          value={pwForm.confirmPassword}
+          onChange={handlePwInput}
+          fullWidth
+        />
+        <Button
+          variant="contained"
+          sx={{ bgcolor: '#ff8800', '&:hover': { bgcolor: '#ff6600' }, fontWeight: 'bold', fontSize: '1.1rem', borderRadius: 2 }}
+          onClick={handleChangePassword}
+          disabled={pwLoading}
+        >
+          {pwLoading ? 'Changing...' : 'Change Password'}
+        </Button>
+      </Box>
+
+      {/* Hesap silme alanı */}
+      <Divider sx={{ my: 3 }} />
+      <Box sx={{ textAlign: 'center' }}>
+        <Button
+          variant="outlined"
+          color="error"
+          startIcon={<DeleteIcon />}
+          onClick={() => setDeleteDialog(true)}
+        >
+          Delete Account
+        </Button>
+        <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)}>
+          <DialogTitle>Hesabı Sil</DialogTitle>
+          <DialogContent>
+            <Typography>Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.</Typography>
+            {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
+            {deleteSuccess && <Alert severity="success" sx={{ mt: 2 }}>{deleteSuccess}</Alert>}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialog(false)}>İptal</Button>
+            <Button color="error" onClick={handleDeleteAccount}>Evet, Sil</Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
     </Box>
   );
 }

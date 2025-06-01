@@ -7,7 +7,10 @@ const {
   resetPassword,
   updateDetails,
   updatePassword,
-  getAllBusinesses
+  getAllBusinesses,
+  deleteAccount,
+  getNotificationSettings,
+  updateNotificationSettings
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 const favoritesRouter = require('./favorites');
@@ -24,9 +27,13 @@ router.put('/resetpassword/:resettoken', resetPassword);
 router.get('/me', protect, getMe);
 router.put('/updatedetails', protect, updateDetails);
 router.put('/updatepassword', protect, updatePassword);
+router.delete('/delete', protect, deleteAccount);
 
 // Tüm işletme kullanıcılarını getir
 router.get('/businesses', getAllBusinesses);
+
+router.get('/notifications', protect, getNotificationSettings);
+router.put('/notifications', protect, updateNotificationSettings);
 
 router.use('/favorites', favoritesRouter);
 
