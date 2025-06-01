@@ -186,11 +186,31 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
             flexDirection: { xs: 'column', lg: 'row' },
             gap: 3
           }}>
-            {/* Left Column: Cart Items */}            <Box sx={{ 
+            {/* Left Column: Cart Items */}
+            <Box sx={{ 
               flex: 1, 
               width: { xs: '100%', lg: 'calc(100% - 350px)' }
             }}>
-              {/* All Cart Items in a Single Card */}
+              <Box sx={{
+                bgcolor: '#f9f9f9',
+                p: 2,
+                borderRadius: '12px',
+                mb: 2
+              }}>
+                <Typography variant="subtitle1" sx={{
+                  fontFamily: '"Alata", sans-serif',
+                  fontWeight: 'bold',
+                  color: '#666',
+                  mb: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}>
+                  <ShoppingBasketIcon fontSize="small" sx={{ color: '#ff8800' }} />
+                  {cartItems.length} items in your cart
+                </Typography>
+              </Box>
+                {/* All Cart Items in a Single Card */}
               <Card 
                 sx={{ 
                   borderRadius: '16px', 
@@ -198,7 +218,6 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                   border: '1px solid #ff8800', 
                   boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                   transition: 'all 0.3s ease',
-                  mb: 2,
                   '&:hover': {
                     transform: 'translateY(-3px)',
                     boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
@@ -247,134 +266,133 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                   
                   {/* Cart Items List */}
                   {cartItems.map((item, index) => (
-                    <Box 
-                      key={item.id}
-                      sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
-                        p: 2.5,
-                        borderBottom: index < cartItems.length - 1 ? '1px dashed #ffddbb' : 'none',
-                        '&:hover': {
-                          bgcolor: '#fafafa'
-                        }
-                      }}
-                    >
-                      <Box sx={{ flex: 1 }}>
-                        <Typography 
-                          component="div" 
-                          variant="h6" 
-                          sx={{ 
-                            fontFamily: '"Alata", sans-serif', 
-                            fontWeight: 'bold',
-                            fontSize: '1rem',
-                            mb: 0.5
-                          }}
-                        >
-                          {item.productName}
-                        </Typography>
-                        <Typography 
-                          variant="subtitle1" 
-                          color="#ff8800" 
-                          component="div" 
-                          sx={{ 
-                            fontFamily: '"Alata", sans-serif',
-                            fontWeight: 'bold'  
-                          }}
-                        >
-                          ₺ {Number(item.price).toFixed(2)}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ 
-                            display: 'block',
-                            mt: 0.5,
-                            fontFamily: '"Alata", sans-serif'
-                          }}
-                        >
-                          Subtotal: ₺ {(Number(item.price) * item.quantity).toFixed(2)}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        flexDirection: 'column',
-                        alignItems: 'flex-end',
-                        gap: 1,
-                        minWidth: 140
-                      }}>
+                    <React.Fragment key={item.id}>
+                      <Box 
+                        sx={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center', 
+                          p: 2.5,
+                          borderBottom: index < cartItems.length - 1 ? '1px dashed #ffddbb' : 'none',
+                          '&:hover': {
+                            bgcolor: '#fafafa'
+                          }
+                        }}
+                      >
+                        <Box sx={{ flex: 1 }}>
+                          <Typography 
+                            component="div" 
+                            variant="h6" 
+                            sx={{ 
+                              fontFamily: '"Alata", sans-serif', 
+                              fontWeight: 'bold',
+                              fontSize: '1rem',
+                              mb: 0.5
+                            }}
+                          >
+                            {item.productName}
+                          </Typography>
+                          <Typography 
+                            variant="subtitle1" 
+                            color="#ff8800" 
+                            component="div" 
+                            sx={{ 
+                              fontFamily: '"Alata", sans-serif',
+                              fontWeight: 'bold'  
+                            }}
+                          >
+                            ₺ {Number(item.price).toFixed(2)}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ 
+                              display: 'block',
+                              mt: 0.5,
+                              fontFamily: '"Alata", sans-serif'
+                            }}
+                          >
+                            Subtotal: ₺ {(Number(item.price) * item.quantity).toFixed(2)}
+                          </Typography>
+                        </Box>
                         <Box sx={{ 
                           display: 'flex', 
-                          alignItems: 'center',
-                          bgcolor: '#f8f8f8',
-                          borderRadius: '50px',
-                          border: '1px solid #ddd',
-                          width: 'max-content',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                          flexDirection: 'column',
+                          alignItems: 'flex-end',
+                          gap: 1,
+                          minWidth: 140
                         }}>
-                          <IconButton 
-                            size="small" 
-                            onClick={() => removeFromCart(item.id)}
-                            sx={{ 
-                              color: '#ff8800',
-                              width: 32,
-                              height: 32,
-                              '&:hover': {
-                                bgcolor: 'rgba(255,136,0,0.1)'
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            bgcolor: '#f8f8f8',
+                            borderRadius: '50px',
+                            border: '1px solid #ddd',
+                            width: 'max-content',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                          }}>
+                            <IconButton 
+                              size="small" 
+                              onClick={() => removeFromCart(item.id)}
+                              sx={{ 
+                                color: '#ff8800',
+                                width: 32,
+                                height: 32,
+                                '&:hover': {
+                                  bgcolor: 'rgba(255,136,0,0.1)'
+                                }
+                              }}
+                            >
+                              <RemoveIcon fontSize="small" />
+                            </IconButton>
+                            <Typography sx={{ 
+                              minWidth: '36px', 
+                              textAlign: 'center',
+                              fontWeight: 'bold',
+                              fontFamily: '"Alata", sans-serif'
+                            }}>{item.quantity}</Typography>
+                            <IconButton 
+                              size="small" 
+                              onClick={() => addToCart(item)}
+                              sx={{ 
+                                color: '#ff8800',
+                                width: 32,
+                                height: 32,
+                                '&:hover': {
+                                  bgcolor: 'rgba(255,136,0,0.1)'
+                                }
+                              }}
+                            >
+                              <AddIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                          <Button
+                            size="small"
+                            startIcon={<DeleteIcon fontSize="small" />}
+                            onClick={() => {
+                              // Remove item completely from cart
+                              const count = item.quantity;
+                              for (let i = 0; i < count; i++) {
+                                removeFromCart(item.id);
                               }
                             }}
-                          >
-                            <RemoveIcon fontSize="small" />
-                          </IconButton>
-                          <Typography sx={{ 
-                            minWidth: '36px', 
-                            textAlign: 'center',
-                            fontWeight: 'bold',
-                            fontFamily: '"Alata", sans-serif'
-                          }}>{item.quantity}</Typography>
-                          <IconButton 
-                            size="small" 
-                            onClick={() => addToCart(item)}
                             sx={{ 
-                              color: '#ff8800',
-                              width: 32,
-                              height: 32,
+                              color: '#666',
+                              fontSize: '0.75rem',
                               '&:hover': {
-                                bgcolor: 'rgba(255,136,0,0.1)'
-                              }
+                                color: '#ff0000',
+                                bgcolor: 'rgba(255,0,0,0.05)'
+                              },
+                              width: 'max-content'
                             }}
                           >
-                            <AddIcon fontSize="small" />
-                          </IconButton>
+                            Remove
+                          </Button>
                         </Box>
-                        <Button
-                          size="small"
-                          startIcon={<DeleteIcon fontSize="small" />}
-                          onClick={() => {
-                            // Remove item completely from cart
-                            const count = item.quantity;
-                            for (let i = 0; i < count; i++) {
-                              removeFromCart(item.id);
-                            }
-                          }}
-                          sx={{ 
-                            color: '#666',
-                            fontSize: '0.75rem',
-                            '&:hover': {
-                              color: '#ff0000',
-                              bgcolor: 'rgba(255,0,0,0.05)'
-                            },
-                            width: 'max-content'
-                          }}
-                        >
-                          Remove
-                        </Button>
                       </Box>
-                    </Box>
+                    </React.Fragment>
                   ))}
-                </CardContent>
-              </Card>
-
+              
               {/* Order Notes Section */}
               <Paper elevation={3} sx={{ 
                 p: 3, 
@@ -610,7 +628,8 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                       }}>
                         ₺ {Number(calculateTotal()).toFixed(2)}
                       </Typography>
-                    </Box>                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography sx={{ 
                         fontFamily: '"Alata", sans-serif',
                         display: 'flex',
@@ -628,36 +647,6 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                         ₺ 10.00
                       </Typography>
                     </Box>
-
-                    {selectedAddressId && (
-                      <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'flex-start', 
-                        mt: 2, 
-                        pt: 2,
-                        borderTop: '1px dashed #ddd'
-                      }}>
-                        <HomeIcon fontSize="small" sx={{ color: '#777', mt: 0.3, mr: 1 }} />
-                        <Box>
-                          <Typography sx={{ 
-                            fontFamily: '"Alata", sans-serif',
-                            fontWeight: 'bold',
-                            fontSize: '0.9rem',
-                            color: '#555'
-                          }}>
-                            {addresses.find(addr => addr.id === selectedAddressId)?.name || 'Selected Address'}
-                          </Typography>
-                          <Typography sx={{ 
-                            fontFamily: '"Alata", sans-serif',
-                            fontSize: '0.8rem',
-                            color: '#777',
-                            mt: 0.5
-                          }}>
-                            {addresses.find(addr => addr.id === selectedAddressId)?.address || 'No address details'}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    )}
                   </Paper>
                   
                   <Divider sx={{ my: 2, borderStyle: 'dashed', borderColor: 'rgba(255,136,0,0.3)' }} />
