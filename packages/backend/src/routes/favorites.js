@@ -3,6 +3,7 @@ const router = express.Router();
 const Favorite = require('../models/Favorite');
 const MenuItem = require('../models/MenuItem');
 const { protect } = require('../middleware/authMiddleware');
+const sequelize = require('../config/database');
 
 // Kullanıcının favorilerini getir
 router.get('/', protect, async (req, res) => {
@@ -34,6 +35,37 @@ router.delete('/:menuItemId', protect, async (req, res) => {
     const { menuItemId } = req.params;
     await Favorite.destroy({ where: { userId: req.user.id, menuItemId } });
     res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Menü itemlarının favori sayılarını getir
+router.get('/counts', async (req, res) => {
+  try {
+    const { menuItemIds } = req.query;
+    if (!menuItemIds) {
+      return res.status(400).json({ message: 'menuItemIds gerekli' });
+    }
+
+    const ids = menuItemIds.split(',').map(id => parseInt(id));
+    const favorites = await Favorite.findAll({
+      where: { menuItemId: ids },
+      attributes: ['menuItemId', [sequelize.fn('COUNT', sequelize.col('menuItemId')), 'count']],
+      group: ['menuItemId']
+    });
+
+    const counts = {};
+    favorites.forEach(fav => {
+      counts[fav.get('menuItemId')] = parseInt(fav.get('count'));
+    });
+
+    // Hiç favorisi olmayanlar için de 0 dön
+    ids.forEach(id => {
+      if (typeof counts[id] === 'undefined') counts[id] = 0;
+    });
+
+    res.json(counts);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

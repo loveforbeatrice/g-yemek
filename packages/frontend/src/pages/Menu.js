@@ -25,6 +25,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
   const [openSort, setOpenSort] = useState(false);
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const [sortAnchorEl, setSortAnchorEl] = useState(null);
+  const [favoriteCounts, setFavoriteCounts] = useState({});
   
   const handleFilterClick = (event) => {
     setFilterAnchorEl(event.currentTarget);
@@ -99,6 +100,19 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
       });
   }, [businessName]);
 
+  // Menü itemları değiştiğinde favori sayılarını çek
+  useEffect(() => {
+    if (menuItems.length === 0) return;
+    const menuItemIds = menuItems.map(item => item.id).join(',');
+    axios.get(`http://localhost:3001/api/favorites/counts?menuItemIds=${menuItemIds}`)
+      .then(res => {
+        setFavoriteCounts(res.data);
+      })
+      .catch(error => {
+        console.error('Error fetching favorite counts:', error);
+      });
+  }, [menuItems]);
+
   const handleFavorite = async (item) => {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -115,6 +129,17 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
       });
       setFavorites(f => ({ ...f, [item.id]: true }));
     }
+    // Her iki durumda da count'u backend'den tekrar çek
+    axios.get(`http://localhost:3001/api/favorites/counts?menuItemIds=${item.id}`)
+      .then(res => {
+        setFavoriteCounts(prev => ({
+          ...prev,
+          [item.id]: typeof res.data[item.id] === 'number' ? res.data[item.id] : 0
+        }));
+      })
+      .catch(error => {
+        console.error('Error fetching favorite count:', error);
+      });
   };
 
   // Filtreleme ve sıralama işlemleri
@@ -385,7 +410,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                             mt: -0.5,
                             filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
                           }}>
-                            12
+                            {typeof favoriteCounts[item.id] === 'number' ? favoriteCounts[item.id] : 0}
                           </Typography>
                         </Box>
                       </Box>
