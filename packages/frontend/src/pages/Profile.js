@@ -158,7 +158,7 @@ function Profile() {
 
       <Stack spacing={3} mb={4}>
         {/* Name */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', px: { xs: 2, sm: 3 }, py: { xs: 0.5, sm: 1 } }}>
           <Typography sx={{ minWidth: 90, fontWeight: 500 }}>Full Name:</Typography>
           {editField === 'name' ? (
             <>
@@ -174,7 +174,7 @@ function Profile() {
           )}
         </Box>
         {/* Email */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', px: { xs: 2, sm: 3 }, py: { xs: 0.5, sm: 1 } }}>
           <Typography sx={{ minWidth: 90, fontWeight: 500 }}>Email:</Typography>
           {editField === 'email' ? (
             <>
@@ -190,7 +190,7 @@ function Profile() {
           )}
         </Box>
         {/* Phone */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', px: { xs: 2, sm: 3 }, py: { xs: 0.5, sm: 1 } }}>
           <Typography sx={{ minWidth: 90, fontWeight: 500 }}>Phone:</Typography>
           {editField === 'phone' ? (
             <>
