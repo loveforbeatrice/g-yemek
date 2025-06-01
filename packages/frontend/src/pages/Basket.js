@@ -11,6 +11,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { keyframes } from '@mui/system';
 
 function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
   const [addressError, setAddressError] = React.useState('');
   const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' });
   const [successModal, setSuccessModal] = React.useState(false);
+  const [privacyOpen, setPrivacyOpen] = React.useState(false);
 
   React.useEffect(() => {
     const fetchAddresses = async () => {
@@ -91,7 +93,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Container maxWidth="md" sx={{ py: 4, pb: { xs: 10, sm: 4 } }}>
       <Box sx={{ 
         display: 'flex', 
         justifyContent: 'center', 
@@ -109,18 +111,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
             fontFamily: '"Alata", sans-serif', 
             letterSpacing: '0.5px',
             color: '#333',
-            position: 'relative',
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              bottom: -8,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '60px',
-              height: '3px',
-              backgroundColor: '#ff8800',
-              borderRadius: '2px'
-            }
+            position: 'relative'
           }}
         >
           My Cart
@@ -213,7 +204,9 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                     p: 2,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between'
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: 1
                   }}>
                     <Typography 
                       component="div" 
@@ -229,20 +222,45 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                       <ShoppingBasketIcon fontSize="small" sx={{ color: '#ff8800' }} />
                       Your Order Items
                     </Typography>
-                    <Typography 
-                      variant="subtitle2" 
-                      sx={{ 
-                        bgcolor: '#ff8800',
-                        color: 'white',
-                        py: 0.5,
-                        px: 1.5,
-                        borderRadius: '50px',
-                        fontFamily: '"Alata", sans-serif',
-                        fontWeight: 'bold'  
-                      }}
-                    >
-                      {cartItems.length} items
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography 
+                        variant="subtitle2" 
+                        sx={{ 
+                          bgcolor: '#ff8800',
+                          color: 'white',
+                          py: 0.5,
+                          px: 1.5,
+                          borderRadius: '50px',
+                          fontFamily: '"Alata", sans-serif',
+                          fontWeight: 'bold'  
+                        }}
+                      >
+                        {cartItems.length} items
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        sx={{
+                          borderRadius: 5,
+                          borderColor: '#ff8800',
+                          color: '#ff8800',
+                          fontWeight: 'bold',
+                          px: 2,
+                          py: 0.5,
+                          fontSize: '0.95rem',
+                          ml: 1,
+                          minWidth: 0,
+                          height: 32,
+                          '&:hover': {
+                            backgroundColor: '#fff3e0',
+                            borderColor: '#ff8800',
+                            color: '#e67a00',
+                          }
+                        }}
+                        onClick={resetCart}
+                      >
+                        Sepeti Boşalt
+                      </Button>
+                    </Box>
                   </Box>
                   
                   {/* Cart Items List */}
@@ -721,7 +739,14 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                     color: '#888',
                     fontFamily: '"Alata", sans-serif'
                   }}>
-                    By placing your order, you agree to our Terms of Service & Privacy Policy
+                    By placing your order, you agree to our Terms of Service &{' '}
+                    <Button
+                      variant="text"
+                      sx={{ color: '#ff8800', textDecoration: 'underline', fontSize: 'inherit', p: 0, minWidth: 0 }}
+                      onClick={() => setPrivacyOpen(true)}
+                    >
+                      Privacy Policy
+                    </Button>
                   </Typography>
                 </CardContent>
               </Card>
@@ -734,14 +759,24 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
         open={snackbar.open}
         autoHideDuration={4000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         sx={{
+          position: 'fixed',
+          top: { xs: 64, sm: 80 },
+          right: { xs: 8, sm: 24 },
+          left: 'auto',
+          width: 'auto',
+          maxWidth: 340,
+          zIndex: 1400,
+          p: 0,
+          m: 0,
           '& .MuiAlert-root': {
             borderRadius: '12px',
             boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
             fontFamily: '"Alata", sans-serif',
             border: '1px solid',
-            borderColor: snackbar.severity === 'success' ? 'rgba(46, 204, 113, 0.3)' : 'rgba(231, 76, 60, 0.3)'
+            borderColor: snackbar.severity === 'success' ? 'rgba(46, 204, 113, 0.3)' : 'rgba(231, 76, 60, 0.3)',
+            width: '100%'
           }
         }}
       >
@@ -767,120 +802,97 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
         BackdropComponent={Backdrop}
         BackdropProps={{
           timeout: 500,
-          sx: { backgroundColor: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(5px)' }
+          sx: { backgroundColor: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }
         }}
       >
         <Fade in={successModal}>
+          <Box sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            p: 0,
+            m: 0,
+            background: 'none',
+            boxShadow: 'none',
+            border: 'none',
+          }}>
+            {/* Dağıtık Kalpler */}
+            <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 2 }}>
+              <span style={{ position: 'absolute', top: '8%', left: '70%', fontSize: 64, color: '#ff8800', opacity: 0.95 }}>❤</span>
+              <span style={{ position: 'absolute', top: '18%', left: '80%', fontSize: 40, color: '#ff8800', opacity: 0.85 }}>❤</span>
+              <span style={{ position: 'absolute', top: '30%', left: '75%', fontSize: 28, color: '#ff8800', opacity: 0.8 }}>❤</span>
+              <span style={{ position: 'absolute', top: '12%', left: '60%', fontSize: 32, color: '#ff8800', opacity: 0.7 }}>❤</span>
+              <span style={{ position: 'absolute', top: '22%', left: '65%', fontSize: 22, color: '#ff8800', opacity: 0.7 }}>❤</span>
+              <span style={{ position: 'absolute', top: '35%', left: '60%', fontSize: 18, color: '#ff8800', opacity: 0.6 }}>❤</span>
+              <span style={{ position: 'absolute', top: '15%', left: '50%', fontSize: 40, color: '#ff8800', opacity: 0.7 }}>❤</span>
+              <span style={{ position: 'absolute', top: '28%', left: '55%', fontSize: 24, color: '#ff8800', opacity: 0.6 }}>❤</span>
+              <span style={{ position: 'absolute', top: '10%', left: '80%', fontSize: 20, color: '#ff8800', opacity: 0.5 }}>❤</span>
+              <span style={{ position: 'absolute', top: '38%', left: '80%', fontSize: 16, color: '#ff8800', opacity: 0.5 }}>❤</span>
+            </Box>
+            {/* Order Successful Yazısı */}
+            <Box sx={{
+              width: '100%',
+              textAlign: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+            }}>
+              <span style={{
+                fontFamily: 'Pacifico, "Dancing Script", cursive',
+                fontSize: 'clamp(2.5rem, 8vw, 4.5rem)',
+                color: '#ff8800',
+                fontWeight: 700,
+                letterSpacing: '2px',
+                textShadow: '2px 2px 8px rgba(255,136,0,0.08)',
+                marginTop: 0,
+                marginBottom: 0,
+                display: 'inline-block',
+              }}>
+                Order Successful
+              </span>
+            </Box>
+          </Box>
+        </Fade>
+      </Modal>
+
+      {/* Privacy Policy Modal */}
+      <Modal
+        open={privacyOpen}
+        onClose={() => setPrivacyOpen(false)}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+          sx: { backgroundColor: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(5px)' }
+        }}
+      >
+        <Fade in={privacyOpen}>
           <Box sx={{
             position: 'absolute',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '90%',
-            maxWidth: 600,
-            textAlign: 'center',
             bgcolor: 'white',
-            borderRadius: '24px',
-            p: 5,
-            boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-            border: '2px solid #ff8800'
+            borderRadius: 3,
+            p: 4,
+            maxWidth: 400,
+            boxShadow: 24,
+            textAlign: 'center'
           }}>
-            <Box sx={{ 
-              position: 'relative',
-              animation: 'fadeIn 0.8s',
-              '@keyframes fadeIn': {
-                '0%': { opacity: 0, transform: 'scale(0.9)' },
-                '100%': { opacity: 1, transform: 'scale(1)' }
-              },
-            }}>
-              <Typography 
-                variant="h2" 
-                sx={{ 
-                  fontFamily: 'Alata, sans-serif',
-                  color: '#ff8800',
-                  fontWeight: 'bold',
-                  textShadow: '2px 2px 4px rgba(0, 0, 0, 0.1)',
-                  fontSize: { xs: '3rem', sm: '3.5rem', md: '4rem' },
-                  mb: 1,
-                  position: 'relative',
-                  zIndex: 10
-                }}
-              >
-                Order Successful!
-              </Typography>
-              
-              {/* Heart animations */}
-              <Box sx={{ position: 'absolute', top: -40, right: { xs: 0, sm: -40 }, zIndex: 5 }}>
-                <FavoriteIcon sx={{ 
-                  fontSize: 100, 
-                  color: '#ff8800',
-                  opacity: 0.9,
-                  animation: 'float 3s ease-in-out infinite',
-                  '@keyframes float': {
-                    '0%': { transform: 'translateY(0px)' },
-                    '50%': { transform: 'translateY(-15px)' },
-                    '100%': { transform: 'translateY(0px)' }
-                  }
-                }} />
-              </Box>
-              <Box sx={{ position: 'absolute', bottom: -20, right: { xs: 30, sm: 70 }, zIndex: 5 }}>
-                <FavoriteIcon sx={{ 
-                  fontSize: 60, 
-                  color: '#ff8800',
-                  opacity: 0.8,
-                  animation: 'float 3.5s ease-in-out infinite 0.5s',
-                  '@keyframes float': {
-                    '0%': { transform: 'translateY(0px)' },
-                    '50%': { transform: 'translateY(-10px)' },
-                    '100%': { transform: 'translateY(0px)' }
-                  }
-                }} />
-              </Box>
-              <Box sx={{ position: 'absolute', top: 10, left: { xs: 10, sm: -20 }, zIndex: 5 }}>
-                <FavoriteIcon sx={{ 
-                  fontSize: 70, 
-                  color: '#ff8800',
-                  opacity: 0.7,
-                  animation: 'float 4s ease-in-out infinite 1s',
-                  '@keyframes float': {
-                    '0%': { transform: 'translateY(0px)' },
-                    '50%': { transform: 'translateY(-12px)' },
-                    '100%': { transform: 'translateY(0px)' }
-                  }
-                }} />
-              </Box>
-              
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontFamily: 'Alata, sans-serif', 
-                  color: '#555',
-                  my: 2,
-                  position: 'relative',
-                  zIndex: 10
-                }}
-              >
-                Thank you for your order! We're preparing it now.
-              </Typography>
-              
-              <Typography 
-                variant="body1"
-                sx={{
-                  fontFamily: 'Alata, sans-serif',
-                  color: '#777',
-                  mt: 3,
-                  fontSize: '1rem',
-                  animation: 'pulse 1.5s infinite',
-                  '@keyframes pulse': {
-                    '0%': { opacity: 0.6 },
-                    '50%': { opacity: 1 },
-                    '100%': { opacity: 0.6 }
-                  }
-                }}
-              >
-                Redirecting to menu...
-              </Typography>
-            </Box>
+            <Typography variant="h6" sx={{ mb: 2, color: '#ff8800', fontWeight: 'bold' }}>Privacy Policy</Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Biz sizin verilerinizi asla satmayız, çünkü kimse almak istemez!<br />
+              Siparişlerinizi uzaylılara iletmiyoruz, sadece mutfağa.<br />
+              <b>Şaka bir yana:</b> Tüm bilgileriniz güvenle saklanır ve asla 3. şahıslarla paylaşılmaz.
+            </Typography>
+            <Button variant="contained" sx={{ mt: 2 }} onClick={() => setPrivacyOpen(false)}>Kapat</Button>
           </Box>
         </Fade>
       </Modal>

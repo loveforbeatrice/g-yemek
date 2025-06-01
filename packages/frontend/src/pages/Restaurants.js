@@ -109,32 +109,31 @@ function Restaurants({ onSelectBusiness }) {
             <Card
               sx={{
                 border: '3px solid #ff8800',
-                background: business.isOpen === false ? 'rgba(235, 235, 235, 0.9)' : '#fff',
+                background: '#fff',
                 borderRadius: '18px',
                 boxShadow: '0 4px 12px 0 rgba(0,0,0,0.08)',
                 transition: 'all 0.3s ease',
-                '&:hover': business.isOpen === false 
-                  ? { opacity: 0.9 } 
-                  : { boxShadow: '0 8px 24px 0 rgba(0,0,0,0.13)' },
+                '&:hover': { boxShadow: '0 8px 24px 0 rgba(0,0,0,0.13)' },
                 p: 0,
                 minHeight: 170,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-start',
                 alignItems: 'flex-start',
-                cursor: business.isOpen === false ? 'not-allowed' : 'pointer',
-                opacity: business.isOpen === false ? 0.85 : 1,
+                cursor: 'pointer',
+                filter: business.isOpen === false ? 'grayscale(100%)' : 'none',
                 position: 'relative',
+                '&::after': {
+                  content: '""', 
+                  display: 'none'
+                },
+                '& .MuiCardContent-root': {
+                  '&::after': {
+                    content: 'none'
+                  }
+                }
               }}
               onClick={() => {
-                if (business.isOpen === false) {
-                  setSnackbar({
-                    open: true,
-                    message: `${business.name} is currently closed. Please visit again during their opening hours.`,
-                    severity: 'warning'
-                  });
-                  return;
-                }
                 onSelectBusiness(business.name);
                 navigate('/menu');
               }}
@@ -152,30 +151,87 @@ function Restaurants({ onSelectBusiness }) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     zIndex: 1,
+                    background: 'rgba(0,0,0,0.5)',
                   }}
                 >
                   <Box
                     sx={{
-                      backgroundColor: 'rgba(0,0,0,0.6)',
-                      color: 'white',
-                      padding: '8px 20px',
-                      borderRadius: '8px',
-                      fontWeight: 'bold',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                      transform: 'rotate(-12deg)',
-                      border: '2px solid white',
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 1,
                     }}
                   >
+                    {/* Clock icon */}
+                    <Box
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: '50%',
+                        border: '3px solid white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative',
+                        backgroundColor: 'rgba(255,136,0,0.9)',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+                      }}
+                    >
+                      {/* Clock hands */}
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          width: '2px',
+                          height: '20px',
+                          background: 'white',
+                          bottom: '50%',
+                          left: 'calc(50% - 1px)',
+                          transformOrigin: 'bottom',
+                          transform: 'rotate(-45deg)',
+                        }}
+                      />
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          width: '2px',
+                          height: '15px',
+                          background: 'white',
+                          bottom: '50%',
+                          left: 'calc(50% - 1px)',
+                          transformOrigin: 'bottom',
+                          transform: 'rotate(70deg)',
+                        }}
+                      />
+                      {/* Center dot */}
+                      <Box
+                        sx={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          background: 'white',
+                          position: 'absolute',
+                        }}
+                      />
+                    </Box>
+                    
+                    {/* Text */}
                     <Typography
                       sx={{
                         fontWeight: 'bold',
-                        fontSize: '1.3rem',
-                        letterSpacing: '1.5px',
+                        fontSize: '1.1rem',
                         color: 'white',
-                        m: 0,
+                        backgroundColor: 'rgba(255,136,0,0.9)',
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: '4px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1px',
                       }}
                     >
-                      CLOSED
+                      Şu an kapalı
                     </Typography>
                   </Box>
                 </Box>
@@ -204,7 +260,7 @@ function Restaurants({ onSelectBusiness }) {
                       objectFit: 'cover', 
                       background: '#fff', 
                       display: 'block',
-                      filter: business.isOpen === false ? 'grayscale(80%) brightness(0.8)' : 'none',
+                      filter: business.isOpen === false ? 'grayscale(80%)' : 'none',
                       transition: 'filter 0.3s ease'
                     }}
                   />
@@ -227,27 +283,15 @@ function Restaurants({ onSelectBusiness }) {
                 </Typography>
                 {business.openingTime && business.closingTime && (
                   <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                    <Box
-                      component="span" 
-                      sx={{ 
-                        display: 'inline-block',
-                        width: 10,
-                        height: 10,
-                        borderRadius: '50%',
-                        bgcolor: business.isOpen === false ? '#d32f2f' : '#4caf50',
-                        mr: 1,
-                        animation: business.isOpen === false ? 'none' : 'pulse 2s infinite'
-                      }}
-                    />
                     <Typography 
                       variant="body2" 
-                      color={business.isOpen === false ? "text.secondary" : "#4caf50"}
+                      color="#4caf50"
                       sx={{ 
-                        fontWeight: business.isOpen === false ? 400 : 500,
+                        fontWeight: 500,
                         fontSize: '0.9rem'
                       }}
                     >
-                      {business.isOpen === false ? 'Closed' : 'Open'} · {business.openingTime.substring(0,5)} - {business.closingTime.substring(0,5)}
+                      {business.openingTime.substring(0,5)} - {business.closingTime.substring(0,5)}
                     </Typography>
                   </Box>
                 )}

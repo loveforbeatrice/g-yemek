@@ -11,7 +11,9 @@ import {
   Avatar,
   IconButton,
   Typography,
-  CircularProgress
+  CircularProgress,
+  Alert,
+  Snackbar
 } from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -29,6 +31,7 @@ function MenuItemFormDialog({ open, handleClose, handleSave, menuItem }) {
   });
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
+  const [error, setError] = useState({ open: false, message: '' });
 
   // Fetch categories from the API
   useEffect(() => {
@@ -106,6 +109,16 @@ function MenuItemFormDialog({ open, handleClose, handleSave, menuItem }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Resim zorunluluğu kontrolü
+    if (!form.image && (!menuItem || !menuItem.imageUrl)) {
+      setError({
+        open: true,
+        message: 'Ürün fotoğrafı eklemek zorunludur. Lütfen bir fotoğraf seçin.'
+      });
+      return;
+    }
+    
     const formData = new FormData();
     
     // Form verilerini ekle
@@ -120,6 +133,10 @@ function MenuItemFormDialog({ open, handleClose, handleSave, menuItem }) {
     }
     
     handleSave(formData);
+  };
+
+  const handleCloseError = () => {
+    setError({ ...error, open: false });
   };
 
   return (
@@ -186,7 +203,7 @@ function MenuItemFormDialog({ open, handleClose, handleSave, menuItem }) {
                   >
                     <AddPhotoAlternateIcon fontSize="large" color="action" />
                     <Typography variant="caption" color="textSecondary">
-                      Resim Ekle
+                      Resim Ekle (Zorunlu)
                     </Typography>
                   </Box>
                 )}
@@ -247,8 +264,11 @@ function MenuItemFormDialog({ open, handleClose, handleSave, menuItem }) {
           <Button type="submit" variant="contained">Kaydet</Button>
         </DialogActions>
       </form>
+      <Snackbar open={error.open} autoHideDuration={6000} onClose={handleCloseError} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>{error.message}</Alert>
+      </Snackbar>
     </Dialog>
   );
 }
 
-export default MenuItemFormDialog; 
+export default MenuItemFormDialog;

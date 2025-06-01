@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Card, CardContent, Typography, Box, Button, IconButton, TextField, Chip, Snackbar, Alert } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
+import { Grid, Card, CardContent, Typography, Box, Button, IconButton, TextField, Chip, Snackbar, Alert, Popover, MenuItem, Divider } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import SortIcon from '@mui/icons-material/Sort';
 import axios from 'axios';
 
 function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
@@ -11,7 +11,54 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
   const [search, setSearch] = useState('');
   const [favorites, setFavorites] = useState({});
   const [businessMap, setBusinessMap] = useState({});
+  const [businessIsOpen, setBusinessIsOpen] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [filters, setFilters] = useState({
+    category: 'all',
+    sortBy: 'name_asc',
+    minPrice: '',
+    maxPrice: ''
+  });
+  
+  const [tempFilters, setTempFilters] = useState({ ...filters });
+  const [openFilter, setOpenFilter] = useState(false);
+  const [openSort, setOpenSort] = useState(false);
+  const [filterAnchorEl, setFilterAnchorEl] = useState(null);
+  const [sortAnchorEl, setSortAnchorEl] = useState(null);
+  
+  const handleFilterClick = (event) => {
+    setFilterAnchorEl(event.currentTarget);
+    setOpenFilter(true);
+  };
+  
+  const handleSortClick = (event) => {
+    setSortAnchorEl(event.currentTarget);
+    setOpenSort(true);
+  };
+  
+  const handleClose = () => {
+    setOpenFilter(false);
+    setOpenSort(false);
+    setFilterAnchorEl(null);
+    setSortAnchorEl(null);
+  };
+  
+  const applyFilters = () => {
+    setFilters({ ...tempFilters });
+    handleClose();
+  };
+  
+  const resetFilters = () => {
+    const defaultFilters = {
+      category: 'all',
+      sortBy: 'name_asc',
+      minPrice: '',
+      maxPrice: ''
+    };
+    setTempFilters(defaultFilters);
+    setFilters(defaultFilters);
+    handleClose();
+  };
 
   // İşletme listesini çek ve eşlemesini hazırla
   useEffect(() => {
@@ -19,10 +66,15 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
       const map = {};
       res.data.businesses.forEach(b => {
         map[b.name] = b.id;
+        
+        // İşletmenin açık/kapalı durumunu kontrol et
+        if (b.name === businessName) {
+          setBusinessIsOpen(b.isOpen !== false);
+        }
       });
       setBusinessMap(map);
     });
-  }, []);
+  }, [businessName]);
 
   useEffect(() => {
     let url = 'http://localhost:3001/api/menu';
@@ -65,32 +117,220 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
     }
   };
 
-  const filtered = menuItems.filter(item =>
-    item.productName.toLowerCase().includes(search.toLowerCase()) ||
-    (item.category && item.category.toLowerCase().includes(search.toLowerCase()))
-  );
+  // Filtreleme ve sıralama işlemleri
+  const filtered = menuItems
+    .filter(item => {
+      const matchesSearch = item.productName.toLowerCase().includes(search.toLowerCase()) ||
+        (item.category && item.category.toLowerCase().includes(search.toLowerCase()));
+      const matchesCategory = filters.category === 'all' || item.category === filters.category;
+      const matchesMinPrice = !filters.minPrice || item.price >= parseFloat(filters.minPrice);
+      const matchesMaxPrice = !filters.maxPrice || item.price <= parseFloat(filters.maxPrice);
+      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice;
+    })
+    .sort((a, b) => {
+      switch (filters.sortBy) {
+        case 'name_asc':
+          return a.productName.localeCompare(b.productName);
+        case 'name_desc':
+          return b.productName.localeCompare(a.productName);
+        case 'price_asc':
+          return a.price - b.price;
+        case 'price_desc':
+          return b.price - a.price;
+        default:
+          return 0;
+      }
+    });
 
   // Kategorilere göre grupla
-  const categories = Array.from(new Set(filtered.map(item => item.category || 'Diğer')));
-  const grouped = categories.map(cat => ({
-    category: cat,
-    items: filtered.filter(item => (item.category || 'Diğer') === cat)
-  }));
+  const categories = Array.from(new Set(menuItems.map(item => item.category || 'Diğer')));
+  const grouped = categories
+    .map(cat => ({
+      category: cat,
+      items: filtered.filter(item => (item.category || 'Diğer') === cat)
+    }))
+    .filter(group => group.items.length > 0); // Sadece öğesi olan kategorileri göster
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '1400px', mx: 'auto', px: 4, background: '#fef3e2', borderRadius: 3, minHeight: '100vh', mt: 4, pb: 6 }}>
+    <Box sx={{ 
+      width: '100%', 
+      maxWidth: '1400px', 
+      mx: 'auto', 
+      px: 4, 
+      background: '#fef3e2', 
+      borderRadius: 3, 
+      minHeight: '100vh', 
+      mt: 4, 
+      pb: 6
+    }}>
       <Typography variant="h2" align="center" fontWeight="bold" sx={{ mb: 3, fontFamily: 'Alata, sans-serif' }}>
         {businessName ? businessName.toUpperCase() : 'TÜM ÜRÜNLER'}
       </Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3, gap: 2 }}>
         <TextField
           variant="outlined"
-          placeholder="Search for an item"
+          placeholder="Ürün ara..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          sx={{ width: 500, background: '#fff', borderRadius: '30px' }}
+          sx={{ 
+            width: 400, 
+            background: '#fff', 
+            borderRadius: '30px',
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '30px',
+              pr: 2
+            }
+          }}
         />
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <IconButton 
+            onClick={handleFilterClick}
+            size="medium"
+            sx={{
+              background: openFilter ? 'rgba(0,0,0,0.05)' : 'transparent',
+              '&:hover': { background: 'rgba(0,0,0,0.05)' },
+              border: '1px solid rgba(0,0,0,0.23)',
+              borderRadius: '8px',
+              p: 1
+            }}
+          >
+            <FilterListIcon />
+          </IconButton>
+          <IconButton 
+            onClick={handleSortClick}
+            size="medium"
+            sx={{
+              background: openSort ? 'rgba(0,0,0,0.05)' : 'transparent',
+              '&:hover': { background: 'rgba(0,0,0,0.05)' },
+              border: '1px solid rgba(0,0,0,0.23)',
+              borderRadius: '8px',
+              p: 1
+            }}
+          >
+            <SortIcon />
+          </IconButton>
+        </Box>
       </Box>
+      
+      {/* Filter Popover */}
+      <Popover
+        open={openFilter}
+        anchorEl={filterAnchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        <Box sx={{ p: 2, width: 280 }}>
+          <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>Filtrele</Typography>
+          
+          <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>Kategori</Typography>
+          <TextField
+            select
+            fullWidth
+            size="small"
+            value={tempFilters.category}
+            onChange={e => setTempFilters({...tempFilters, category: e.target.value})}
+            sx={{ mb: 2 }}
+          >
+            <MenuItem value="all">Tüm Kategoriler</MenuItem>
+            {categories.map(category => (
+              <MenuItem key={category} value={category}>{category}</MenuItem>
+            ))}
+          </TextField>
+          
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>Fiyat Aralığı</Typography>
+          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+            <TextField
+              type="number"
+              placeholder="Min"
+              size="small"
+              value={tempFilters.minPrice}
+              onChange={e => setTempFilters({...tempFilters, minPrice: e.target.value})}
+              sx={{ flex: 1 }}
+              InputProps={{
+                startAdornment: '₺',
+              }}
+            />
+            <TextField
+              type="number"
+              placeholder="Max"
+              size="small"
+              value={tempFilters.maxPrice}
+              onChange={e => setTempFilters({...tempFilters, maxPrice: e.target.value})}
+              sx={{ flex: 1 }}
+              InputProps={{
+                startAdornment: '₺',
+              }}
+            />
+          </Box>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+            <Button onClick={resetFilters} color="inherit">Sıfırla</Button>
+            <Button onClick={applyFilters} variant="contained" color="primary">Uygula</Button>
+          </Box>
+        </Box>
+      </Popover>
+      
+      {/* Sort Popover */}
+      <Popover
+        open={openSort}
+        anchorEl={sortAnchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        <Box sx={{ p: 1, width: 200 }}>
+          <MenuItem 
+            selected={filters.sortBy === 'name_asc'}
+            onClick={() => {
+              setFilters({...filters, sortBy: 'name_asc'});
+              handleClose();
+            }}
+          >
+            İsme göre (A-Z)
+          </MenuItem>
+          <MenuItem 
+            selected={filters.sortBy === 'name_desc'}
+            onClick={() => {
+              setFilters({...filters, sortBy: 'name_desc'});
+              handleClose();
+            }}
+          >
+            İsme göre (Z-A)
+          </MenuItem>
+          <Divider />
+          <MenuItem 
+            selected={filters.sortBy === 'price_asc'}
+            onClick={() => {
+              setFilters({...filters, sortBy: 'price_asc'});
+              handleClose();
+            }}
+          >
+            Fiyata göre (Artan)
+          </MenuItem>
+          <MenuItem 
+            selected={filters.sortBy === 'price_desc'}
+            onClick={() => {
+              setFilters({...filters, sortBy: 'price_desc'});
+              handleClose();
+            }}
+          >
+            Fiyata göre (Azalan)
+          </MenuItem>
+        </Box>
+      </Popover>
       <Grid container columnSpacing={6} rowSpacing={3}>
         {filtered.length === 0 ? (
           <Grid item xs={12}>
@@ -120,20 +360,31 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                     minHeight: 240,
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'flex-start'
                   }}>
                     <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%', mb: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mb: 1 }}>
                         <Typography variant="h3" fontWeight="bold" sx={{ fontFamily: 'Alata, sans-serif', fontSize: '2.3rem', lineHeight: 1.1 }}>
                           {item.productName}
                         </Typography>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 36 }}>
-                          <IconButton onClick={() => handleFavorite(item)} sx={{ p: 0 }}>
-                            {favorites[item.id]
-                              ? <FavoriteIcon sx={{ color: '#ff8800', fontSize: 32 }} />
-                              : <FavoriteBorderIcon sx={{ color: '#ff8800', fontSize: 32 }} />}
+                          <IconButton 
+                            onClick={(e) => { e.stopPropagation(); handleFavorite(item); }} 
+                            sx={{ 
+                              p: 0.5, 
+                              color: favorites[item.id] ? '#ff6d00' : '#aaa',
+                              filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
+                            }}
+                          >
+                            {favorites[item.id] ? <FavoriteIcon /> : <FavoriteBorderIcon />}
                           </IconButton>
-                          <Typography sx={{ color: '#ff8800', fontWeight: 600, fontSize: '1.1rem', mt: -0.5 }}>
+                          <Typography sx={{ 
+                            color: '#ff8800', 
+                            fontWeight: 600, 
+                            fontSize: '1.1rem', 
+                            mt: -0.5,
+                            filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
+                          }}>
                             12
                           </Typography>
                         </Box>
@@ -146,7 +397,15 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                           <img
                             src={item.imageUrl ? `http://localhost:3001/uploads/${item.imageUrl}` : '/images/food-bg.jpg'}
                             alt={item.productName}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12, background: '#fff', display: 'block' }}
+                            style={{ 
+                              width: '100%', 
+                              height: '100%', 
+                              objectFit: 'cover', 
+                              borderRadius: 12, 
+                              background: '#fff', 
+                              display: 'block',
+                              filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
+                            }}
                             onError={(e) => {
                               e.target.src = '/images/food-bg.jpg';
                             }}
@@ -156,23 +415,70 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                           <Typography variant="h3" sx={{ color: '#222', fontWeight: 700, fontSize: '2rem', mb: 1 }}>
                             ₺ {Number(item.price).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                           </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', border: '2px solid #9d8df1', borderRadius: '30px', px: 2, py: 0.5, minWidth: 100, justifyContent: 'center', background: '#fff' }}>
-                            <Button variant="text" sx={{ minWidth: 0, color: '#ff8800', fontSize: '2rem', fontWeight: 700, p: 0, lineHeight: 1 }} onClick={() => removeFromCart(item.id)}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            border: '2px solid #9d8df1', 
+                            borderRadius: '30px', 
+                            px: 2, 
+                            py: 0.5, 
+                            minWidth: 100, 
+                            justifyContent: 'center', 
+                            background: '#fff',
+                            filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
+                          }}>
+                            <Button 
+                              variant="text" 
+                              sx={{ 
+                                minWidth: 0, 
+                                color: '#ff8800', 
+                                fontSize: '2rem', 
+                                fontWeight: 700, 
+                                p: 0, 
+                                lineHeight: 1 
+                              }} 
+                              onClick={() => removeFromCart(item.id)}
+                            >
                               –
                             </Button>
-                            <Typography variant="h5" sx={{ mx: 1.5, color: '#ff8800', fontWeight: 700, fontSize: '2rem', minWidth: 24, textAlign: 'center' }}>
+                            <Typography 
+                              variant="h5" 
+                              sx={{ 
+                                mx: 1.5, 
+                                color: '#ff8800', 
+                                fontWeight: 700, 
+                                fontSize: '2rem', 
+                                minWidth: 24, 
+                                textAlign: 'center' 
+                              }}
+                            >
                               {cartItems.find(i => i.id === item.id)?.quantity || 0}
                             </Typography>
                             <Button 
                               variant="text" 
-                              sx={{ minWidth: 0, color: '#ff8800', fontSize: '2rem', fontWeight: 700, p: 0, lineHeight: 1 }} 
+                              sx={{ 
+                                minWidth: 0, 
+                                color: '#ff8800', 
+                                fontSize: '2rem', 
+                                fontWeight: 700, 
+                                p: 0, 
+                                lineHeight: 1 
+                              }} 
                               onClick={() => {
-                                addToCart({ ...item, businessId: businessMap[item.businessName] });
-                                setSnackbar({ 
-                                  open: true, 
-                                  message: `${item.productName} has been added to your cart!`, 
-                                  severity: 'success' 
-                                });
+                                if (businessIsOpen) {
+                                  addToCart({ ...item, businessId: businessMap[item.businessName] });
+                                  setSnackbar({ 
+                                    open: true, 
+                                    message: `${item.productName} has been added to your cart!`, 
+                                    severity: 'success' 
+                                  });
+                                } else {
+                                  setSnackbar({ 
+                                    open: true, 
+                                    message: `İşletme şu anda kapalı olduğu için sipariş veremezsiniz.`, 
+                                    severity: 'error' 
+                                  });
+                                }
                               }}
                             >
                               +

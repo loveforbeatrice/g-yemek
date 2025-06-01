@@ -17,11 +17,11 @@ export default function AccountMenu() {
   return (
     <Box sx={{ minHeight: '100vh', p: 0 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', p: 2, pb: 1 }}>
-        <IconButton onClick={() => navigate(-1)} sx={{ mr: 1 }}>
-          <ArrowBackIosNewIcon sx={{ color: '#9d8df1' }} />
+      <Box sx={{ display: 'flex', alignItems: 'center', p: 2, pb: 1, justifyContent: 'center', position: 'relative' }}>
+        <IconButton onClick={() => navigate(-1)} sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)' }}>
+          <ArrowBackIosNewIcon sx={{ color: '#ff8800' }} />
         </IconButton>
-        <Typography variant="h6" sx={{ color: '#9d8df1', fontWeight: 700, fontFamily: 'Alata, sans-serif' }}>
+        <Typography variant="h6" sx={{ color: '#ff8800', fontWeight: 700, fontFamily: 'Alata, sans-serif', textAlign: 'center', width: '100%' }}>
           Account Menu
         </Typography>
       </Box>
@@ -37,16 +37,16 @@ export default function AccountMenu() {
               fullWidth
               sx={{
                 borderRadius: 3,
-                borderColor: '#9d8df1',
-                color: '#9d8df1',
+                borderColor: '#ff8800',
+                color: '#ff8800',
                 fontWeight: 600,
                 fontSize: '1.1rem',
                 fontFamily: 'Alata, sans-serif',
                 py: 1.5,
                 '&:hover': {
-                  backgroundColor: '#edeafd',
-                  borderColor: '#9d8df1',
-                  color: '#9d8df1',
+                  backgroundColor: '#fff3e0',
+                  borderColor: '#ff8800',
+                  color: '#ff8800',
                 },
               }}
               onClick={() => {
@@ -71,7 +71,7 @@ export default function AccountMenu() {
             fontSize: '1.1rem',
             fontFamily: 'Alata, sans-serif',
             py: 1.5,
-            background: 'linear-gradient(90deg, #ff8800 0%, #ff5e62 100%)',
+            background: '#ff8800',
             color: 'white',
             boxShadow: '0 2px 8px rgba(255,136,0,0.08)',
             '&:hover': {
