@@ -15,6 +15,7 @@ import {
   CardMedia,
   IconButton
 } from '@mui/material';
+import ResponsivePageTitle from '../components/ResponsivePageTitle';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
 import axios from 'axios';
@@ -227,9 +228,9 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
   return (
     <BusinessLayout>
       <Box sx={{ maxWidth: 800, mx: 'auto', px: 2 }}>
-        <Typography variant="h3" align="center" sx={{ mb: 4, fontWeight: 'bold', color: '#333' }}>
+        <ResponsivePageTitle sx={{ color: '#333' }}>
           İŞLETME AYARLARI
-        </Typography>
+        </ResponsivePageTitle>
         
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
@@ -288,7 +289,7 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
                         Restoranınız için bir görsel yükleyin. Müşterileriniz bu görseli restoranlar sayfasında görecektir.
                       </Typography>
                       
-                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, justifyContent: { xs: 'center', sm: 'flex-start' } }}>
                         <input
                           accept="image/*"
                           style={{ display: 'none' }}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Box, Typography, Card, CardContent, Grid, Divider, Snackbar, Alert, Button } from '@mui/material';
 import BusinessLayout from '../components/BusinessLayout';
+import ResponsivePageTitle from '../components/ResponsivePageTitle';
 
 function BusinessOrderHistory() {
   const [orders, setOrders] = useState([]);
@@ -40,7 +41,7 @@ function BusinessOrderHistory() {
 
   return (
     <BusinessLayout>
-      <Typography variant="h3" align="center" sx={{ fontWeight: 'bold', mb: 4 }}>ORDER HISTORY</Typography>
+      <ResponsivePageTitle>ORDER HISTORY</ResponsivePageTitle>
       {error && <Alert severity="error">{error}</Alert>}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 6 }}><Typography>Yükleniyor...</Typography></Box>
