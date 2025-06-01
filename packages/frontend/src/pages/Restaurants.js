@@ -109,77 +109,27 @@ function Restaurants({ onSelectBusiness }) {
             <Card
               sx={{
                 border: '3px solid #ff8800',
-                background: business.isOpen === false ? 'rgba(235, 235, 235, 0.9)' : '#fff',
+                background: '#fff',
                 borderRadius: '18px',
                 boxShadow: '0 4px 12px 0 rgba(0,0,0,0.08)',
                 transition: 'all 0.3s ease',
-                '&:hover': business.isOpen === false 
-                  ? { opacity: 0.9 } 
-                  : { boxShadow: '0 8px 24px 0 rgba(0,0,0,0.13)' },
+                '&:hover': { boxShadow: '0 8px 24px 0 rgba(0,0,0,0.13)' },
                 p: 0,
                 minHeight: 170,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'flex-start',
                 alignItems: 'flex-start',
-                cursor: business.isOpen === false ? 'not-allowed' : 'pointer',
-                opacity: business.isOpen === false ? 0.85 : 1,
+                cursor: 'pointer',
+                filter: business.isOpen === false ? 'grayscale(100%)' : 'none',
                 position: 'relative',
               }}
               onClick={() => {
-                if (business.isOpen === false) {
-                  setSnackbar({
-                    open: true,
-                    message: `${business.name} is currently closed. Please visit again during their opening hours.`,
-                    severity: 'warning'
-                  });
-                  return;
-                }
                 onSelectBusiness(business.name);
                 navigate('/menu');
               }}
             >
-              {/* Add CLOSED overlay when restaurant is closed */}
-              {business.isOpen === false && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      backgroundColor: 'rgba(0,0,0,0.6)',
-                      color: 'white',
-                      padding: '8px 20px',
-                      borderRadius: '8px',
-                      fontWeight: 'bold',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                      transform: 'rotate(-12deg)',
-                      border: '2px solid white',
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontWeight: 'bold',
-                        fontSize: '1.3rem',
-                        letterSpacing: '1.5px',
-                        color: 'white',
-                        m: 0,
-                      }}
-                    >
-                      CLOSED
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
+              {/* No closed overlay */}
               <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', pt: 2 }}>
                 <Box sx={{
                   width: '92%',
@@ -204,7 +154,7 @@ function Restaurants({ onSelectBusiness }) {
                       objectFit: 'cover', 
                       background: '#fff', 
                       display: 'block',
-                      filter: business.isOpen === false ? 'grayscale(80%) brightness(0.8)' : 'none',
+                      filter: business.isOpen === false ? 'grayscale(80%)' : 'none',
                       transition: 'filter 0.3s ease'
                     }}
                   />
@@ -227,27 +177,15 @@ function Restaurants({ onSelectBusiness }) {
                 </Typography>
                 {business.openingTime && business.closingTime && (
                   <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                    <Box
-                      component="span" 
-                      sx={{ 
-                        display: 'inline-block',
-                        width: 10,
-                        height: 10,
-                        borderRadius: '50%',
-                        bgcolor: business.isOpen === false ? '#d32f2f' : '#4caf50',
-                        mr: 1,
-                        animation: business.isOpen === false ? 'none' : 'pulse 2s infinite'
-                      }}
-                    />
                     <Typography 
                       variant="body2" 
-                      color={business.isOpen === false ? "text.secondary" : "#4caf50"}
+                      color="#4caf50"
                       sx={{ 
-                        fontWeight: business.isOpen === false ? 400 : 500,
+                        fontWeight: 500,
                         fontSize: '0.9rem'
                       }}
                     >
-                      {business.isOpen === false ? 'Closed' : 'Open'} · {business.openingTime.substring(0,5)} - {business.closingTime.substring(0,5)}
+                      {business.openingTime.substring(0,5)} - {business.closingTime.substring(0,5)}
                     </Typography>
                   </Box>
                 )}

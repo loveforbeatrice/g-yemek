@@ -153,8 +153,8 @@ function Header({ cartItems, resetCart }) {
         zIndex: 2
       }}>
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        {/* Logo */}
-        <Box onClick={() => navigate('/')} sx={{ cursor: 'pointer' }}>
+        {/* Logo - Non-functional */}
+        <Box sx={{ cursor: 'default' }}>
           <img 
             src="/images/logo.png" 
             alt="Yemek Logo" 
