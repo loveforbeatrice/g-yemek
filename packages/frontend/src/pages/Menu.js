@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Card, CardContent, Typography, Box, Button, IconButton, TextField, Chip, Snackbar, Alert, Popover, MenuItem, Divider } from '@mui/material';
+import { Grid, Card, CardContent, Typography, Box, Button, IconButton, TextField, Chip, Snackbar, Alert, Popover, MenuItem, Divider, InputAdornment, Badge, Paper } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import SortIcon from '@mui/icons-material/Sort';
+import SearchIcon from '@mui/icons-material/Search';
+import TuneIcon from '@mui/icons-material/Tune';
+import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 
 function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
@@ -25,6 +28,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
   const [openSort, setOpenSort] = useState(false);
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const [sortAnchorEl, setSortAnchorEl] = useState(null);
+  const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   
   const handleFilterClick = (event) => {
     setFilterAnchorEl(event.currentTarget);
@@ -45,6 +49,12 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
   
   const applyFilters = () => {
     setFilters({ ...tempFilters });
+    // Count active filters
+    let count = 0;
+    if (tempFilters.category !== 'all') count++;
+    if (tempFilters.minPrice) count++;
+    if (tempFilters.maxPrice) count++;
+    setActiveFiltersCount(count);
     handleClose();
   };
   
@@ -57,6 +67,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
     };
     setTempFilters(defaultFilters);
     setFilters(defaultFilters);
+    setActiveFiltersCount(0);
     handleClose();
   };
 
@@ -166,45 +177,105 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
       <Typography variant="h2" align="center" fontWeight="bold" sx={{ mb: 3, fontFamily: 'Alata, sans-serif' }}>
         {businessName ? businessName.toUpperCase() : 'TÜM ÜRÜNLER'}
       </Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3, gap: 2 }}>
-        <TextField
-          variant="outlined"
-          placeholder="Ürün ara..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          sx={{ 
-            width: 400, 
-            background: '#fff', 
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4, gap: 2, position: 'relative' }}>
+        <Paper
+          elevation={3}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            width: { xs: '100%', sm: 500 },
             borderRadius: '30px',
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '30px',
-              pr: 2
-            }
+            px: 2,
+            py: 0.5,
+            background: '#fff',
+            border: '2px solid #ff8800',
+            boxShadow: '0 4px 12px rgba(255, 136, 0, 0.1)'
           }}
-        />
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton 
-            onClick={handleFilterClick}
-            size="medium"
+        >
+          <InputAdornment position="start" sx={{ mr: 1 }}>
+            <SearchIcon sx={{ color: '#ff8800' }} />
+          </InputAdornment>
+          <TextField
+            variant="standard"
+            placeholder="Ürün veya kategori ara..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            sx={{ 
+              flex: 1,
+              '& .MuiInput-root': {
+                fontSize: '1.1rem',
+                '&:before, &:after': {
+                  display: 'none'
+                }
+              },
+              '& .MuiInputBase-input': {
+                py: 1.2
+              }
+            }}
+            InputProps={{
+              endAdornment: search ? (
+                <InputAdornment position="end">
+                  <IconButton
+                    edge="end"
+                    onClick={() => setSearch('')}
+                    size="small"
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ) : null
+            }}
+          />
+        </Paper>
+        
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
+          <Badge 
+            badgeContent={activeFiltersCount} 
+            color="error"
+            overlap="circular"
             sx={{
-              background: openFilter ? 'rgba(0,0,0,0.05)' : 'transparent',
-              '&:hover': { background: 'rgba(0,0,0,0.05)' },
-              border: '1px solid rgba(0,0,0,0.23)',
-              borderRadius: '8px',
-              p: 1
+              '& .MuiBadge-badge': {
+                fontSize: '0.7rem',
+                height: 18,
+                minWidth: 18,
+                padding: '0 4px'
+              }
             }}
           >
-            <FilterListIcon />
-          </IconButton>
+            <IconButton 
+              onClick={handleFilterClick}
+              size="large"
+              sx={{
+                background: openFilter ? '#ff8800' : '#fff',
+                color: openFilter ? '#fff' : '#ff8800',
+                border: '2px solid #ff8800',
+                boxShadow: '0 4px 8px rgba(255, 136, 0, 0.15)',
+                '&:hover': { 
+                  background: '#ff9a33',
+                  color: '#fff' 
+                },
+                transition: 'all 0.2s ease',
+                p: 1.2
+              }}
+            >
+              <TuneIcon />
+            </IconButton>
+          </Badge>
+          
           <IconButton 
             onClick={handleSortClick}
-            size="medium"
+            size="large"
             sx={{
-              background: openSort ? 'rgba(0,0,0,0.05)' : 'transparent',
-              '&:hover': { background: 'rgba(0,0,0,0.05)' },
-              border: '1px solid rgba(0,0,0,0.23)',
-              borderRadius: '8px',
-              p: 1
+              background: openSort ? '#ff8800' : '#fff',
+              color: openSort ? '#fff' : '#ff8800',
+              border: '2px solid #ff8800',
+              boxShadow: '0 4px 8px rgba(255, 136, 0, 0.15)',
+              '&:hover': { 
+                background: '#ff9a33',
+                color: '#fff' 
+              },
+              transition: 'all 0.2s ease',
+              p: 1.2
             }}
           >
             <SortIcon />
@@ -225,54 +296,180 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
           vertical: 'top',
           horizontal: 'left',
         }}
+        PaperProps={{
+          elevation: 5,
+          sx: {
+            borderRadius: 3,
+            overflow: 'hidden',
+            border: '2px solid #ff8800',
+          }
+        }}
       >
-        <Box sx={{ p: 2, width: 280 }}>
-          <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>Filtrele</Typography>
-          
-          <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>Kategori</Typography>
-          <TextField
-            select
-            fullWidth
-            size="small"
-            value={tempFilters.category}
-            onChange={e => setTempFilters({...tempFilters, category: e.target.value})}
-            sx={{ mb: 2 }}
-          >
-            <MenuItem value="all">Tüm Kategoriler</MenuItem>
-            {categories.map(category => (
-              <MenuItem key={category} value={category}>{category}</MenuItem>
-            ))}
-          </TextField>
-          
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Fiyat Aralığı</Typography>
-          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-            <TextField
-              type="number"
-              placeholder="Min"
-              size="small"
-              value={tempFilters.minPrice}
-              onChange={e => setTempFilters({...tempFilters, minPrice: e.target.value})}
-              sx={{ flex: 1 }}
-              InputProps={{
-                startAdornment: '₺',
+        <Box sx={{ 
+          width: 320,
+          background: 'linear-gradient(to bottom, #fff8f0, #fff)',
+        }}>
+          <Box sx={{ 
+            p: 2, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            borderBottom: '1px solid rgba(255, 136, 0, 0.2)',
+            background: '#fff8f0'
+          }}>
+            <Typography 
+              variant="h6" 
+              fontWeight="bold" 
+              sx={{ 
+                color: '#ff8800',
+                fontFamily: 'Alata, sans-serif',
+                fontSize: '1.3rem'
               }}
-            />
-            <TextField
-              type="number"
-              placeholder="Max"
-              size="small"
-              value={tempFilters.maxPrice}
-              onChange={e => setTempFilters({...tempFilters, maxPrice: e.target.value})}
-              sx={{ flex: 1 }}
-              InputProps={{
-                startAdornment: '₺',
-              }}
-            />
+            >
+              Filtrele
+            </Typography>
+            <IconButton 
+              size="small" 
+              onClick={handleClose}
+              sx={{ color: '#ff8800' }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
           </Box>
           
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-            <Button onClick={resetFilters} color="inherit">Sıfırla</Button>
-            <Button onClick={applyFilters} variant="contained" color="primary">Uygula</Button>
+          <Box sx={{ p: 2.5 }}>
+            <Typography 
+              variant="subtitle2" 
+              sx={{ 
+                mb: 1.5, 
+                fontWeight: 600,
+                color: '#333',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              <FilterListIcon fontSize="small" sx={{ color: '#ff8800' }} />
+              Kategori
+            </Typography>
+            <TextField
+              select
+              fullWidth
+              size="small"
+              value={tempFilters.category}
+              onChange={e => setTempFilters({...tempFilters, category: e.target.value})}
+              sx={{ 
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#ff8800',
+                  },
+                },
+              }}
+            >
+              <MenuItem value="all">Tüm Kategoriler</MenuItem>
+              {categories.map(category => (
+                <MenuItem key={category} value={category}>{category}</MenuItem>
+              ))}
+            </TextField>
+            
+            <Typography 
+              variant="subtitle2" 
+              sx={{ 
+                mb: 1.5, 
+                fontWeight: 600,
+                color: '#333',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              <SortIcon fontSize="small" sx={{ color: '#ff8800' }} />
+              Fiyat Aralığı
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
+              <TextField
+                type="number"
+                placeholder="Min"
+                size="small"
+                value={tempFilters.minPrice}
+                onChange={e => setTempFilters({...tempFilters, minPrice: e.target.value})}
+                sx={{ 
+                  flex: 1,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ff8800',
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start" sx={{ color: '#ff8800', fontWeight: 'bold' }}>₺</InputAdornment>,
+                }}
+              />
+              <TextField
+                type="number"
+                placeholder="Max"
+                size="small"
+                value={tempFilters.maxPrice}
+                onChange={e => setTempFilters({...tempFilters, maxPrice: e.target.value})}
+                sx={{ 
+                  flex: 1,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#ff8800',
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start" sx={{ color: '#ff8800', fontWeight: 'bold' }}>₺</InputAdornment>,
+                }}
+              />
+            </Box>
+            
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              mt: 3,
+              pt: 2,
+              borderTop: '1px solid rgba(255, 136, 0, 0.2)'
+            }}>
+              <Button 
+                onClick={resetFilters} 
+                variant="outlined"
+                sx={{
+                  borderColor: '#ff8800',
+                  color: '#ff8800',
+                  '&:hover': {
+                    borderColor: '#ff8800',
+                    backgroundColor: 'rgba(255, 136, 0, 0.08)'
+                  },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600
+                }}
+              >
+                Sıfırla
+              </Button>
+              <Button 
+                onClick={applyFilters} 
+                variant="contained" 
+                sx={{
+                  backgroundColor: '#ff8800',
+                  '&:hover': {
+                    backgroundColor: '#ff9a33'
+                  },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: '0 4px 8px rgba(255, 136, 0, 0.25)'
+                }}
+              >
+                Uygula
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Popover>
@@ -290,45 +487,249 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
           vertical: 'top',
           horizontal: 'left',
         }}
+        PaperProps={{
+          elevation: 5,
+          sx: {
+            borderRadius: 3,
+            overflow: 'hidden',
+            border: '2px solid #ff8800',
+          }
+        }}
       >
-        <Box sx={{ p: 1, width: 200 }}>
-          <MenuItem 
-            selected={filters.sortBy === 'name_asc'}
-            onClick={() => {
-              setFilters({...filters, sortBy: 'name_asc'});
-              handleClose();
-            }}
-          >
-            İsme göre (A-Z)
-          </MenuItem>
-          <MenuItem 
-            selected={filters.sortBy === 'name_desc'}
-            onClick={() => {
-              setFilters({...filters, sortBy: 'name_desc'});
-              handleClose();
-            }}
-          >
-            İsme göre (Z-A)
-          </MenuItem>
-          <Divider />
-          <MenuItem 
-            selected={filters.sortBy === 'price_asc'}
-            onClick={() => {
-              setFilters({...filters, sortBy: 'price_asc'});
-              handleClose();
-            }}
-          >
-            Fiyata göre (Artan)
-          </MenuItem>
-          <MenuItem 
-            selected={filters.sortBy === 'price_desc'}
-            onClick={() => {
-              setFilters({...filters, sortBy: 'price_desc'});
-              handleClose();
-            }}
-          >
-            Fiyata göre (Azalan)
-          </MenuItem>
+        <Box sx={{ 
+          width: 280,
+          background: 'linear-gradient(to bottom, #fff8f0, #fff)',
+        }}>
+          <Box sx={{ 
+            p: 2, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            borderBottom: '1px solid rgba(255, 136, 0, 0.2)',
+            background: '#fff8f0'
+          }}>
+            <Typography 
+              variant="h6" 
+              fontWeight="bold" 
+              sx={{ 
+                color: '#ff8800',
+                fontFamily: 'Alata, sans-serif',
+                fontSize: '1.3rem'
+              }}
+            >
+              Sıralama
+            </Typography>
+            <IconButton 
+              size="small" 
+              onClick={handleClose}
+              sx={{ color: '#ff8800' }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
+          
+          <Box sx={{ p: 0 }}>
+            <Typography 
+              variant="subtitle2" 
+              sx={{ 
+                px: 2.5,
+                pt: 2,
+                pb: 1,
+                fontWeight: 600,
+                color: '#666'
+              }}
+            >
+              İsme Göre
+            </Typography>
+            
+            <MenuItem 
+              selected={filters.sortBy === 'name_asc'}
+              onClick={() => {
+                setFilters({...filters, sortBy: 'name_asc'});
+                handleClose();
+              }}
+              sx={{
+                py: 1.5,
+                px: 2.5,
+                '&.Mui-selected': {
+                  backgroundColor: 'rgba(255, 136, 0, 0.08)',
+                },
+                '&.Mui-selected:hover': {
+                  backgroundColor: 'rgba(255, 136, 0, 0.12)',
+                },
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box 
+                  sx={{ 
+                    width: 24, 
+                    height: 24, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    backgroundColor: filters.sortBy === 'name_asc' ? '#ff8800' : 'transparent',
+                    border: filters.sortBy === 'name_asc' ? 'none' : '2px solid #ddd'
+                  }}
+                >
+                  {filters.sortBy === 'name_asc' && (
+                    <Typography sx={{ color: '#fff', fontWeight: 'bold', fontSize: '0.8rem' }}>✓</Typography>
+                  )}
+                </Box>
+                <Typography sx={{ fontWeight: filters.sortBy === 'name_asc' ? 600 : 400 }}>
+                  A'dan Z'ye
+                </Typography>
+              </Box>
+            </MenuItem>
+            
+            <MenuItem 
+              selected={filters.sortBy === 'name_desc'}
+              onClick={() => {
+                setFilters({...filters, sortBy: 'name_desc'});
+                handleClose();
+              }}
+              sx={{
+                py: 1.5,
+                px: 2.5,
+                '&.Mui-selected': {
+                  backgroundColor: 'rgba(255, 136, 0, 0.08)',
+                },
+                '&.Mui-selected:hover': {
+                  backgroundColor: 'rgba(255, 136, 0, 0.12)',
+                },
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box 
+                  sx={{ 
+                    width: 24, 
+                    height: 24, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    backgroundColor: filters.sortBy === 'name_desc' ? '#ff8800' : 'transparent',
+                    border: filters.sortBy === 'name_desc' ? 'none' : '2px solid #ddd'
+                  }}
+                >
+                  {filters.sortBy === 'name_desc' && (
+                    <Typography sx={{ color: '#fff', fontWeight: 'bold', fontSize: '0.8rem' }}>✓</Typography>
+                  )}
+                </Box>
+                <Typography sx={{ fontWeight: filters.sortBy === 'name_desc' ? 600 : 400 }}>
+                  Z'den A'ya
+                </Typography>
+              </Box>
+            </MenuItem>
+            
+            <Divider sx={{ my: 1.5, mx: 2 }} />
+            
+            <Typography 
+              variant="subtitle2" 
+              sx={{ 
+                px: 2.5,
+                pt: 1,
+                pb: 1,
+                fontWeight: 600,
+                color: '#666'
+              }}
+            >
+              Fiyata Göre
+            </Typography>
+            
+            <MenuItem 
+              selected={filters.sortBy === 'price_asc'}
+              onClick={() => {
+                setFilters({...filters, sortBy: 'price_asc'});
+                handleClose();
+              }}
+              sx={{
+                py: 1.5,
+                px: 2.5,
+                '&.Mui-selected': {
+                  backgroundColor: 'rgba(255, 136, 0, 0.08)',
+                },
+                '&.Mui-selected:hover': {
+                  backgroundColor: 'rgba(255, 136, 0, 0.12)',
+                },
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box 
+                  sx={{ 
+                    width: 24, 
+                    height: 24, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    backgroundColor: filters.sortBy === 'price_asc' ? '#ff8800' : 'transparent',
+                    border: filters.sortBy === 'price_asc' ? 'none' : '2px solid #ddd'
+                  }}
+                >
+                  {filters.sortBy === 'price_asc' && (
+                    <Typography sx={{ color: '#fff', fontWeight: 'bold', fontSize: '0.8rem' }}>✓</Typography>
+                  )}
+                </Box>
+                <Typography sx={{ fontWeight: filters.sortBy === 'price_asc' ? 600 : 400 }}>
+                  Düşükten Yükseğe
+                </Typography>
+              </Box>
+            </MenuItem>
+            
+            <MenuItem 
+              selected={filters.sortBy === 'price_desc'}
+              onClick={() => {
+                setFilters({...filters, sortBy: 'price_desc'});
+                handleClose();
+              }}
+              sx={{
+                py: 1.5,
+                px: 2.5,
+                mb: 1,
+                '&.Mui-selected': {
+                  backgroundColor: 'rgba(255, 136, 0, 0.08)',
+                },
+                '&.Mui-selected:hover': {
+                  backgroundColor: 'rgba(255, 136, 0, 0.12)',
+                },
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box 
+                  sx={{ 
+                    width: 24, 
+                    height: 24, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    backgroundColor: filters.sortBy === 'price_desc' ? '#ff8800' : 'transparent',
+                    border: filters.sortBy === 'price_desc' ? 'none' : '2px solid #ddd'
+                  }}
+                >
+                  {filters.sortBy === 'price_desc' && (
+                    <Typography sx={{ color: '#fff', fontWeight: 'bold', fontSize: '0.8rem' }}>✓</Typography>
+                  )}
+                </Box>
+                <Typography sx={{ fontWeight: filters.sortBy === 'price_desc' ? 600 : 400 }}>
+                  Yüksekten Düşüğe
+                </Typography>
+              </Box>
+            </MenuItem>
+          </Box>
         </Box>
       </Popover>
       <Grid container columnSpacing={6} rowSpacing={3}>
