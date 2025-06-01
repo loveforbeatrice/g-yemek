@@ -123,13 +123,123 @@ function Restaurants({ onSelectBusiness }) {
                 cursor: 'pointer',
                 filter: business.isOpen === false ? 'grayscale(100%)' : 'none',
                 position: 'relative',
+                '&::after': {
+                  content: '""', 
+                  display: 'none'
+                },
+                '& .MuiCardContent-root': {
+                  '&::after': {
+                    content: 'none'
+                  }
+                }
               }}
               onClick={() => {
                 onSelectBusiness(business.name);
                 navigate('/menu');
               }}
             >
+<<<<<<< HEAD
               {/* No closed overlay */}
+=======
+              {/* Add CLOSED overlay when restaurant is closed */}
+              {business.isOpen === false && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1,
+                    background: 'rgba(0,0,0,0.5)',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 1,
+                    }}
+                  >
+                    {/* Clock icon */}
+                    <Box
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: '50%',
+                        border: '3px solid white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative',
+                        backgroundColor: 'rgba(255,136,0,0.9)',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+                      }}
+                    >
+                      {/* Clock hands */}
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          width: '2px',
+                          height: '20px',
+                          background: 'white',
+                          bottom: '50%',
+                          left: 'calc(50% - 1px)',
+                          transformOrigin: 'bottom',
+                          transform: 'rotate(-45deg)',
+                        }}
+                      />
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          width: '2px',
+                          height: '15px',
+                          background: 'white',
+                          bottom: '50%',
+                          left: 'calc(50% - 1px)',
+                          transformOrigin: 'bottom',
+                          transform: 'rotate(70deg)',
+                        }}
+                      />
+                      {/* Center dot */}
+                      <Box
+                        sx={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          background: 'white',
+                          position: 'absolute',
+                        }}
+                      />
+                    </Box>
+                    
+                    {/* Text */}
+                    <Typography
+                      sx={{
+                        fontWeight: 'bold',
+                        fontSize: '1.1rem',
+                        color: 'white',
+                        backgroundColor: 'rgba(255,136,0,0.9)',
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: '4px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1px',
+                      }}
+                    >
+                      Şu an kapalı
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+>>>>>>> alps
               <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', pt: 2 }}>
                 <Box sx={{
                   width: '92%',
