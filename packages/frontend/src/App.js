@@ -18,6 +18,7 @@ import BusinessOrderHistory from './pages/BusinessOrderHistory';
 import BusinessMenu from './pages/BusinessMenu';
 import BusinessSettings from './pages/BusinessSettings';
 import BusinessPerformance from './pages/BusinessPerformance';
+import AccountMenu from './pages/AccountMenu';
 
 // Tema oluşturma fonksiyonu
 const createAppTheme = (isLoggedIn) => {
@@ -221,6 +222,11 @@ function App() {
           <Route path="/business-performance" element={
             <Layout isAuthenticated={isAuthenticated} cartItems={cartItems} resetCart={resetCart}>
               <BusinessPerformance />
+            </Layout>
+          } />
+          <Route path="/account" element={
+            <Layout isAuthenticated={isAuthenticated} cartItems={cartItems} resetCart={resetCart}>
+              <AccountMenu />
             </Layout>
           } />
         </Routes>

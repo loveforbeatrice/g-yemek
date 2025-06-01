@@ -11,14 +11,18 @@ import {
   CircularProgress,
   Alert,
   Button,
-  Snackbar
+  Snackbar,
+  IconButton
 } from '@mui/material';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import { useNavigate } from 'react-router-dom';
 
 function Orders({ addToCart }) {
   const [orders, setOrders] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -66,10 +70,27 @@ function Orders({ addToCart }) {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: '#333', mb: 4 }}>
-        Sipariş Geçmişim
-      </Typography>
+    <Container maxWidth="md" sx={{ mt: { xs: 2, sm: 4 }, mb: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
+      <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', mb: { xs: 2, sm: 4 }, mt: { xs: 1, sm: 0 }, position: 'relative', justifyContent: 'center' }}>
+        <IconButton onClick={() => navigate(-1)} sx={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', display: { xs: 'flex', sm: 'none' } }}>
+          <ArrowBackIosNewIcon sx={{ color: '#9d8df1' }} />
+        </IconButton>
+        <Typography
+          variant="h3"
+          component="h1"
+          sx={{
+            fontFamily: 'Alata, sans-serif',
+            fontWeight: 'bold',
+            fontSize: { xs: '2rem', sm: '2.5rem' },
+            color: '#222',
+            textAlign: 'center',
+            width: '100%',
+            mb: 0
+          }}
+        >
+          Sipariş Geçmişim
+        </Typography>
+      </Box>
       {Object.keys(orders).length === 0 ? (
         <Card sx={{ borderRadius: 2, border: '1px solid #ff8800', boxShadow: 'none', p: 3, textAlign: 'center' }}>
           <Typography variant="h6" color="text.secondary">

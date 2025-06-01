@@ -11,11 +11,14 @@ import {
   InputLabel,
   Stack,
   CircularProgress,
-  Alert
+  Alert,
+  IconButton
 } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 import FlagIcon from '@mui/icons-material/Flag';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function Settings() {
   // Bildirim ayarları
@@ -32,6 +35,8 @@ function Settings() {
   const [language, setLanguage] = useState('tr');
   const [theme, setTheme] = useState('original');
   const [useDeviceTheme, setUseDeviceTheme] = useState(false);
+
+  const navigate = useNavigate();
 
   // Bildirim ayarlarını backend'den çek
   useEffect(() => {
@@ -92,14 +97,30 @@ function Settings() {
   };
 
   return (
-    <Box sx={{ width: '100%', minHeight: 'calc(100vh - 100px)', bgcolor: '#fef3e2', display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6 }}>
-      <Typography variant="h2" sx={{ fontFamily: 'Alata, sans-serif', fontWeight: 700, fontSize: '2.5rem', color: '#222', mb: 6, textAlign: 'center' }}>
-        Settings
-      </Typography>
-
+    <Box sx={{ width: '100%', minHeight: 'calc(100vh - 100px)', bgcolor: 'background.default', display: 'flex', flexDirection: 'column', alignItems: 'center', py: { xs: 2, sm: 6 }, px: { xs: 1, sm: 0 } }}>
+      {/* Mobil üst bar: Geri butonu ve başlık */}
+      <Box sx={{ width: '100%', maxWidth: 480, display: 'flex', alignItems: 'center', mb: 2, mt: 1, position: 'relative' }}>
+        <IconButton onClick={() => navigate(-1)} sx={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', display: { xs: 'flex', sm: 'none' } }}>
+          <ArrowBackIosNewIcon sx={{ color: '#9d8df1' }} />
+        </IconButton>
+        <Typography
+          variant="h2"
+          sx={{
+            fontFamily: 'Alata, sans-serif',
+            fontWeight: 700,
+            fontSize: { xs: '2rem', sm: '2.5rem' },
+            color: '#222',
+            textAlign: 'center',
+            width: '100%',
+            mb: { xs: 2, sm: 6 }
+          }}
+        >
+          Settings
+        </Typography>
+      </Box>
       {/* Notifications Section */}
-      <Box sx={{ width: '100%', maxWidth: 420, mb: 6 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif' }}>
+      <Box sx={{ width: '100%', maxWidth: 480, mb: 4, px: { xs: 0.5, sm: 0 } }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif', fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
           Notifications
         </Typography>
         {notifLoading ? (
@@ -167,10 +188,9 @@ function Settings() {
         )}
         {notifError && <Alert severity="error" sx={{ mt: 2 }}>{notifError}</Alert>}
       </Box>
-
       {/* Language Section */}
-      <Box sx={{ width: '100%', maxWidth: 420, mb: 6 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif' }}>
+      <Box sx={{ width: '100%', maxWidth: 480, mb: 4, px: { xs: 0.5, sm: 0 } }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif', fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
           Language
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -180,7 +200,7 @@ function Settings() {
               <img src="https://flagcdn.com/w20/tr.png" alt="TR" style={{ width: 24, height: 16, borderRadius: 2, marginRight: 6 }} />
             )}
           </Box>
-          <FormControl sx={{ minWidth: 180 }}>
+          <FormControl sx={{ minWidth: 0, flex: 1 }}>
             <Select
               value={language}
               onChange={handleLanguageChange}
@@ -192,6 +212,7 @@ function Settings() {
                 fontWeight: 500,
                 fontSize: '1.1rem',
                 pl: 2,
+                width: '100%',
                 '& .MuiSelect-select': { display: 'flex', alignItems: 'center' },
                 '& fieldset': { borderColor: '#eee' },
                 '&:hover fieldset': { borderColor: '#ff8800' },
@@ -223,78 +244,57 @@ function Settings() {
           </FormControl>
         </Box>
       </Box>
-
       {/* Theme Section */}
-      <Box sx={{ width: '100%', maxWidth: 420, mb: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif' }}>
+      <Box sx={{ width: '100%', maxWidth: 480, mb: 4, px: { xs: 0.5, sm: 0 } }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif', fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
           Theme
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <Box 
-            sx={{ 
-              width: 40, 
-              height: 40, 
-              borderRadius: '50%', 
-              background: 'linear-gradient(135deg, #ff8800 0%, #ff6611 100%)',
-              mr: 1 
-            }} 
-          />
-          <FormControl sx={{ minWidth: 180 }}>
-            <Select
-              value={theme}
-              onChange={handleThemeChange}
-              displayEmpty
-              sx={{
-                height: 44,
-                bgcolor: '#fff',
-                borderRadius: 2,
-                fontWeight: 500,
-                fontSize: '1.1rem',
-                pl: 2,
-                '& fieldset': { borderColor: '#eee' },
-                '&:hover fieldset': { borderColor: '#ff8800' },
-                '&.Mui-focused fieldset': { borderColor: '#ff8800' }
-              }}
-              IconComponent={(props) => (
-                <Box
-                  component="div"
-                  sx={{ ml: '0 !important', mr: 1, fontSize: '1.2rem', color: '#666', transform: 'none !important', transition: 'none !important' }}
-                  {...props}
-                >
-                  ▼
-                </Box>
-              )}
-            >
-              <MenuItem value="original">
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={{ width: 18, height: 12, borderRadius: 1, bgcolor: '#ff8800', mr: 1, border: '1px solid #eee' }} />
-                  Original
-                </Box>
-              </MenuItem>
-              <MenuItem value="dark">
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={{ width: 18, height: 12, borderRadius: 1, bgcolor: '#333', mr: 1, border: '1px solid #eee' }} />
-                  Dark
-                </Box>
-              </MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
+        <FormControl sx={{ width: '100%' }}>
+          <Select
+            value={theme}
+            onChange={handleThemeChange}
+            displayEmpty
+            sx={{
+              height: 44,
+              bgcolor: '#fff',
+              borderRadius: 2,
+              fontWeight: 500,
+              fontSize: '1.1rem',
+              pl: 2,
+              width: '100%',
+              '& .MuiSelect-select': { display: 'flex', alignItems: 'center' },
+              '& fieldset': { borderColor: '#eee' },
+              '&:hover fieldset': { borderColor: '#ff8800' },
+              '&.Mui-focused fieldset': { borderColor: '#ff8800' }
+            }}
+          >
+            <MenuItem value="original">
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ width: 18, height: 12, borderRadius: 1, bgcolor: '#ff8800', mr: 1, border: '1px solid #eee' }} />
+                Original
+              </Box>
+            </MenuItem>
+            <MenuItem value="dark">
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ width: 18, height: 12, borderRadius: 1, bgcolor: '#333', mr: 1, border: '1px solid #eee' }} />
+                Dark
+              </Box>
+            </MenuItem>
+          </Select>
+        </FormControl>
         <FormControlLabel
           control={
             <Checkbox
               checked={useDeviceTheme}
               onChange={handleDeviceThemeChange}
               sx={{
-                color: '#ccc',
-                '&.Mui-checked': {
-                  color: '#ff8800',
-                },
+                color: '#9d8df1',
+                '&.Mui-checked': { color: '#ff8800' }
               }}
             />
           }
-          label={<Typography sx={{ fontWeight: 400, fontSize: '1rem', color: '#222' }}>Use Device Theme</Typography>}
-          sx={{ ml: 1 }}
+          label={<Typography sx={{ fontWeight: 400, fontSize: '1.1rem', color: '#222' }}>Use device theme</Typography>}
+          sx={{ mt: 1, ml: 0 }}
         />
       </Box>
     </Box>

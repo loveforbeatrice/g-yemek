@@ -17,7 +17,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 axios.defaults.baseURL = 'http://localhost:3001';
 
@@ -38,6 +40,8 @@ function Profile() {
 
   // Token'ı localStorage'dan al
   const token = localStorage.getItem('token');
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -128,10 +132,26 @@ function Profile() {
   if (loading) return <Box sx={{ p: 6, textAlign: 'center' }}>Yükleniyor...</Box>;
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 500, mx: 'auto', px: 2, pt: 4, pb: 6 }}>
-      <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
-        Account Details
-      </Typography>
+    <Box sx={{ width: '100%', maxWidth: 500, mx: 'auto', px: { xs: 1, sm: 2 }, pt: { xs: 2, sm: 4 }, pb: { xs: 3, sm: 6 } }}>
+      <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', mb: { xs: 2, sm: 5 }, mt: { xs: 1, sm: 0 }, position: 'relative' }}>
+        <IconButton onClick={() => navigate(-1)} sx={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', display: { xs: 'flex', sm: 'none' } }}>
+          <ArrowBackIosNewIcon sx={{ color: '#9d8df1' }} />
+        </IconButton>
+        <Typography
+          variant="h2"
+          sx={{
+            fontFamily: 'Alata, sans-serif',
+            fontWeight: 700,
+            fontSize: { xs: '2rem', sm: '2.5rem' },
+            color: '#222',
+            textAlign: 'center',
+            width: '100%',
+            mb: 0
+          }}
+        >
+          Account Details
+        </Typography>
+      </Box>
 
       {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}
       {errorMsg && <Alert severity="error" sx={{ mb: 2 }}>{errorMsg}</Alert>}

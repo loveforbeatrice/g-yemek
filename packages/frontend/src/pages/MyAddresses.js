@@ -15,13 +15,17 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import axios from 'axios';
 import AddressFormDialog from '../components/AddressFormDialog';
+import { useNavigate } from 'react-router-dom';
 
 function MyAddresses() {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
   useEffect(() => {    const fetchAddresses = async () => {
       try {
         // Gerçek API'den adresleri çek
@@ -141,9 +145,24 @@ function MyAddresses() {
     }
   };
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold' }}>
+    <Container maxWidth="md" sx={{ mt: { xs: 2, sm: 4 }, mb: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
+      <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', mb: { xs: 2, sm: 4 }, mt: { xs: 1, sm: 0 }, position: 'relative', justifyContent: 'center' }}>
+        <IconButton onClick={() => navigate(-1)} sx={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', display: { xs: 'flex', sm: 'none' } }}>
+          <ArrowBackIosNewIcon sx={{ color: '#9d8df1' }} />
+        </IconButton>
+        <Typography
+          variant="h3"
+          component="h1"
+          sx={{
+            fontFamily: 'Alata, sans-serif',
+            fontWeight: 'bold',
+            fontSize: { xs: '2rem', sm: '2.5rem' },
+            color: '#222',
+            textAlign: 'center',
+            width: '100%',
+            mb: 0
+          }}
+        >
           MY ADDRESSES
         </Typography>
       </Box>

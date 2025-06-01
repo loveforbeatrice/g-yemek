@@ -23,6 +23,12 @@ import BusinessLayout from '../components/BusinessLayout';
 import ImageCropDialog from '../components/ImageCropDialog';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import { format, parse } from 'date-fns';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Paper from '@mui/material/Paper';
 
 function BusinessSettings() {  const [businessData, setBusinessData] = useState({
     name: '',
@@ -46,6 +52,15 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+
+  // Şifre değiştirme işlemleri
+  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState('');
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  const [deleteSuccess, setDeleteSuccess] = useState('');
 
   // Fetch business settings
   useEffect(() => {
@@ -225,6 +240,48 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
+  // Şifre değiştirme işlemleri
+  const handlePwInput = (e) => {
+    setPwForm({ ...pwForm, [e.target.name]: e.target.value });
+  };
+  const handleChangePassword = async () => {
+    setPwError('');
+    setPwSuccess('');
+    setPwLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put('/api/auth/updatepassword', pwForm, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPwSuccess('Şifre başarıyla değiştirildi.');
+      setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      setPwError(err.response?.data?.message || 'Şifre değiştirilemedi.');
+    } finally {
+      setPwLoading(false);
+    }
+  };
+
+  // Hesap silme işlemleri
+  const handleDeleteAccount = async () => {
+    setDeleteError('');
+    setDeleteSuccess('');
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete('/api/auth/delete', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDeleteSuccess('Hesabınız silindi. Oturum kapatılıyor...');
+      setTimeout(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }, 2000);
+    } catch (err) {
+      setDeleteError(err.response?.data?.message || 'Hesap silinemedi.');
+    }
+  };
+
   return (
     <BusinessLayout>
       <Box sx={{ maxWidth: 800, mx: 'auto', px: 2 }}>
@@ -401,6 +458,76 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
           imageUrl={selectedImageUrl}
           aspectRatio={16 / 9} // Restaurant kartları için ideal oran
         />
+
+        <Box sx={{ mt: 6, display: 'flex', justifyContent: 'center' }}>
+          <Paper elevation={2} sx={{ p: 4, maxWidth: 360, width: '100%', bgcolor: '#fff8f0', borderRadius: 3 }}>
+            <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, fontFamily: 'Alata, sans-serif', textAlign: 'center', color: '#222' }}>
+              Change Password
+            </Typography>
+            {pwSuccess && <Alert severity="success" sx={{ mb: 2 }}>{pwSuccess}</Alert>}
+            {pwError && <Alert severity="error" sx={{ mb: 2 }}>{pwError}</Alert>}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+              <TextField
+                label="Current Password"
+                name="currentPassword"
+                type="password"
+                value={pwForm.currentPassword}
+                onChange={handlePwInput}
+                fullWidth
+                size="small"
+              />
+              <TextField
+                label="New Password"
+                name="newPassword"
+                type="password"
+                value={pwForm.newPassword}
+                onChange={handlePwInput}
+                fullWidth
+                size="small"
+              />
+              <TextField
+                label="Confirm New Password"
+                name="confirmPassword"
+                type="password"
+                value={pwForm.confirmPassword}
+                onChange={handlePwInput}
+                fullWidth
+                size="small"
+              />
+              <Button
+                variant="contained"
+                sx={{ bgcolor: '#ff8800', '&:hover': { bgcolor: '#ff6600' }, fontWeight: 'bold', fontSize: '1.1rem', borderRadius: 2, mt: 1 }}
+                onClick={handleChangePassword}
+                disabled={pwLoading}
+                fullWidth
+              >
+                {pwLoading ? 'Changing...' : 'Change Password'}
+              </Button>
+            </Box>
+          </Paper>
+        </Box>
+        <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={() => setDeleteDialog(true)}
+          >
+            Delete Account
+          </Button>
+          <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)}>
+            <DialogTitle>Hesabı Sil</DialogTitle>
+            <DialogContent>
+              <Typography>Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.</Typography>
+              {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
+              {deleteSuccess && <Alert severity="success" sx={{ mt: 2 }}>{deleteSuccess}</Alert>}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setDeleteDialog(false)}>İptal</Button>
+              <Button color="error" onClick={handleDeleteAccount}>Evet, Sil</Button>
+            </DialogActions>
+          </Dialog>
+        </Box>
       </Box>
     </BusinessLayout>
   );
