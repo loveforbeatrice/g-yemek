@@ -103,7 +103,7 @@ exports.signup = async (req, res) => {
 // Kullanıcı girişi (login)
 exports.login = async (req, res) => {
   try {
-    const { phone, password, isBusinessPortal } = req.body;
+    const { phone, password } = req.body;
 
     // Telefon numarası ve şifre kontrolü
     if (!phone || !password) {
@@ -121,22 +121,6 @@ exports.login = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: 'Geçersiz kullanıcı bilgileri'
-      });
-    }
-
-    // İşletme portalına giriş yapılmaya çalışılıyorsa ve kullanıcı işletme değilse
-    if (isBusinessPortal && !user.isBusiness) {
-      return res.status(403).json({
-        success: false,
-        message: 'İşletme portalına erişim için işletme hesabı gereklidir'
-      });
-    }
-
-    // Normal kullanıcı portalına giriş yapılmaya çalışılıyorsa ve kullanıcı işletme ise
-    if (!isBusinessPortal && user.isBusiness) {
-      return res.status(403).json({
-        success: false,
-        message: 'İşletme hesapları normal kullanıcı portalına giriş yapamaz'
       });
     }
 

@@ -17,6 +17,29 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
+// Favori ekle
+router.post('/', protect, async (req, res) => {
+  try {
+    const { menuItemId } = req.body;
+    if (!menuItemId) return res.status(400).json({ message: 'menuItemId gerekli' });
+    const [favorite, created] = await Favorite.findOrCreate({ where: { userId: req.user.id, menuItemId } });
+    res.status(created ? 201 : 200).json(favorite);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Favori sil
+router.delete('/:menuItemId', protect, async (req, res) => {
+  try {
+    const { menuItemId } = req.params;
+    await Favorite.destroy({ where: { userId: req.user.id, menuItemId } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Menü itemlarının favori sayılarını getir
 router.get('/counts', async (req, res) => {
   try {
@@ -37,30 +60,12 @@ router.get('/counts', async (req, res) => {
       counts[fav.get('menuItemId')] = parseInt(fav.get('count'));
     });
 
+    // Hiç favorisi olmayanlar için de 0 dön
+    ids.forEach(id => {
+      if (typeof counts[id] === 'undefined') counts[id] = 0;
+    });
+
     res.json(counts);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Favori ekle
-router.post('/', protect, async (req, res) => {
-  try {
-    const { menuItemId } = req.body;
-    if (!menuItemId) return res.status(400).json({ message: 'menuItemId gerekli' });
-    const [favorite, created] = await Favorite.findOrCreate({ where: { userId: req.user.id, menuItemId } });
-    res.status(created ? 201 : 200).json(favorite);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Favori sil
-router.delete('/:menuItemId', protect, async (req, res) => {
-  try {
-    const { menuItemId } = req.params;
-    await Favorite.destroy({ where: { userId: req.user.id, menuItemId } });
-    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

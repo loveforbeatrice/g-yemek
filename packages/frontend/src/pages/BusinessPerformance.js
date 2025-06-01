@@ -163,6 +163,15 @@ function BusinessPerformance() {
 
   return (
     <BusinessLayout>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#ff8800', fontWeight: 'bold' }}>
+          Performance Analytics
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary">
+          {user.name} - Business Performance Dashboard
+        </Typography>
+      </Box>
+
       {/* Time Range Toggle */}
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
         <ToggleButtonGroup

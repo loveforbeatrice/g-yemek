@@ -86,8 +86,7 @@ const Login = () => {
       // Backend'e login isteği gönder
       const response = await axios.post('http://localhost:3001/api/auth/login', {
         phone: formData.phone,
-        password: formData.password,
-        isBusinessPortal: formType === 'business'
+        password: formData.password
       });
       
       // Token'ı localStorage'a kaydet
@@ -148,17 +147,19 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify(response.data.user));
       
       // Başarı mesajı göster
-      showSnackbar('Kayıt işlemi başarılı!', 'success');
+      showSnackbar('Kayıt işlemi başarılı! Adresler sayfasına yönlendiriliyorsunuz.', 'success');
       
-      if (formType === 'user' || (isFlipped && formType !== 'business')) {
+      if (formType === 'user') {
         console.log('User sign up successful:', response.data);
+        // Başarılı kayıt sonrası ana sayfaya yönlendir
         setTimeout(() => {
-          navigate('/restaurants');
-        }, 500);
+          navigate('/addresses');
+        }, 500); // Kısa bir gecikme ekleyerek alert'in görünmesini sağla
       } else {
         console.log('Business sign up successful:', response.data);
+        // İşletme kaydı sonrası işletme paneline yönlendir
         setTimeout(() => {
-          navigate('/business-settings');
+          navigate('/addresses');
         }, 500);
       }
     } catch (error) {
