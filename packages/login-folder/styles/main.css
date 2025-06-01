@@ -1,0 +1,526 @@
+/* Google Fonts import for Alata */
+@import url('https://fonts.googleapis.com/css2?family=Alata&display=swap');
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Alata', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Arka plan opaklık ile */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-image: url('/src/assets/food-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.85;
+  z-index: -1;
+  filter: blur(2px);
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+.login-page {
+  width: 100%;
+  min-height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  margin-top: -1rem;
+}
+
+/* Kartları saran yapı */
+.login-card-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 1100px;
+  gap: 3rem;
+  justify-content: center;
+  perspective: 2000px;
+  align-items: flex-start;
+  padding: 0 2rem;
+}
+
+/* Kartlar daha uzun ve dar */
+.left-card {
+  width: calc(40% - 1.5rem);
+  min-height: 480px;
+  background-color: rgba(254, 243, 226, 0.95);
+  padding: 2rem;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  margin: 0;
+}
+
+/* Sağ kart için flip container */
+.right-card-container {
+  width: calc(40% - 1.5rem);
+  height: 480px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: all 0.6s ease;
+}
+
+/* Seçim yapıldıktan sonraki stiller */
+.login-card-container.selection-made .left-card {
+  width: calc(35% - 1.5rem);
+  min-height: 420px;
+  opacity: 0.85;
+  transform: scale(0.95);
+}
+
+.login-card-container.selection-made .right-card-container {
+  width: calc(45% - 1.5rem);
+  height: 520px;
+}
+
+.login-card-container.selection-made .right-card-front,
+.login-card-container.selection-made .right-card-back {
+  height: 520px;
+}
+
+/* Flip efekti için class */
+.right-card-container.flipped {
+  transform: rotateX(180deg);
+  height: 480px;
+}
+
+/* Sağ kart için yeni stiller */
+.right-card-front,
+.right-card-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background-color: rgba(254, 243, 226, 0.95);
+  padding: 2rem;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.8rem;
+}
+
+.right-card-front {
+  transform: rotateX(0deg);
+}
+
+.right-card-back {
+  transform: rotateX(180deg);
+  padding: 2.2rem;
+  height: 480px;
+}
+
+/* Hover efektlerini güncelleme */
+.left-card:hover {
+  /* Hover efektlerini kaldırıyoruz */
+  transform: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.right-card-front:hover,
+.right-card-back:hover {
+  /* Hover efektlerini kaldırıyoruz */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* Metinler */
+.left-heading {
+  color: #9d8df1;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.account-warning {
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 0.3rem 0;
+  position: relative;
+  z-index: 2;
+}
+
+.or-text {
+  color: #888;
+  font-size: 1rem;
+  font-style: italic;
+  text-align: center;
+  margin: 0.3rem 0;
+}
+
+.business-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  margin: 0.3rem 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* When followed by orange button */
+.btn-orange + .or-text + .business-text,
+.btn-orange + .or-text + .business-text + .btn-blue {
+  color: #89d8d3;
+}
+
+/* When followed by blue button */
+.btn-blue + .or-text + .business-text,
+.btn-blue + .or-text + .business-text + .btn-orange {
+  color: #ff8800;
+}
+
+/* Default state - before button */
+.account-warning + .btn-orange {
+  ~ .account-warning {
+    color: #ff8800;
+  }
+}
+
+.account-warning + .btn-blue {
+  ~ .account-warning {
+    color: #89d8d3;
+  }
+}
+
+/* Text colors based on the portal type */
+.left-card-front .account-warning,
+.left-card-back .business-text {
+  color: #ff8800;
+}
+
+.left-card-front .business-text,
+.left-card-back .account-warning {
+  color: #89d8d3;
+}
+
+/* Butonlar */
+.btn-orange, .btn-blue {
+  padding: 13px 32px;
+  font-size: 1.1rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  width: 100%;
+  max-width: 280px;
+  margin: 0.4rem 0;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  color: #FFFFFF !important;
+}
+
+.btn-orange {
+  background-color: #e67700;
+  box-shadow: 0 4px 15px rgba(255, 136, 0, 0.2);
+}
+
+.btn-orange:hover {
+  background-color: #ff7700;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 136, 0, 0.3);
+}
+
+.btn-blue {
+  background-color: #3fb5ae;
+  box-shadow: 0 4px 15px rgba(137, 216, 211, 0.2);
+}
+
+.btn-blue:hover {
+  background-color: #7acbc5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(137, 216, 211, 0.3);
+}
+
+/* Sağ kart özel stiller */
+.signin-title {
+  margin: 0;
+  margin-top: 1rem;
+  font-size: 2.5rem;
+  color: #8e72e9;
+  text-align: center;
+  letter-spacing: 1px;
+  font-weight: 600;
+  width: 100%;
+  position: relative;
+}
+
+p.subtitle {
+  color: #f80;
+  font-style: italic;
+  font-size: 1.1rem;
+  margin: 0;
+  margin-bottom: 3rem;
+  padding-left: 50%;
+  transform: translateX(10px);
+  opacity: 0.9;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  position: relative;
+  top: -5px;
+}
+
+/* Input alanları */
+.input-field {
+  width: 100%;
+  max-width: 100%;
+  padding: 13px 16px;
+  border: 2px solid rgba(255, 136, 0, 0.3);
+  border-radius: 12px;
+  font-size: 1rem;
+  background-color: white;
+  transition: all 0.3s ease;
+  margin: 0.3rem 0;
+  box-sizing: border-box;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #ff8800;
+  box-shadow: 0 0 0 3px rgba(255, 136, 0, 0.1);
+}
+
+/* Forgot password */
+.forgot-link {
+  font-size: 0.95rem;
+  color: #8e72e9;
+  text-decoration: none;
+  margin-top: 1rem;
+  align-self: center;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.forgot-link:hover {
+  color: #7057d3;
+}
+
+.forgot-link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: -2px;
+  left: 0;
+  background-color: #8e72e9;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.forgot-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Responsive styles */
+@media screen and (max-width: 1024px) {
+  .login-card-container {
+    padding: 1.5rem;
+    gap: 2rem;
+  }
+
+  .left-card, .right-card-container {
+    width: calc(45% - 1rem);
+    min-height: 520px;
+    padding: 2rem;
+  }
+
+  .left-heading {
+    font-size: 1.4rem;
+  }
+
+  .signin-title {
+    font-size: 2.3rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .login-page {
+    padding: 2rem 1.5rem;
+  }
+
+  .login-card-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .left-card, .right-card-container {
+    width: 90%;
+  }
+
+  .right-card-front,
+  .right-card-back {
+    width: 100%;
+  }
+
+  .btn-orange, .btn-blue {
+    width: 90%;
+    max-width: 320px;
+    padding: 12px 24px;
+  }
+
+  .input-field {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .signin-title {
+    font-size: 2.2rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .login-page {
+    padding: 1.5rem 1rem;
+  }
+
+  .left-card, .right-card-container {
+    width: 100%;
+  }
+
+  .left-card, .right-card-front, .right-card-back {
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+  }
+
+  .left-heading {
+    font-size: 1.3rem;
+  }
+
+  .signin-title {
+    font-size: 2rem;
+  }
+
+  .account-warning,
+  .business-text {
+    font-size: 1rem;
+  }
+
+  .btn-orange, .btn-blue {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+
+  .input-field {
+    padding: 12px 14px;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    padding-right: 0.8rem;
+  }
+}
+
+/* Form container */
+.right-card-back form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+}
+
+/* Password input container */
+.password-input-container {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.password-input-container .input-field {
+  padding-right: 40px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #666;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.password-toggle:hover {
+  opacity: 1;
+}
+
+.password-toggle:focus {
+  outline: none;
+}
+
+/* Business mode styles */
+.business-mode .left-card {
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+}
+
+.business-mode .left-card.flipped {
+  transform: rotateY(180deg);
+}
+
+.left-card-front,
+.left-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.left-card-front {
+  transform: rotateY(0deg);
+}
+
+.left-card-back {
+  transform: rotateY(180deg);
+}

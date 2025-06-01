@@ -1,0 +1,916 @@
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Typography,
+  Box,
+  Tab,
+  Tabs,
+  Switch,
+  FormControl,
+  FormControlLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  Button,
+  TextField,
+  IconButton,
+  InputAdornment,
+  AppBar,
+  Container
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
+import LanguageIcon from '@mui/icons-material/Language';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+
+function Profile() {
+  const [activeTab, setActiveTab] = useState('account');
+  const [notificationSettings, setNotificationSettings] = useState({
+    pushNotifications: false,
+    pullNotifications: true,
+    promotionNotifications: false
+  });
+  const [language, setLanguage] = useState('tr');
+  const [theme, setTheme] = useState('original');
+  const [useDeviceTheme, setUseDeviceTheme] = useState(false);
+  
+  // Refs for each section
+  const accountRef = useRef(null);
+  const notificationsRef = useRef(null);
+  const languageRef = useRef(null);
+  const themeRef = useRef(null);
+  
+  // Observer for scroll spy functionality
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: '-10% 0px -90% 0px', // Element is considered in view when it enters the top 10% of viewport
+      threshold: 0
+    };
+    
+    const handleIntersect = (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setActiveTab(entry.target.id);
+        }
+      });
+    };
+    
+    const observer = new IntersectionObserver(handleIntersect, options);
+    
+    // Observe all section elements
+    if (accountRef.current) observer.observe(accountRef.current);
+    if (notificationsRef.current) observer.observe(notificationsRef.current);
+    if (languageRef.current) observer.observe(languageRef.current);
+    if (themeRef.current) observer.observe(themeRef.current);
+    
+    return () => {
+      if (accountRef.current) observer.unobserve(accountRef.current);
+      if (notificationsRef.current) observer.unobserve(notificationsRef.current);
+      if (languageRef.current) observer.unobserve(languageRef.current);
+      if (themeRef.current) observer.unobserve(themeRef.current);
+    };
+  }, []);
+  
+  // New state variables for editable fields
+  const [editPhone, setEditPhone] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('+90 555 123 4567');
+  const [tempPhoneNumber, setTempPhoneNumber] = useState('+90 555 123 4567');
+    const [editPassword, setEditPassword] = useState(false);
+  const [password, setPassword] = useState('password123');
+  const [tempPassword, setTempPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Name editing states
+  const [editName, setEditName] = useState(false);
+  const [fullName, setFullName] = useState('Alp Yılmaz');
+  const [tempFullName, setTempFullName] = useState('Alp Yılmaz');
+  
+  // Success message state
+  const [savedMessage, setSavedMessage] = useState('');
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    
+    // Scroll to the appropriate section
+    let ref;
+    switch (newValue) {
+      case 'account':
+        ref = accountRef;
+        break;
+      case 'notifications':
+        ref = notificationsRef;
+        break;
+      case 'language':
+        ref = languageRef;
+        break;
+      case 'theme':
+        ref = themeRef;
+        break;
+      default:
+        ref = accountRef;
+    }
+    
+    if (ref.current) {
+      ref.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
+  const handleNotificationChange = (name) => (event) => {
+    setNotificationSettings({
+      ...notificationSettings,
+      [name]: event.target.checked
+    });
+  };
+
+  const handleLanguageChange = (event) => {
+    setLanguage(event.target.value);
+  };
+
+  const handleThemeChange = (event) => {
+    setTheme(event.target.value);
+  };
+
+  const handleDeviceThemeChange = (event) => {
+    setUseDeviceTheme(event.target.checked);
+  };
+  
+  // Phone editing functions
+  const handleEditPhone = () => {
+    setTempPhoneNumber(phoneNumber);
+    setEditPhone(true);
+  };
+  
+  const handleSavePhone = () => {
+    setPhoneNumber(tempPhoneNumber);
+    setEditPhone(false);
+    showSavedMessage('Phone number updated successfully!');
+  };
+  
+  const handleCancelPhone = () => {
+    setTempPhoneNumber(phoneNumber);
+    setEditPhone(false);
+  };
+    // Name editing functions
+  const handleEditName = () => {
+    setTempFullName(fullName);
+    setEditName(true);
+  };
+  
+  const handleSaveName = () => {
+    if (tempFullName.trim() !== '') {
+      setFullName(tempFullName);
+      setEditName(false);
+      showSavedMessage('Name updated successfully!');
+    } else {
+      showSavedMessage('Name cannot be empty!', 'error');
+    }
+  };
+  
+  const handleCancelName = () => {
+    setTempFullName(fullName);
+    setEditName(false);
+  };
+
+  // Password editing functions
+  const handleEditPassword = () => {
+    setTempPassword('');
+    setConfirmPassword('');
+    setEditPassword(true);
+  };
+  
+  const handleSavePassword = () => {
+    if (tempPassword.length < 6) {
+      showSavedMessage('Password must be at least 6 characters long!', 'error');
+      return;
+    }
+    
+    if (tempPassword !== confirmPassword) {
+      showSavedMessage('Passwords do not match!', 'error');
+      return;
+    }
+    
+    setPassword(tempPassword);
+    setEditPassword(false);
+    showSavedMessage('Password updated successfully!');
+  };
+  
+  const handleCancelPassword = () => {
+    setTempPassword('');
+    setConfirmPassword('');
+    setEditPassword(false);
+  };
+  
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+  
+  const toggleShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+  
+  // Show temporary success message
+  const showSavedMessage = (message, type = 'success') => {
+    setSavedMessage({ text: message, type });
+    setTimeout(() => {
+      setSavedMessage('');
+    }, 3000);
+  };
+  return (
+    <Box sx={{ width: '100%' }}>
+      {/* Sticky Header with Tabs */}
+      <AppBar 
+        position="sticky" 
+        color="default" 
+        elevation={0}
+        sx={{ 
+          top: 0, 
+          bgcolor: 'white',
+          borderBottom: '1px solid rgba(0,0,0,0.1)',
+          zIndex: 1100
+        }}
+      >
+        <Container maxWidth="lg">
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="fullWidth"
+            aria-label="Settings tabs"
+            sx={{
+              '& .MuiTab-root': { 
+                color: '#666',
+                fontFamily: '"Alata", sans-serif',
+                fontSize: '1.1rem'
+              },
+              '& .Mui-selected': { 
+                color: '#222', 
+                fontWeight: 'bold' 
+              },
+              '& .MuiTabs-indicator': { 
+                backgroundColor: '#ff8800'
+              }
+            }}
+          >
+            <Tab value="account" label="Account" />
+            <Tab value="notifications" label="Notifications" />
+            <Tab value="language" label="Language" />
+            <Tab value="theme" label="Theme" />
+          </Tabs>
+        </Container>
+      </AppBar>
+        <Container maxWidth="lg" sx={{ mt: 4, pb: 6 }}>
+        {/* Success message that appears at the top */}
+        {savedMessage && (
+          <Box 
+            sx={{ 
+              maxWidth: 600, 
+              mx: 'auto', 
+              mb: 3, 
+              p: 2, 
+              borderRadius: 1,
+              bgcolor: savedMessage.type === 'success' ? '#e6f7e6' : '#ffebee',
+              color: savedMessage.type === 'success' ? '#2e7d32' : '#d32f2f'
+            }}
+          >
+            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+              {savedMessage.text}
+            </Typography>
+          </Box>
+        )}
+        {/* Account Section */}
+        <Box 
+          id="account" 
+          ref={accountRef} 
+          sx={{ 
+            py: 8, 
+            minHeight: '100vh',
+            scrollMarginTop: '64px' // To account for the sticky header when scrolling
+          }}
+        >
+          <Box sx={{ py: 2 }}>
+            <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
+              Account
+            </Typography>
+
+          {/* Display success message */}
+          {savedMessage && (
+            <Box 
+              sx={{ 
+                maxWidth: 600, 
+                mx: 'auto', 
+                mb: 3, 
+                p: 2, 
+                borderRadius: 1,
+                bgcolor: savedMessage.type === 'success' ? '#e6f7e6' : '#ffebee',
+                color: savedMessage.type === 'success' ? '#2e7d32' : '#d32f2f'
+              }}
+            >
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                {savedMessage.text}
+              </Typography>
+            </Box>
+          )}
+
+          <Box sx={{ maxWidth: 600, mx: 'auto', mt: 3 }}>
+            {/* Personal Information Section */}
+            <Box sx={{ mb: 5 }}>
+              <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, fontFamily: 'Alata, sans-serif' }}>
+                Personal Information
+              </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
+                  Full Name:
+                </Typography>
+                
+                {editName ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <TextField
+                      size="small"
+                      value={tempFullName}
+                      onChange={(e) => setTempFullName(e.target.value)}
+                      sx={{ 
+                        width: '180px',
+                        '& .MuiOutlinedInput-root': {
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#ff8800',
+                          },
+                        },
+                      }}
+                    />
+                    <IconButton 
+                      size="small" 
+                      onClick={handleSaveName}
+                      sx={{ color: 'green', ml: 1 }}
+                    >
+                      <SaveIcon />
+                    </IconButton>
+                    <IconButton 
+                      size="small" 
+                      onClick={handleCancelName}
+                      sx={{ color: 'red' }}
+                    >
+                      <CancelIcon />
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
+                      {fullName}
+                    </Typography>
+                    <IconButton 
+                      size="small" 
+                      onClick={handleEditName}
+                      sx={{ color: '#ff8800', ml: 1 }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Box>
+                )}
+              </Box>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
+                  Phone:
+                </Typography>
+                
+                {editPhone ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <TextField
+                      size="small"
+                      value={tempPhoneNumber}
+                      onChange={(e) => setTempPhoneNumber(e.target.value)}
+                      sx={{ 
+                        width: '180px',
+                        '& .MuiOutlinedInput-root': {
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#ff8800',
+                          },
+                        },
+                      }}
+                    />
+                    <IconButton 
+                      size="small" 
+                      onClick={handleSavePhone}
+                      sx={{ color: 'green', ml: 1 }}
+                    >
+                      <SaveIcon />
+                    </IconButton>
+                    <IconButton 
+                      size="small" 
+                      onClick={handleCancelPhone}
+                      sx={{ color: 'red' }}
+                    >
+                      <CancelIcon />
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
+                      {phoneNumber}
+                    </Typography>
+                    <IconButton 
+                      size="small" 
+                      onClick={handleEditPhone}
+                      sx={{ color: '#ff8800', ml: 1 }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+            
+            {/* Security Section */}
+            <Box sx={{ mb: 5 }}>
+              <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, fontFamily: 'Alata, sans-serif' }}>
+                Security
+              </Typography>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
+                  Password:
+                </Typography>
+                  {editPassword ? (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <TextField
+                        size="small"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="New password"
+                        value={tempPassword}
+                        onChange={(e) => setTempPassword(e.target.value)}
+                        sx={{ 
+                          width: '180px',
+                          '& .MuiOutlinedInput-root': {
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#ff8800',
+                            },
+                          },
+                        }}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={toggleShowPassword}
+                                edge="end"
+                                size="small"
+                              >
+                                {showPassword ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <TextField
+                        size="small"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        placeholder="Confirm password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        sx={{ 
+                          width: '180px',
+                          '& .MuiOutlinedInput-root': {
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#ff8800',
+                            },
+                          },
+                        }}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={toggleShowConfirmPassword}
+                                edge="end"
+                                size="small"
+                              >
+                                {showConfirmPassword ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                      <IconButton 
+                        size="small" 
+                        onClick={handleSavePassword}
+                        sx={{ color: 'green', ml: 1 }}
+                      >
+                        <SaveIcon />
+                      </IconButton>
+                      <IconButton 
+                        size="small" 
+                        onClick={handleCancelPassword}
+                        sx={{ color: 'red' }}
+                      >
+                        <CancelIcon />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                ): (
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
+                      ••••••••
+                    </Typography>
+                    <IconButton 
+                      size="small" 
+                      onClick={handleEditPassword}
+                      sx={{ color: '#ff8800', ml: 1 }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+            
+            {/* Account Settings */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, fontFamily: 'Alata, sans-serif' }}>
+                Account Settings
+              </Typography>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
+                  Account Type:
+                </Typography>
+                <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
+                  Standard User
+                </Typography>
+              </Box>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="body1" sx={{ fontSize: '1.1rem', fontWeight: 500 }}>
+                  Membership Since:
+                </Typography>
+                <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
+                  January 15, 2024
+                </Typography>
+              </Box>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+                <Button 
+                  variant="contained" 
+                  sx={{ 
+                    bgcolor: '#ff8800', 
+                    '&:hover': { bgcolor: '#ff6600' },
+                    px: 4,
+                    py: 1,
+                    fontSize: '1.1rem',
+                    fontWeight: 'bold',
+                    borderRadius: 2
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      )}
+
+      {/* Notifications Tab */}
+      {activeTab === 'notifications' && (
+        <Box sx={{ py: 2 }}>
+          <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
+            Notifications
+          </Typography>
+          
+          <Box sx={{ maxWidth: 600, mx: 'auto' }}>
+            <Box sx={{ my: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={notificationSettings.pushNotifications}
+                    onChange={handleNotificationChange('pushNotifications')}
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': {
+                        color: '#ff8800',
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: '#ff8800',
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Typography sx={{ fontWeight: 500, fontSize: '1.1rem' }}>
+                    Allow push notifications
+                  </Typography>
+                }
+              />
+            </Box>
+            
+            <Box sx={{ my: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={notificationSettings.pullNotifications}
+                    onChange={handleNotificationChange('pullNotifications')}
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': {
+                        color: '#ff8800',
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: '#ff8800',
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Typography sx={{ fontWeight: 500, fontSize: '1.1rem' }}>
+                    Allow pull notifications
+                  </Typography>
+                }
+              />
+            </Box>
+            
+            <Box sx={{ my: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={notificationSettings.promotionNotifications}
+                    onChange={handleNotificationChange('promotionNotifications')}
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': {
+                        color: '#ff8800',
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: '#ff8800',
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Typography sx={{ fontWeight: 500, fontSize: '1.1rem' }}>
+                    Allow promotion notifications
+                  </Typography>
+                }
+              />
+            </Box>
+          </Box>
+        </Box>
+      )}
+
+      {/* Language Tab */}
+      {activeTab === 'language' && (
+        <Box sx={{ py: 2 }}>
+          <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
+            Language
+          </Typography>
+          
+          <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, display: 'flex', alignItems: 'center' }}>
+            <LanguageIcon sx={{ mr: 2, fontSize: 28 }} />
+            
+            <FormControl sx={{ minWidth: 200 }}>
+              <Select
+                value={language}
+                onChange={handleLanguageChange}
+                displayEmpty
+                sx={{ 
+                  height: 48,
+                  '&.MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: '#ccc' },
+                    '&:hover fieldset': { borderColor: '#ff8800' },
+                    '&.Mui-focused fieldset': { borderColor: '#ff8800' }
+                  }
+                }}
+                IconComponent={(props) => (
+                  <Box
+                    component="div"
+                    sx={{
+                      ml: '0 !important',
+                      mr: 1,
+                      fontSize: '1.2rem',
+                      color: '#666',
+                      transform: 'none !important',
+                      transition: 'none !important'
+                    }}
+                    {...props}
+                  >
+                    ▼
+                  </Box>
+                )}
+              >
+                <MenuItem value="en">English</MenuItem>
+                <MenuItem value="tr">Türkçe</MenuItem>
+                <MenuItem value="de">Deutsch</MenuItem>
+                <MenuItem value="fr">Français</MenuItem>
+                <MenuItem value="es">Español</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </Box>
+      )}
+
+      {/* Theme Tab */}
+      {activeTab === 'theme' && (
+        <Box sx={{ py: 2 }}>
+          <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
+            Theme
+          </Typography>
+          
+          <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+              <Box 
+                sx={{ 
+                  width: 40, 
+                  height: 40, 
+                  borderRadius: '50%', 
+                  background: 'linear-gradient(135deg, #ff8800 0%, #ff6611 100%)',
+                  mr: 2 
+                }} 
+              />
+              
+              <FormControl sx={{ minWidth: 200 }}>
+                <Select
+                  value={theme}
+                  onChange={handleThemeChange}
+                  displayEmpty
+                  sx={{ 
+                    height: 48,
+                    '&.MuiOutlinedInput-root': {
+                      '& fieldset': { borderColor: '#ccc' },
+                      '&:hover fieldset': { borderColor: '#ff8800' },
+                      '&.Mui-focused fieldset': { borderColor: '#ff8800' }
+                    }
+                  }}
+                  IconComponent={(props) => (
+                    <Box
+                      component="div"
+                      sx={{
+                        ml: '0 !important',
+                        mr: 1,
+                        fontSize: '1.2rem',
+                        color: '#666',
+                        transform: 'none !important',
+                        transition: 'none !important'
+                      }}
+                      {...props}
+                    >
+                      ▼
+                    </Box>
+                  )}
+                >
+                  <MenuItem value="original">Original</MenuItem>
+                  <MenuItem value="dark">Dark</MenuItem>
+                  <MenuItem value="light">Light</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={useDeviceTheme}
+                  onChange={handleDeviceThemeChange}
+                  sx={{
+                    color: '#ccc',
+                    '&.Mui-checked': {
+                      color: '#ff8800',
+                    },
+                  }}
+                />
+              }
+              label="Use Device Theme"
+            />
+          </Box>
+        </Box>      )}
+
+      {/* Language Tab */}
+      {activeTab === 'language' && (
+        <Box sx={{ py: 2 }}>
+          <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
+            Language
+          </Typography>
+          
+          <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, display: 'flex', alignItems: 'center' }}>
+            <LanguageIcon sx={{ mr: 2, fontSize: 28 }} />
+            
+            <FormControl sx={{ minWidth: 200 }}>
+              <Select
+                value={language}
+                onChange={handleLanguageChange}
+                displayEmpty
+                sx={{ 
+                  height: 48,
+                  '&.MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: '#ccc' },
+                    '&:hover fieldset': { borderColor: '#ff8800' },
+                    '&.Mui-focused fieldset': { borderColor: '#ff8800' }
+                  }
+                }}
+                IconComponent={(props) => (
+                  <Box
+                    component="div"
+                    sx={{
+                      ml: '0 !important',
+                      mr: 1,
+                      fontSize: '1.2rem',
+                      color: '#666',
+                      transform: 'none !important',
+                      transition: 'none !important'
+                    }}
+                    {...props}
+                  >
+                    ▼
+                  </Box>
+                )}
+              >
+                <MenuItem value="en">English</MenuItem>
+                <MenuItem value="tr">Türkçe</MenuItem>
+                <MenuItem value="de">Deutsch</MenuItem>
+                <MenuItem value="fr">Français</MenuItem>
+                <MenuItem value="es">Español</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </Box>
+      )}
+
+      {/* Theme Tab */}
+      {activeTab === 'theme' && (
+        <Box sx={{ py: 2 }}>
+          <Typography variant="h2" fontWeight="bold" sx={{ mb: 5, fontFamily: 'Alata, sans-serif', textAlign: 'center' }}>
+            Theme
+          </Typography>
+          
+          <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+              <Box 
+                sx={{ 
+                  width: 40, 
+                  height: 40, 
+                  borderRadius: '50%', 
+                  background: 'linear-gradient(135deg, #ff8800 0%, #ff6611 100%)',
+                  mr: 2 
+                }} 
+              />
+              
+              <FormControl sx={{ minWidth: 200 }}>
+                <Select
+                  value={theme}
+                  onChange={handleThemeChange}
+                  displayEmpty
+                  sx={{ 
+                    height: 48,
+                    '&.MuiOutlinedInput-root': {
+                      '& fieldset': { borderColor: '#ccc' },
+                      '&:hover fieldset': { borderColor: '#ff8800' },
+                      '&.Mui-focused fieldset': { borderColor: '#ff8800' }
+                    }
+                  }}
+                  IconComponent={(props) => (
+                    <Box
+                      component="div"
+                      sx={{
+                        ml: '0 !important',
+                        mr: 1,
+                        fontSize: '1.2rem',
+                        color: '#666',
+                        transform: 'none !important',
+                        transition: 'none !important'
+                      }}
+                      {...props}
+                    >
+                      ▼
+                    </Box>
+                  )}
+                >
+                  <MenuItem value="original">Original</MenuItem>
+                  <MenuItem value="dark">Dark</MenuItem>
+                  <MenuItem value="light">Light</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={useDeviceTheme}
+                  onChange={handleDeviceThemeChange}
+                  sx={{
+                    color: '#ccc',
+                    '&.Mui-checked': {
+                      color: '#ff8800',
+                    },
+                  }}
+                />
+              }
+              label="Use Device Theme"
+            />
+          </Box>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+export default Profile;
