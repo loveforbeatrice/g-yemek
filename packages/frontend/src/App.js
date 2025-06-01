@@ -219,11 +219,7 @@ function App() {
           <Route path="/business-order-history" element={<BusinessOrderHistory />} />
           <Route path="/business-menu" element={<BusinessMenu />} />
           <Route path="/business-settings" element={<BusinessSettings />} />
-          <Route path="/business-performance" element={
-            <Layout isAuthenticated={isAuthenticated} cartItems={cartItems} resetCart={resetCart}>
-              <BusinessPerformance />
-            </Layout>
-          } />
+          <Route path="/business-performance" element={<BusinessPerformance />} />
           <Route path="/account" element={
             <Layout isAuthenticated={isAuthenticated} cartItems={cartItems} resetCart={resetCart}>
               <AccountMenu />

@@ -10,6 +10,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
   const [menuItems, setMenuItems] = useState([]);
   const [search, setSearch] = useState('');
   const [favorites, setFavorites] = useState({});
+  const [favoriteCounts, setFavoriteCounts] = useState({});
   const [businessMap, setBusinessMap] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
@@ -44,6 +45,16 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
         } else {
           setFavorites({});
         }
+
+        // Favori sayılarını getir
+        const menuItemIds = res.data.map(item => item.id).join(',');
+        axios.get(`http://localhost:3001/api/favorites/counts?menuItemIds=${menuItemIds}`)
+          .then(res => {
+            setFavoriteCounts(res.data);
+          })
+          .catch(error => {
+            console.error('Error fetching favorite counts:', error);
+          });
       });
   }, [businessName]);
 
@@ -63,6 +74,17 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
       });
       setFavorites(f => ({ ...f, [item.id]: true }));
     }
+    // Her iki durumda da count'u backend'den tekrar çek
+    axios.get(`http://localhost:3001/api/favorites/counts?menuItemIds=${item.id}`)
+      .then(res => {
+        setFavoriteCounts(prev => ({
+          ...prev,
+          [item.id]: res.data[item.id] || 0
+        }));
+      })
+      .catch(error => {
+        console.error('Error fetching favorite count:', error);
+      });
   };
 
   const filtered = menuItems.filter(item =>
@@ -134,7 +156,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                               : <FavoriteBorderIcon sx={{ color: '#ff8800', fontSize: 32 }} />}
                           </IconButton>
                           <Typography sx={{ color: '#ff8800', fontWeight: 600, fontSize: '1.1rem', mt: -0.5 }}>
-                            12
+                            {typeof favoriteCounts[item.id] === 'number' ? favoriteCounts[item.id] : 0}
                           </Typography>
                         </Box>
                       </Box>
