@@ -180,7 +180,6 @@ function Restaurants({ onSelectBusiness }) {
                   </Box>
                 </Box>
               )}
-            >
               <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', pt: 2 }}>
                 <Box sx={{
                   width: '92%',
