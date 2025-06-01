@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Typography, Box, Card, CardContent, CardMedia, IconButton, Button, Divider, TextField, Paper, Alert, MenuItem, Select, FormControl, Snackbar, Modal, Backdrop, Fade } from '@mui/material';
+import { Container, Typography, Box, Grid, Card, CardContent, CardMedia, IconButton, Button, Divider, TextField, Paper, Radio, Alert, MenuItem, Select, FormControl, InputLabel, Snackbar, Dialog, Modal, Backdrop, Fade } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -80,7 +80,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
       resetCart && resetCart();
       setAddressError('');
       
-      // Automatically redirect to menu page after 3 seconds
+      // Otomatik olarak 3 saniye sonra ana sayfaya yönlendir
       setTimeout(() => {
         setSuccessModal(false);
         navigate('/menu');
@@ -180,394 +180,198 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
         </Paper>
       ) : (
         <>
-          {/* Two-column main layout - Left: Cart items, Right: Order Summary */}
           <Box sx={{
+            position: 'relative',
             display: 'flex',
-            flexDirection: { xs: 'column', lg: 'row' },
+            flexDirection: { xs: 'column', md: 'row' },
             gap: 3
           }}>
-            {/* Left Column: Cart Items */}            <Box sx={{ 
+            {/* Ana içerik alanı */}
+            <Box sx={{ 
               flex: 1, 
-              width: { xs: '100%', lg: 'calc(100% - 350px)' }
+              order: { xs: 1, md: 1 },
+              width: '100%'
             }}>
-              {/* All Cart Items in a Single Card */}
-              <Card 
-                sx={{ 
-                  borderRadius: '16px', 
-                  overflow: 'hidden',
-                  border: '1px solid #ff8800', 
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                  transition: 'all 0.3s ease',
-                  mb: 2,
-                  '&:hover': {
-                    transform: 'translateY(-3px)',
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
-                  }
-                }}
-              >
-                <CardContent sx={{ p: 0 }}>
-                  {/* Card Header */}
-                  <Box sx={{
-                    bgcolor: '#fff8f0',
-                    borderBottom: '1px solid #ffddbb',
-                    p: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
+              <Box sx={{
+                bgcolor: '#f9f9f9',
+                p: 2,
+                borderRadius: '12px',
+                mb: 2
+              }}>
+                <Typography variant="subtitle1" sx={{
+                  fontFamily: '"Alata", sans-serif',
+                  fontWeight: 'bold',
+                  color: '#666',
+                  mb: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}>
+                  <ShoppingBasketIcon fontSize="small" sx={{ color: '#ff8800' }} />
+                  {cartItems.length} items in your cart
+                </Typography>
+              </Box>
+              {cartItems.map((item) => (
+                <Card 
+                  key={item.id} 
+                  sx={{ 
+                    display: 'flex', 
+                    mb: 2, 
+                    borderRadius: '16px', 
+                    overflow: 'hidden',
+                    border: '1px solid #ff8800', 
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
+                    }
+                  }}
+                >
+                  <CardMedia
+                    component="img"
+                    sx={{ 
+                      width: 120, 
+                      height: 120, 
+                      objectFit: 'cover',
+                      borderRight: '1px solid rgba(255,136,0,0.3)'
+                    }}
+                    image={item.imageUrl || item.image || '/images/food-bg.jpg'}
+                    alt={item.productName}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/images/food-bg.jpg';
+                    }}
+                  />
+                  <CardContent sx={{ 
+                    flex: '1 0 auto',
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    width: '100%',
+                    p: 2
                   }}>
-                    <Typography 
-                      component="div" 
-                      variant="h6" 
-                      sx={{ 
-                        fontFamily: '"Alata", sans-serif', 
-                        fontWeight: 'bold',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1
-                      }}
-                    >
-                      <ShoppingBasketIcon fontSize="small" sx={{ color: '#ff8800' }} />
-                      Your Order Items
-                    </Typography>
-                    <Typography 
-                      variant="subtitle2" 
-                      sx={{ 
-                        bgcolor: '#ff8800',
-                        color: 'white',
-                        py: 0.5,
-                        px: 1.5,
-                        borderRadius: '50px',
-                        fontFamily: '"Alata", sans-serif',
-                        fontWeight: 'bold'  
-                      }}
-                    >
-                      {cartItems.length} items
-                    </Typography>
-                  </Box>
-                  
-                  {/* Cart Items List */}
-                  {cartItems.map((item, index) => (
-                    <Box 
-                      key={item.id}
-                      sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
-                        p: 2.5,
-                        borderBottom: index < cartItems.length - 1 ? '1px dashed #ffddbb' : 'none',
-                        '&:hover': {
-                          bgcolor: '#fafafa'
-                        }
-                      }}
-                    >
-                      <Box sx={{ flex: 1 }}>
-                        <Typography 
-                          component="div" 
-                          variant="h6" 
-                          sx={{ 
-                            fontFamily: '"Alata", sans-serif', 
-                            fontWeight: 'bold',
-                            fontSize: '1rem',
-                            mb: 0.5
-                          }}
-                        >
-                          {item.productName}
-                        </Typography>
-                        <Typography 
-                          variant="subtitle1" 
-                          color="#ff8800" 
-                          component="div" 
-                          sx={{ 
-                            fontFamily: '"Alata", sans-serif',
-                            fontWeight: 'bold'  
-                          }}
-                        >
-                          ₺ {Number(item.price).toFixed(2)}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ 
-                            display: 'block',
-                            mt: 0.5,
-                            fontFamily: '"Alata", sans-serif'
-                          }}
-                        >
-                          Subtotal: ₺ {(Number(item.price) * item.quantity).toFixed(2)}
-                        </Typography>
-                      </Box>
+                    <Box>
+                      <Typography 
+                        component="div" 
+                        variant="h6" 
+                        sx={{ 
+                          fontFamily: '"Alata", sans-serif', 
+                          fontWeight: 'bold',
+                          fontSize: '1.1rem',
+                          mb: 0.5
+                        }}
+                      >
+                        {item.productName}
+                      </Typography>
+                      <Typography 
+                        variant="subtitle1" 
+                        color="#ff8800" 
+                        component="div" 
+                        sx={{ 
+                          fontFamily: '"Alata", sans-serif',
+                          fontWeight: 'bold'  
+                        }}
+                      >
+                        ₺ {Number(item.price).toFixed(2)}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ 
+                          display: 'block',
+                          mt: 0.5,
+                          fontFamily: '"Alata", sans-serif'
+                        }}
+                      >
+                        Subtotal: ₺ {(Number(item.price) * item.quantity).toFixed(2)}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 1,
+                      minWidth: 120 // Sabit genişlik veriyoruz taşma sorunu için
+                    }}>
                       <Box sx={{ 
                         display: 'flex', 
-                        flexDirection: 'column',
-                        alignItems: 'flex-end',
-                        gap: 1,
-                        minWidth: 140
+                        alignItems: 'center',
+                        bgcolor: '#f8f8f8',
+                        borderRadius: '50px',
+                        border: '1px solid #ddd',
+                        width: 'fit-content', // İçeriğe göre boyutlandırma
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
                       }}>
-                        <Box sx={{ 
-                          display: 'flex', 
-                          alignItems: 'center',
-                          bgcolor: '#f8f8f8',
-                          borderRadius: '50px',
-                          border: '1px solid #ddd',
-                          width: 'max-content',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                        }}>
-                          <IconButton 
-                            size="small" 
-                            onClick={() => removeFromCart(item.id)}
-                            sx={{ 
-                              color: '#ff8800',
-                              width: 32,
-                              height: 32,
-                              '&:hover': {
-                                bgcolor: 'rgba(255,136,0,0.1)'
-                              }
-                            }}
-                          >
-                            <RemoveIcon fontSize="small" />
-                          </IconButton>
-                          <Typography sx={{ 
-                            minWidth: '36px', 
-                            textAlign: 'center',
-                            fontWeight: 'bold',
-                            fontFamily: '"Alata", sans-serif'
-                          }}>{item.quantity}</Typography>
-                          <IconButton 
-                            size="small" 
-                            onClick={() => addToCart(item)}
-                            sx={{ 
-                              color: '#ff8800',
-                              width: 32,
-                              height: 32,
-                              '&:hover': {
-                                bgcolor: 'rgba(255,136,0,0.1)'
-                              }
-                            }}
-                          >
-                            <AddIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
-                        <Button
-                          size="small"
-                          startIcon={<DeleteIcon fontSize="small" />}
-                          onClick={() => {
-                            // Remove item completely from cart
-                            const count = item.quantity;
-                            for (let i = 0; i < count; i++) {
-                              removeFromCart(item.id);
-                            }
-                          }}
+                        <IconButton 
+                          size="small" 
+                          onClick={() => removeFromCart(item.id)}
                           sx={{ 
-                            color: '#666',
-                            fontSize: '0.75rem',
+                            color: '#ff8800',
+                            width: 28,
+                            height: 28,
                             '&:hover': {
-                              color: '#ff0000',
-                              bgcolor: 'rgba(255,0,0,0.05)'
-                            },
-                            width: 'max-content'
+                              bgcolor: 'rgba(255,136,0,0.1)'
+                            }
                           }}
                         >
-                          Remove
-                        </Button>
-                      </Box>
-                    </Box>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Order Notes Section */}
-              <Paper elevation={3} sx={{ 
-                p: 3, 
-                mt: 3,
-                borderRadius: '16px',
-                border: '1px solid rgba(255,136,0,0.3)',
-                background: 'linear-gradient(to bottom right, #fff, #fffaf5)'
-              }}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  mb: 2,
-                  pb: 1,
-                  borderBottom: '1px dashed rgba(255,136,0,0.3)'
-                }}>
-                  <NoteAltIcon sx={{ color: '#ff8800', mr: 1, fontSize: 26 }} />
-                  <Typography variant="h6" sx={{ 
-                    fontWeight: 'bold',
-                    color: '#333',
-                    fontFamily: '"Alata", sans-serif'
-                  }}>
-                    Special Instructions
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontFamily: '"Alata", sans-serif' }}>
-                  Let us know if you have specific preparation preferences or allergies.
-                </Typography>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  variant="outlined"
-                  placeholder="E.g., Extra spicy, no onions, allergen concerns, etc..."
-                  value={orderNote}
-                  onChange={handleOrderNoteChange}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '12px',
-                      fontFamily: '"Alata", sans-serif',
-                      border: '1px solid #ff880050',
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#ff8800',
-                      },
-                      '&:hover fieldset': {
-                        borderColor: '#ff8800',
-                      }
-                    },
-                    '& .MuiInputBase-input': {
-                      fontFamily: '"Alata", sans-serif',
-                    },
-                    '&:hover': {
-                      '& .MuiOutlinedInput-root': {
-                        boxShadow: '0 0 0 2px rgba(255,136,0,0.1)',
-                      }
-                    }
-                  }}
-                />
-              </Paper>
-
-              {/* Address Select Dropdown */}
-              <Paper elevation={3} sx={{ 
-                p: 3, 
-                mt: 3,
-                borderRadius: '16px',
-                border: '1px solid rgba(255,136,0,0.3)',
-                background: 'linear-gradient(to bottom right, #fff, #fffaf5)'
-              }}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  mb: 2,
-                  pb: 1,
-                  borderBottom: '1px dashed rgba(255,136,0,0.3)'
-                }}>
-                  <HomeIcon sx={{ color: '#ff8800', mr: 1, fontSize: 26 }} />
-                  <Typography variant="h6" sx={{ 
-                    fontWeight: 'bold',
-                    color: '#333',
-                    fontFamily: '"Alata", sans-serif'
-                  }}>
-                    Delivery Address
-                  </Typography>
-                </Box>
-
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontFamily: '"Alata", sans-serif' }}>
-                  Select where you want your order to be delivered.
-                </Typography>
-
-                <FormControl fullWidth variant="outlined">
-                  <Select
-                    labelId="address-select-label"
-                    id="address-select"
-                    value={selectedAddressId}
-                    onChange={handleAddressSelect}
-                    displayEmpty
-                    sx={{ 
-                      background: '#fff', 
-                      borderRadius: '12px', 
-                      fontFamily: '"Alata", sans-serif',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgba(255,136,0,0.3)',
-                        borderWidth: '1px'
-                      },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#ff8800'
-                      },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#ff8800',
-                        borderWidth: '2px'
-                      }
-                    }}
-                  >
-                    {addresses.length === 0 ? (
-                      <MenuItem value="" disabled>
-                        <Box sx={{ p: 1 }}>
-                          <Typography sx={{ fontWeight: 'bold', color: '#666', fontFamily: '"Alata", sans-serif' }}>
-                            No addresses found
-                          </Typography>
-                          <Typography sx={{ color: '#888', fontSize: '0.85rem', fontFamily: '"Alata", sans-serif' }}>
-                            You can add one from the Addresses page.
-                          </Typography>
-                        </Box>
-                      </MenuItem>
-                    ) : (
-                      addresses.map(addr => (
-                        <MenuItem key={addr.id} value={addr.id} sx={{
-                          borderRadius: '8px',
-                          my: 0.5,
-                          '&:hover': {
-                            bgcolor: 'rgba(255,136,0,0.05)'
-                          },
-                          '&.Mui-selected': {
-                            bgcolor: 'rgba(255,136,0,0.1)',
+                          <RemoveIcon fontSize="small" />
+                        </IconButton>
+                        <Typography sx={{ 
+                          minWidth: '32px', 
+                          textAlign: 'center',
+                          fontWeight: 'bold',
+                          fontFamily: '"Alata", sans-serif'
+                        }}>{item.quantity}</Typography>
+                        <IconButton 
+                          size="small" 
+                          onClick={() => addToCart(item)}
+                          sx={{ 
+                            color: '#ff8800',
+                            width: 28,
+                            height: 28,
                             '&:hover': {
-                              bgcolor: 'rgba(255,136,0,0.15)'
+                              bgcolor: 'rgba(255,136,0,0.1)'
                             }
+                          }}
+                        >
+                          <AddIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                      <Button
+                        size="small"
+                        startIcon={<DeleteIcon fontSize="small" />}
+                        onClick={() => {
+                          // Remove item completely from cart
+                          const count = item.quantity;
+                          for (let i = 0; i < count; i++) {
+                            removeFromCart(item.id);
                           }
-                        }}>
-                          <Box sx={{ py: 0.5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                              <HomeIcon sx={{ color: '#ff8800', fontSize: 18, mr: 1 }} />
-                              <Typography sx={{ fontWeight: 'bold', color: '#222', fontFamily: '"Alata", sans-serif' }}>
-                                {addr.name}
-                              </Typography>
-                            </Box>
-                            <Typography sx={{ color: '#666', fontSize: '0.9rem', fontFamily: '"Alata", sans-serif', pl: 3.5 }}>
-                              {addr.address}
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                      ))
-                    )}
-                  </Select>
-                </FormControl>
-                {addressError && <Alert severity="warning" sx={{ mt: 2, borderRadius: '8px' }}>{addressError}</Alert>}
-                
-                <Button 
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    mt: 2,
-                    borderColor: 'rgba(255,136,0,0.5)',
-                    color: '#ff8800',
-                    fontFamily: '"Alata", sans-serif',
-                    fontSize: '0.8rem',
-                    fontWeight: 'bold',
-                    borderRadius: '8px',
-                    '&:hover': {
-                      borderColor: '#ff8800',
-                      bgcolor: 'rgba(255,136,0,0.05)'
-                    }
-                  }}
-                  component="a"
-                  href="/addresses"
-                >
-                  Manage Addresses
-                </Button>
-              </Paper>
-            </Box>
-
-            {/* Right Column: Order Summary (Fixed on the right) */}
-            <Box sx={{ 
-              width: { xs: '100%', lg: '350px' },
-              position: { xs: 'static', lg: 'sticky' },
-              top: '20px',
-              alignSelf: 'flex-start',
-              height: 'fit-content'
-            }}>
+                        }}
+                        sx={{ 
+                          color: '#666',
+                          fontSize: '0.75rem',
+                          '&:hover': {
+                            color: '#ff0000',
+                            bgcolor: 'rgba(255,0,0,0.05)'
+                          },
+                          width: 'fit-content' // İçeriğe göre boyutlandırma
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))}
+            </Grid>
+            <Grid item xs={12} md={4}>
               <Card sx={{ 
                 borderRadius: '16px', 
                 border: '1px solid #ff8800', 
                 boxShadow: '0 8px 24px rgba(255,136,0,0.15)',
+                position: 'sticky',
+                top: '20px'
               }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ 
@@ -610,7 +414,8 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                       }}>
                         ₺ {Number(calculateTotal()).toFixed(2)}
                       </Typography>
-                    </Box>                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography sx={{ 
                         fontFamily: '"Alata", sans-serif',
                         display: 'flex',
@@ -628,36 +433,6 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                         ₺ 10.00
                       </Typography>
                     </Box>
-
-                    {selectedAddressId && (
-                      <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'flex-start', 
-                        mt: 2, 
-                        pt: 2,
-                        borderTop: '1px dashed #ddd'
-                      }}>
-                        <HomeIcon fontSize="small" sx={{ color: '#777', mt: 0.3, mr: 1 }} />
-                        <Box>
-                          <Typography sx={{ 
-                            fontFamily: '"Alata", sans-serif',
-                            fontWeight: 'bold',
-                            fontSize: '0.9rem',
-                            color: '#555'
-                          }}>
-                            {addresses.find(addr => addr.id === selectedAddressId)?.name || 'Selected Address'}
-                          </Typography>
-                          <Typography sx={{ 
-                            fontFamily: '"Alata", sans-serif',
-                            fontSize: '0.8rem',
-                            color: '#777',
-                            mt: 0.5
-                          }}>
-                            {addresses.find(addr => addr.id === selectedAddressId)?.address || 'No address details'}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    )}
                   </Paper>
                   
                   <Divider sx={{ my: 2, borderStyle: 'dashed', borderColor: 'rgba(255,136,0,0.3)' }} />
@@ -725,11 +500,189 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                   </Typography>
                 </CardContent>
               </Card>
+            </Grid>
+          </Grid>
+          {/* Order Notes Section */}
+          <Paper elevation={3} sx={{ 
+            p: 3, 
+            mt: 3,
+            borderRadius: '16px',
+            border: '1px solid rgba(255,136,0,0.3)',
+            background: 'linear-gradient(to bottom right, #fff, #fffaf5)'
+          }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              mb: 2,
+              pb: 1,
+              borderBottom: '1px dashed rgba(255,136,0,0.3)'
+            }}>
+              <NoteAltIcon sx={{ color: '#ff8800', mr: 1, fontSize: 26 }} />
+              <Typography variant="h6" sx={{ 
+                fontWeight: 'bold',
+                color: '#333',
+                fontFamily: '"Alata", sans-serif'
+              }}>
+                Special Instructions
+              </Typography>
             </Box>
-          </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontFamily: '"Alata", sans-serif' }}>
+              Let us know if you have specific preparation preferences or allergies.
+            </Typography>
+            <TextField
+              fullWidth
+              multiline
+              rows={3}
+              variant="outlined"
+              placeholder="E.g., Extra spicy, no onions, allergen concerns, etc..."
+              value={orderNote}
+              onChange={handleOrderNoteChange}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '12px',
+                  fontFamily: '"Alata", sans-serif',
+                  border: '1px solid #ff880050',
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#ff8800',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#ff8800',
+                  }
+                },
+                '& .MuiInputBase-input': {
+                  fontFamily: '"Alata", sans-serif',
+                },
+                '&:hover': {
+                  '& .MuiOutlinedInput-root': {
+                    boxShadow: '0 0 0 2px rgba(255,136,0,0.1)',
+                  }
+                }
+              }}
+            />
+          </Paper>
+
+          {/* Adres Seçici Dropdown */}
+          <Paper elevation={3} sx={{ 
+            p: 3, 
+            mt: 3,
+            borderRadius: '16px',
+            border: '1px solid rgba(255,136,0,0.3)',
+            background: 'linear-gradient(to bottom right, #fff, #fffaf5)'
+          }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              mb: 2,
+              pb: 1,
+              borderBottom: '1px dashed rgba(255,136,0,0.3)'
+            }}>
+              <HomeIcon sx={{ color: '#ff8800', mr: 1, fontSize: 26 }} />
+              <Typography variant="h6" sx={{ 
+                fontWeight: 'bold',
+                color: '#333',
+                fontFamily: '"Alata", sans-serif'
+              }}>
+                Delivery Address
+              </Typography>
+            </Box>
+
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontFamily: '"Alata", sans-serif' }}>
+              Select where you want your order to be delivered.
+            </Typography>
+
+            <FormControl fullWidth variant="outlined">
+              <Select
+                labelId="address-select-label"
+                id="address-select"
+                value={selectedAddressId}
+                onChange={handleAddressSelect}
+                displayEmpty
+                sx={{ 
+                  background: '#fff', 
+                  borderRadius: '12px', 
+                  fontFamily: '"Alata", sans-serif',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(255,136,0,0.3)',
+                    borderWidth: '1px'
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#ff8800'
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#ff8800',
+                    borderWidth: '2px'
+                  }
+                }}
+              >
+                {addresses.length === 0 ? (
+                  <MenuItem value="" disabled>
+                    <Box sx={{ p: 1 }}>
+                      <Typography sx={{ fontWeight: 'bold', color: '#666', fontFamily: '"Alata", sans-serif' }}>
+                        No addresses found
+                      </Typography>
+                      <Typography sx={{ color: '#888', fontSize: '0.85rem', fontFamily: '"Alata", sans-serif' }}>
+                        You can add one from the Addresses page.
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ) : (
+                  addresses.map(addr => (
+                    <MenuItem key={addr.id} value={addr.id} sx={{
+                      borderRadius: '8px',
+                      my: 0.5,
+                      '&:hover': {
+                        bgcolor: 'rgba(255,136,0,0.05)'
+                      },
+                      '&.Mui-selected': {
+                        bgcolor: 'rgba(255,136,0,0.1)',
+                        '&:hover': {
+                          bgcolor: 'rgba(255,136,0,0.15)'
+                        }
+                      }
+                    }}>
+                      <Box sx={{ py: 0.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                          <HomeIcon sx={{ color: '#ff8800', fontSize: 18, mr: 1 }} />
+                          <Typography sx={{ fontWeight: 'bold', color: '#222', fontFamily: '"Alata", sans-serif' }}>
+                            {addr.name}
+                          </Typography>
+                        </Box>
+                        <Typography sx={{ color: '#666', fontSize: '0.9rem', fontFamily: '"Alata", sans-serif', pl: 3.5 }}>
+                          {addr.address}
+                        </Typography>
+                      </Box>
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </FormControl>
+            {addressError && <Alert severity="warning" sx={{ mt: 2, borderRadius: '8px' }}>{addressError}</Alert>}
+            
+            <Button 
+              variant="outlined"
+              size="small"
+              sx={{
+                mt: 2,
+                borderColor: 'rgba(255,136,0,0.5)',
+                color: '#ff8800',
+                fontFamily: '"Alata", sans-serif',
+                fontSize: '0.8rem',
+                fontWeight: 'bold',
+                borderRadius: '8px',
+                '&:hover': {
+                  borderColor: '#ff8800',
+                  bgcolor: 'rgba(255,136,0,0.05)'
+                }
+              }}
+              component="a"
+              href="/addresses"
+            >
+              Manage Addresses
+            </Button>
+          </Paper>
         </>
       )}
-      
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
