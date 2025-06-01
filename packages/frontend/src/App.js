@@ -9,7 +9,6 @@ import MyAddresses from './pages/MyAddresses';
 import Basket from './pages/Basket';
 import FavoritesPage from './pages/FavoritesPage';
 import Profile from './pages/Profile';
-import Settings from './pages/Settings';
 import Login from './pages/login';
 import Restaurants from './pages/Restaurants';
 import Orders from './pages/Orders';
@@ -197,11 +196,6 @@ function App() {
           <Route path="/profile" element={
             <Layout isAuthenticated={isAuthenticated} cartItems={cartItems} resetCart={resetCart}>
               <Profile />
-            </Layout>
-          } />
-          <Route path="/settings" element={
-            <Layout isAuthenticated={isAuthenticated} cartItems={cartItems} resetCart={resetCart}>
-              <Settings />
             </Layout>
           } />
           <Route path="/orders" element={

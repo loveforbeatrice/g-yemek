@@ -61,18 +61,6 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     allowNull: true,
   },
-  allowPushNotifications: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true,
-  },
-  allowPullNotifications: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true,
-  },
-  allowPromotionNotifications: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true,
-  },
 }, {
   tableName: 'users',
   timestamps: true,
