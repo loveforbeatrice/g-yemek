@@ -10,8 +10,8 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
   const [menuItems, setMenuItems] = useState([]);
   const [search, setSearch] = useState('');
   const [favorites, setFavorites] = useState({});
-  const [favoriteCounts, setFavoriteCounts] = useState({});
   const [businessMap, setBusinessMap] = useState({});
+  const [businessIsOpen, setBusinessIsOpen] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // İşletme listesini çek ve eşlemesini hazırla
@@ -20,10 +20,15 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
       const map = {};
       res.data.businesses.forEach(b => {
         map[b.name] = b.id;
+        
+        // İşletmenin açık/kapalı durumunu kontrol et
+        if (b.name === businessName) {
+          setBusinessIsOpen(b.isOpen !== false);
+        }
       });
       setBusinessMap(map);
     });
-  }, []);
+  }, [businessName]);
 
   useEffect(() => {
     let url = 'http://localhost:3001/api/menu';
@@ -45,16 +50,6 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
         } else {
           setFavorites({});
         }
-
-        // Favori sayılarını getir
-        const menuItemIds = res.data.map(item => item.id).join(',');
-        axios.get(`http://localhost:3001/api/favorites/counts?menuItemIds=${menuItemIds}`)
-          .then(res => {
-            setFavoriteCounts(res.data);
-          })
-          .catch(error => {
-            console.error('Error fetching favorite counts:', error);
-          });
       });
   }, [businessName]);
 
@@ -74,17 +69,6 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
       });
       setFavorites(f => ({ ...f, [item.id]: true }));
     }
-    // Her iki durumda da count'u backend'den tekrar çek
-    axios.get(`http://localhost:3001/api/favorites/counts?menuItemIds=${item.id}`)
-      .then(res => {
-        setFavoriteCounts(prev => ({
-          ...prev,
-          [item.id]: res.data[item.id] || 0
-        }));
-      })
-      .catch(error => {
-        console.error('Error fetching favorite count:', error);
-      });
   };
 
   const filtered = menuItems.filter(item =>
@@ -100,7 +84,17 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
   }));
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '1400px', mx: 'auto', px: 4, background: '#fef3e2', borderRadius: 3, minHeight: '100vh', mt: 4, pb: 6 }}>
+    <Box sx={{ 
+      width: '100%', 
+      maxWidth: '1400px', 
+      mx: 'auto', 
+      px: 4, 
+      background: '#fef3e2', 
+      borderRadius: 3, 
+      minHeight: '100vh', 
+      mt: 4, 
+      pb: 6
+    }}>
       <Typography variant="h2" align="center" fontWeight="bold" sx={{ mb: 3, fontFamily: 'Alata, sans-serif' }}>
         {businessName ? businessName.toUpperCase() : 'TÜM ÜRÜNLER'}
       </Typography>
@@ -142,21 +136,32 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                     minHeight: 240,
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'flex-start'
                   }}>
                     <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%', mb: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mb: 1 }}>
                         <Typography variant="h3" fontWeight="bold" sx={{ fontFamily: 'Alata, sans-serif', fontSize: '2.3rem', lineHeight: 1.1 }}>
                           {item.productName}
                         </Typography>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 36 }}>
-                          <IconButton onClick={() => handleFavorite(item)} sx={{ p: 0 }}>
-                            {favorites[item.id]
-                              ? <FavoriteIcon sx={{ color: '#ff8800', fontSize: 32 }} />
-                              : <FavoriteBorderIcon sx={{ color: '#ff8800', fontSize: 32 }} />}
+                          <IconButton 
+                            onClick={(e) => { e.stopPropagation(); handleFavorite(item); }} 
+                            sx={{ 
+                              p: 0.5, 
+                              color: favorites[item.id] ? '#ff6d00' : '#aaa',
+                              filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
+                            }}
+                          >
+                            {favorites[item.id] ? <FavoriteIcon /> : <FavoriteBorderIcon />}
                           </IconButton>
-                          <Typography sx={{ color: '#ff8800', fontWeight: 600, fontSize: '1.1rem', mt: -0.5 }}>
-                            {typeof favoriteCounts[item.id] === 'number' ? favoriteCounts[item.id] : 0}
+                          <Typography sx={{ 
+                            color: '#ff8800', 
+                            fontWeight: 600, 
+                            fontSize: '1.1rem', 
+                            mt: -0.5,
+                            filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
+                          }}>
+                            12
                           </Typography>
                         </Box>
                       </Box>
@@ -168,7 +173,15 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                           <img
                             src={item.imageUrl ? `http://localhost:3001/uploads/${item.imageUrl}` : '/images/food-bg.jpg'}
                             alt={item.productName}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12, background: '#fff', display: 'block' }}
+                            style={{ 
+                              width: '100%', 
+                              height: '100%', 
+                              objectFit: 'cover', 
+                              borderRadius: 12, 
+                              background: '#fff', 
+                              display: 'block',
+                              filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
+                            }}
                             onError={(e) => {
                               e.target.src = '/images/food-bg.jpg';
                             }}
@@ -178,23 +191,70 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                           <Typography variant="h3" sx={{ color: '#222', fontWeight: 700, fontSize: '2rem', mb: 1 }}>
                             ₺ {Number(item.price).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                           </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', border: '2px solid #9d8df1', borderRadius: '30px', px: 2, py: 0.5, minWidth: 100, justifyContent: 'center', background: '#fff' }}>
-                            <Button variant="text" sx={{ minWidth: 0, color: '#ff8800', fontSize: '2rem', fontWeight: 700, p: 0, lineHeight: 1 }} onClick={() => removeFromCart(item.id)}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            border: '2px solid #9d8df1', 
+                            borderRadius: '30px', 
+                            px: 2, 
+                            py: 0.5, 
+                            minWidth: 100, 
+                            justifyContent: 'center', 
+                            background: '#fff',
+                            filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
+                          }}>
+                            <Button 
+                              variant="text" 
+                              sx={{ 
+                                minWidth: 0, 
+                                color: '#ff8800', 
+                                fontSize: '2rem', 
+                                fontWeight: 700, 
+                                p: 0, 
+                                lineHeight: 1 
+                              }} 
+                              onClick={() => removeFromCart(item.id)}
+                            >
                               –
                             </Button>
-                            <Typography variant="h5" sx={{ mx: 1.5, color: '#ff8800', fontWeight: 700, fontSize: '2rem', minWidth: 24, textAlign: 'center' }}>
+                            <Typography 
+                              variant="h5" 
+                              sx={{ 
+                                mx: 1.5, 
+                                color: '#ff8800', 
+                                fontWeight: 700, 
+                                fontSize: '2rem', 
+                                minWidth: 24, 
+                                textAlign: 'center' 
+                              }}
+                            >
                               {cartItems.find(i => i.id === item.id)?.quantity || 0}
                             </Typography>
                             <Button 
                               variant="text" 
-                              sx={{ minWidth: 0, color: '#ff8800', fontSize: '2rem', fontWeight: 700, p: 0, lineHeight: 1 }} 
+                              sx={{ 
+                                minWidth: 0, 
+                                color: '#ff8800', 
+                                fontSize: '2rem', 
+                                fontWeight: 700, 
+                                p: 0, 
+                                lineHeight: 1 
+                              }} 
                               onClick={() => {
-                                addToCart({ ...item, businessId: businessMap[item.businessName] });
-                                setSnackbar({ 
-                                  open: true, 
-                                  message: `${item.productName} has been added to your cart!`, 
-                                  severity: 'success' 
-                                });
+                                if (businessIsOpen) {
+                                  addToCart({ ...item, businessId: businessMap[item.businessName] });
+                                  setSnackbar({ 
+                                    open: true, 
+                                    message: `${item.productName} has been added to your cart!`, 
+                                    severity: 'success' 
+                                  });
+                                } else {
+                                  setSnackbar({ 
+                                    open: true, 
+                                    message: `İşletme şu anda kapalı olduğu için sipariş veremezsiniz.`, 
+                                    severity: 'error' 
+                                  });
+                                }
                               }}
                             >
                               +
