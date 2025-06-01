@@ -45,4 +45,3 @@ packages/backend/uploads/*
 .cache/
 .npm/
 .eslintcache 
-packages/backend/.env
