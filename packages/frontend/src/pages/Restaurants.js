@@ -138,9 +138,6 @@ function Restaurants({ onSelectBusiness }) {
                 navigate('/menu');
               }}
             >
-<<<<<<< HEAD
-              {/* No closed overlay */}
-=======
               {/* Add CLOSED overlay when restaurant is closed */}
               {business.isOpen === false && (
                 <Box
@@ -239,7 +236,6 @@ function Restaurants({ onSelectBusiness }) {
                   </Box>
                 </Box>
               )}
->>>>>>> alps
               <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', pt: 2 }}>
                 <Box sx={{
                   width: '92%',
