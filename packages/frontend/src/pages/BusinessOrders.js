@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Box, Typography, Card, CardContent, Button, Grid, Divider, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import BusinessLayout from '../components/BusinessLayout';
+import ResponsivePageTitle from '../components/ResponsivePageTitle';
 
 function BusinessOrders() {
   const [orders, setOrders] = useState([]);
@@ -85,7 +86,7 @@ function BusinessOrders() {
 
   return (
     <BusinessLayout>
-      <Typography variant="h3" align="center" sx={{ fontWeight: 'bold', mb: 4 }}>ORDERS</Typography>
+      <ResponsivePageTitle>ORDERS</ResponsivePageTitle>
       {error && <Alert severity="error">{error}</Alert>}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 6 }}><Typography>Yükleniyor...</Typography></Box>
