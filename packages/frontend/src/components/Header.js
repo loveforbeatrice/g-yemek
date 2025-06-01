@@ -11,11 +11,13 @@ import {
   Paper,
   Button,
   Backdrop,
-  Drawer
+  Drawer,
+  Badge
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 
 function Header({ cartItems, resetCart }) {
   // Backdrop state for blur effect
@@ -31,6 +33,12 @@ function Header({ cartItems, resetCart }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
+  const notificationOpen = Boolean(notificationAnchorEl);
+  const [notifications, setNotifications] = useState([
+    { id: 1, message: 'Siparişiniz hazırlanıyor!', time: '5 dk önce' },
+    { id: 2, message: 'Yeni kampanya: %20 indirim!', time: '1 saat önce' }
+  ]);
   
   // Sayfa yüklenirken localStorage'dan kullanıcı bilgilerini al ve aktif sekmeyi belirle
   useEffect(() => {
@@ -134,12 +142,32 @@ function Header({ cartItems, resetCart }) {
     navigate('/login');
   };
 
+  const handleNotificationClick = (event) => {
+    setNotificationAnchorEl(event.currentTarget);
+    setBackdropOpen(true);
+  };
+
+  const handleNotificationClose = () => {
+    setNotificationAnchorEl(null);
+    setBackdropOpen(false);
+  };
+
+  const cartCount = cartItems?.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <>
       {/* Mobilde üstte ortalanmış logo */}
       {isMobile && (
-        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, mb: 2 }}>
+        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, mb: 2, position: 'relative' }}>
           <img src="/images/logo.png" alt="Yemek Logo" style={{ height: 60 }} />
+          {/* Mobilde sağ üstte bildirim ikonu */}
+          <Box sx={{ position: 'absolute', right: 12, top: 0, zIndex: 1201 }}>
+            <IconButton color="inherit" onClick={handleNotificationClick}>
+              <Badge badgeContent={notifications.length} color="error">
+                <NotificationsIcon sx={{ color: notificationOpen ? '#ff8800' : '#9d8df1', fontSize: 28 }} />
+              </Badge>
+            </IconButton>
+          </Box>
         </Box>
       )}
       {/* Backdrop for blur effect */}
@@ -154,6 +182,7 @@ function Header({ cartItems, resetCart }) {
         onClick={() => {
           handleCartClose();
           handleProfileClose();
+          handleNotificationClose();
         }}
       />
       {/* Masaüstü için klasik AppBar */}
@@ -177,6 +206,32 @@ function Header({ cartItems, resetCart }) {
 
             {/* Sağ taraftaki ikonlar */}
             <Box sx={{ display: 'flex', gap: 2 }}>
+              {/* Bildirim İkonu */}
+              <IconButton 
+                color="inherit" 
+                onClick={handleNotificationClick}
+                sx={{ position: 'relative' }}
+              >
+                <Badge badgeContent={notifications.length} color="error">
+                  <Box sx={{ 
+                    backgroundColor: notificationOpen ? '#ff8800' : 'white', 
+                    borderRadius: '50%', 
+                    width: 32, 
+                    height: 32, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    boxShadow: notificationOpen ? '0 0 0 2px #ff8800, 0 0 0 4px rgba(255, 136, 0, 0.3)' : 'none',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <NotificationsIcon sx={{ 
+                      color: notificationOpen ? 'white' : '#9d8df1',
+                      fontSize: 20
+                    }} />
+                  </Box>
+                </Badge>
+              </IconButton>
+
               <IconButton color="inherit" onClick={goToMenu} sx={{ position: 'relative' }}>
                 <Box sx={{ 
                   backgroundColor: activeTab === 'menu' ? '#ff8800' : 'white', 
@@ -195,25 +250,32 @@ function Header({ cartItems, resetCart }) {
                 </Box>
               </IconButton>
 
-              <IconButton color="inherit" onClick={handleCartClick} sx={{ position: 'relative' }}>
-                <Box sx={{ 
-                  backgroundColor: (activeTab === 'basket' || cartOpen) ? '#ff8800' : 'white', 
-                  borderRadius: '50%', 
-                  width: 32, 
-                  height: 32, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  boxShadow: (activeTab === 'basket' || cartOpen) ? '0 0 0 2px #ff8800, 0 0 0 4px rgba(255, 136, 0, 0.3)' : 'none',
-                  transition: 'all 0.3s ease'
-                }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M8.25 20.25C8.66421 20.25 9 19.9142 9 19.5C9 19.0858 8.66421 18.75 8.25 18.75C7.83579 18.75 7.5 19.0858 7.5 19.5C7.5 19.9142 7.83579 20.25 8.25 20.25Z" fill={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} stroke={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} />
-                    <path d="M18.75 20.25C19.1642 20.25 19.5 19.9142 19.5 19.5C19.5 19.0858 19.1642 18.75 18.75 18.75C18.3358 18.75 18 19.0858 18 19.5C18 19.9142 18.3358 20.25 18.75 20.25Z" fill={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} stroke={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} />
-                    <path d="M3.75 4.5H5.25L7.5 15.75H19.5" />
-                    <path d="M7.5 12H19.1925C19.2792 12 19.3633 11.9653 19.4235 11.9033C19.4838 11.8412 19.5154 11.7564 19.5123 11.6697L19.2825 7.41975C19.2766 7.25013 19.1348 7.125 18.9647 7.125H6" />
-                  </svg>
-                </Box>
+              <IconButton 
+                color="inherit" 
+                onClick={location === '/basket' ? undefined : handleCartClick}
+                disabled={location === '/basket'}
+                sx={{ position: 'relative' }}
+              >
+                <Badge badgeContent={cartCount > 0 ? cartCount : null} color="error" overlap="circular" sx={{ '& .MuiBadge-badge': { fontWeight: 'bold', fontSize: '0.85rem', minWidth: 20, height: 20, right: -4, top: 2 } }}>
+                  <Box sx={{ 
+                    backgroundColor: (activeTab === 'basket' || cartOpen) ? '#ff8800' : 'white', 
+                    borderRadius: '50%', 
+                    width: 32, 
+                    height: 32, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    boxShadow: (activeTab === 'basket' || cartOpen) ? '0 0 0 2px #ff8800, 0 0 0 4px rgba(255, 136, 0, 0.3)' : 'none',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8.25 20.25C8.66421 20.25 9 19.9142 9 19.5C9 19.0858 8.66421 18.75 8.25 18.75C7.83579 18.75 7.5 19.0858 7.5 19.5C7.5 19.9142 7.83579 20.25 8.25 20.25Z" fill={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} stroke={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} />
+                      <path d="M18.75 20.25C19.1642 20.25 19.5 19.9142 19.5 19.5C19.5 19.0858 19.1642 18.75 18.75 18.75C18.3358 18.75 18 19.0858 18 19.5C18 19.9142 18.3358 20.25 18.75 20.25Z" fill={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} stroke={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} />
+                      <path d="M3.75 4.5H5.25L7.5 15.75H19.5" />
+                      <path d="M7.5 12H19.1925C19.2792 12 19.3633 11.9653 19.4235 11.9033C19.4838 11.8412 19.5154 11.7564 19.5123 11.6697L19.2825 7.41975C19.2766 7.25013 19.1348 7.125 18.9647 7.125H6" />
+                    </svg>
+                  </Box>
+                </Badge>
               </IconButton>
               
               {/* Sepet Menüsü */}
@@ -491,9 +553,11 @@ function Header({ cartItems, resetCart }) {
               </Box>
             </IconButton>
             <IconButton color="inherit" onClick={goToBasket}>
-              <Box sx={{ color: activeTab === 'basket' ? '#ff8800' : '#fff' }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-              </Box>
+              <Badge badgeContent={cartCount > 0 ? cartCount : null} color="error" overlap="circular" sx={{ '& .MuiBadge-badge': { fontWeight: 'bold', fontSize: '0.85rem', minWidth: 20, height: 20, right: -4, top: 2 } }}>
+                <Box sx={{ color: activeTab === 'basket' ? '#ff8800' : '#fff' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                </Box>
+              </Badge>
             </IconButton>
             <IconButton color="inherit" onClick={goToFavorites}>
               <Box sx={{ color: activeTab === 'favorites' ? '#ff8800' : '#fff' }}>
@@ -527,6 +591,92 @@ function Header({ cartItems, resetCart }) {
           </Box>
         </Drawer>
       )}
+      {/* Bildirim Menüsü */}
+      <Menu
+        id="notification-menu"
+        anchorEl={notificationAnchorEl}
+        open={notificationOpen}
+        onClose={handleNotificationClose}
+        onClick={handleNotificationClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: 'visible',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.1))',
+            mt: 1.5,
+            borderRadius: '20px',
+            width: 300,
+            border: '2px solid #ff8800',
+            fontFamily: '"Alata", sans-serif',
+            zIndex: 3,
+            '&::before': {
+              content: '""',
+              display: 'block',
+              position: 'absolute',
+              top: -10,
+              right: 16,
+              width: 0,
+              height: 0,
+              borderLeft: '10px solid transparent',
+              borderRight: '10px solid transparent',
+              borderBottom: '10px solid #ff8800',
+              zIndex: 1,
+            },
+          },
+        }}
+      >
+        {/* Bildirim Başlığı */}
+        <Box sx={{ px: 2, py: 2, borderBottom: '1px solid #f0f0f0', textAlign: 'center' }}>
+          <Typography sx={{ fontWeight: 'bold', color: '#9d8df1', fontSize: '1.3rem', fontFamily: '"Alata", sans-serif' }}>
+            Bildirimler
+          </Typography>
+        </Box>
+        
+        {/* Bildirim Listesi */}
+        {notifications.length > 0 ? (
+          notifications.map((notification) => (
+            <MenuItem key={notification.id} sx={{
+              display: 'block',
+              py: 1.5,
+              px: 2,
+              borderBottom: '1px solid #f0f0f0',
+              '&:hover': {
+                bgcolor: 'rgba(255,136,0,0.05)'
+              }
+            }}>
+              <Typography sx={{ 
+                color: '#333',
+                fontSize: '0.95rem',
+                fontFamily: '"Alata", sans-serif',
+                mb: 0.5
+              }}>
+                {notification.message}
+              </Typography>
+              <Typography sx={{ 
+                color: '#888',
+                fontSize: '0.8rem',
+                fontFamily: '"Alata", sans-serif'
+              }}>
+                {notification.time}
+              </Typography>
+            </MenuItem>
+          ))
+        ) : (
+          <Box sx={{ p: 3, textAlign: 'center' }}>
+            <Typography sx={{ color: '#666', fontSize: '1rem', fontFamily: '"Alata", sans-serif' }}>
+              Bildirim bulunmuyor
+            </Typography>
+          </Box>
+        )}
+      </Menu>
     </>
   );
 }
