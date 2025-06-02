@@ -367,12 +367,32 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
           grouped.map(group => (
             <React.Fragment key={group.category}>
               <Grid item xs={12}>
-                <Typography 
-                  variant="h2"
-                  fontWeight="regular"
-                  sx={{ mb: 2, mt: 3, fontFamily: 'Alata, sans-serif', color: '#222', ml: '2ch', letterSpacing: '0.5px' }}>
-                  {'  '}{group.category.toUpperCase()}
-                </Typography>
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  mb: 3, 
+                  mt: 6
+                }}>
+                  <Typography 
+                    variant="h5"
+                    fontWeight="700"
+                    sx={{ 
+                      fontFamily: 'Alata, sans-serif', 
+                      color: '#ff8800', 
+                      fontSize: '1.4rem',
+                      letterSpacing: '1px',
+                      textTransform: 'uppercase',
+                      mr: 3
+                    }}>
+                    {group.category}
+                  </Typography>
+                  <Box sx={{ 
+                    flex: 1, 
+                    height: '2px', 
+                    background: '#ff8800',
+                    borderRadius: '1px'
+                  }} />
+                </Box>
               </Grid>
               {group.items.map(item => (
                 <Grid item xs={12} sm={6} md={4} key={item.id || `${item.productName}-${item.category}`}>
