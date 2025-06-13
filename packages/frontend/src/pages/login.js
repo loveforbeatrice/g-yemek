@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import "../styles/login.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Snackbar, Alert, Slide, IconButton, Box } from "@mui/material";
+import { Snackbar, Alert, Slide, IconButton, Box, Select, MenuItem, FormControl } from "@mui/material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import LanguageIcon from '@mui/icons-material/Language';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const Login = () => {
@@ -33,6 +32,17 @@ const Login = () => {
   });
   const [otpSent, setOtpSent] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  
+  // Forgot Password state
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [forgotPasswordStep, setForgotPasswordStep] = useState(1); // 1: phone, 2: otp, 3: new password
+  const [forgotPasswordData, setForgotPasswordData] = useState({
+    phone: '',
+    otp: ['', '', '', '', '', ''],
+    newPassword: '',
+    confirmNewPassword: ''
+  });
+  const [forgotPasswordTimer, setForgotPasswordTimer] = useState(0);
   
   // Snackbar state
   const [snackbar, setSnackbar] = useState({
@@ -307,7 +317,7 @@ const Login = () => {
           <p className="subtitle business-subtitle">{t('business')}</p>
           <input 
             type="text" 
-            placeholder={t('phoneNumber')} 
+            placeholder={t('phoneNumberMinimal')} 
             className="input-field" 
             name="phone"
             value={formData.phone}
@@ -315,7 +325,7 @@ const Login = () => {
           />
           {renderPasswordInput(t('password'), "password")}
           <button type="submit" className="btn-blue">{t('signIn')}</button>
-          <a href="#" className="forgot-link">{t('forgotPassword')}</a>
+          <a href="#" className="forgot-link" onClick={(e) => { e.preventDefault(); handleForgotPasswordOpen(); }}>{t('forgotPassword')}</a>
         </form>
       );
     } else if (formType === 'business' && isFlipped) {
@@ -333,7 +343,7 @@ const Login = () => {
           />
           <input 
             type="text" 
-            placeholder={t('phoneNumberPlaceholder')} 
+            placeholder={t('phoneNumberMinimal')} 
             className="input-field" 
             name="phone"
             value={formData.phone}
@@ -360,7 +370,7 @@ const Login = () => {
           />
           <input 
             type="text" 
-            placeholder={t('phoneNumberPlaceholder')} 
+            placeholder={t('phoneNumberMinimal')} 
             className="input-field" 
             name="phone"
             value={formData.phone}
@@ -379,7 +389,7 @@ const Login = () => {
           <p className="subtitle user-subtitle">Gülbahçe Yemek</p>
           <input 
             type="text" 
-            placeholder={t('phoneNumber')} 
+            placeholder={t('phoneNumberMinimal')} 
             className="input-field" 
             name="phone"
             value={formData.phone}
@@ -387,7 +397,7 @@ const Login = () => {
           />
           {renderPasswordInput(t('password'), "password")}
           <button type="submit" className="btn-orange">{t('signIn')}</button>
-          <a href="#" className="forgot-link">{t('forgotPassword')}</a>
+          <a href="#" className="forgot-link" onClick={(e) => { e.preventDefault(); handleForgotPasswordOpen(); }}>{t('forgotPassword')}</a>
         </form>
       );
     }
@@ -405,6 +415,209 @@ const Login = () => {
     setOtpSent(false);
     setResendTimer(0);
     setIsModalOpen(false);
+  };
+
+  // Forgot Password Functions
+  const handleForgotPasswordOpen = () => {
+    setForgotPasswordOpen(true);
+    setForgotPasswordStep(1);
+    setForgotPasswordData({
+      phone: '',
+      otp: ['', '', '', '', '', ''],
+      newPassword: '',
+      confirmNewPassword: ''
+    });
+  };
+
+  const handleForgotPasswordClose = () => {
+    setForgotPasswordOpen(false);
+    setForgotPasswordStep(1);
+    setForgotPasswordTimer(0);
+  };
+
+  const handleForgotPasswordPhoneSubmit = async () => {
+    if (!forgotPasswordData.phone) {
+      showSnackbar(t('fillAllFields'), 'error');
+      return;
+    }
+
+    // Telefon numarası validasyonu (10 haneli, 5 ile başlayan)
+    if (!/^5\d{9}$/.test(forgotPasswordData.phone)) {
+      showSnackbar('Geçerli bir telefon numarası girin (10 haneli, 5 ile başlamalı)', 'error');
+      return;
+    }
+
+    try {
+      showSnackbar(t('verificationCodeSending'), 'info');
+      
+      // API call to send reset code
+      await axios.post('http://localhost:3001/api/auth/forgot-password', {
+        phone: forgotPasswordData.phone
+      });
+      
+      setForgotPasswordStep(2);
+      showSnackbar(t('verificationCodeSentMsg'), 'success');
+      
+      // Start timer
+      setForgotPasswordTimer(60);
+      const timer = setInterval(() => {
+        setForgotPasswordTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+    } catch (error) {
+      showSnackbar(error.response?.data?.message || t('error'), 'error');
+    }
+  };
+
+  const handleForgotPasswordOtpSubmit = async () => {
+    const otpCode = forgotPasswordData.otp.join('');
+    if (otpCode.length !== 6) {
+      showSnackbar(t('enterVerificationCode'), 'error');
+      return;
+    }
+
+    try {
+      // API call to verify reset code
+      const response = await axios.post('http://localhost:3001/api/auth/verify-reset-code', {
+        phone: forgotPasswordData.phone,
+        resetCode: otpCode
+      });
+      
+      if (response.data.success) {
+        setForgotPasswordStep(3);
+        showSnackbar(t('verify'), 'success');
+      }
+      
+    } catch (error) {
+      showSnackbar(error.response?.data?.message || t('invalidResetCode'), 'error');
+    }
+  };
+
+  const handleForgotPasswordNewPasswordSubmit = async () => {
+    if (!forgotPasswordData.newPassword || !forgotPasswordData.confirmNewPassword) {
+      showSnackbar(t('fillAllFields'), 'error');
+      return;
+    }
+
+    if (forgotPasswordData.newPassword !== forgotPasswordData.confirmNewPassword) {
+      showSnackbar(t('passwordsNotMatch'), 'error');
+      return;
+    }
+
+    try {
+      const otpCode = forgotPasswordData.otp.join('');
+      
+      // API call to reset password
+      await axios.post('http://localhost:3001/api/auth/reset-password', {
+        phone: forgotPasswordData.phone,
+        resetCode: otpCode,
+        newPassword: forgotPasswordData.newPassword
+      });
+      
+      showSnackbar(t('passwordResetSuccess'), 'success');
+      handleForgotPasswordClose();
+      
+    } catch (error) {
+      showSnackbar(error.response?.data?.message || t('passwordResetFailed'), 'error');
+    }
+  };
+
+  const handleForgotPasswordInputChange = (field, value) => {
+    if (field === 'phone') {
+      // Sadece rakamları al
+      let phoneNumber = value.replace(/\D/g, '');
+      
+      // 5 ile başlaması zorunlu ve maksimum 10 hane
+      if (phoneNumber.length > 0) {
+        // İlk rakam 5 değilse, 5 ile başlat
+        if (!phoneNumber.startsWith('5')) {
+          phoneNumber = '5' + phoneNumber.slice(0, 9);
+        }
+        // Maksimum 10 haneli olacak şekilde kısalt
+        phoneNumber = phoneNumber.slice(0, 10);
+      }
+      
+      setForgotPasswordData(prev => ({
+        ...prev,
+        [field]: phoneNumber
+      }));
+    } else {
+      setForgotPasswordData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
+  };
+
+  const handleForgotPasswordOtpChange = (index, value) => {
+    if (value.length <= 1 && /^\d*$/.test(value)) {
+      const newOtp = [...forgotPasswordData.otp];
+      newOtp[index] = value;
+      setForgotPasswordData(prev => ({
+        ...prev,
+        otp: newOtp
+      }));
+
+      // Auto focus next input
+      if (value && index < 5) {
+        const nextInput = document.getElementById(`forgot-otp-${index + 1}`);
+        if (nextInput) nextInput.focus();
+      }
+    }
+  };
+
+  const handleForgotPasswordOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !forgotPasswordData.otp[index] && index > 0) {
+      const prevInput = document.getElementById(`forgot-otp-${index - 1}`);
+      if (prevInput) {
+        prevInput.focus();
+        // Clear the previous input
+        const newOtp = [...forgotPasswordData.otp];
+        newOtp[index - 1] = '';
+        setForgotPasswordData(prev => ({
+          ...prev,
+          otp: newOtp
+        }));
+      }
+    }
+  };
+
+  const handleForgotPasswordResendCode = async () => {
+    try {
+      const formattedPhone = `+90${forgotPasswordData.phone}`;
+      await axios.post('http://localhost:3001/api/auth/forgot-password', { 
+        phone: formattedPhone 
+      });
+      
+      showSnackbar(t('newVerificationCodeSent'), 'success');
+      
+      // Reset OTP inputs
+      setForgotPasswordData(prev => ({
+        ...prev,
+        otp: ['', '', '', '', '', '']
+      }));
+      
+      // Start timer
+      setForgotPasswordTimer(60);
+      const timerInterval = setInterval(() => {
+        setForgotPasswordTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(timerInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      console.error('Resend code error:', error);
+      showSnackbar(error.response?.data?.message || t('error'), 'error');
+    }
   };
   
   // Business moduna geçiş
@@ -430,39 +643,170 @@ const Login = () => {
         position: 'absolute', 
         top: 20, 
         right: 20, 
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1
+        zIndex: 1000
       }}>
-        <IconButton 
-          onClick={() => changeLanguage(language === 'tr' ? 'en' : 'tr')}
-          sx={{ 
-            bgcolor: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 136, 0, 0.3)',
-            '&:hover': {
-              bgcolor: '#ff8800',
-              color: 'white'
-            }
-          }}
-        >
-          <LanguageIcon />
-        </IconButton>
-        <Box sx={{ 
-          bgcolor: 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 136, 0, 0.3)',
-          borderRadius: '20px',
-          px: 1.5,
-          py: 0.5,
-          fontSize: '0.8rem',
-          fontWeight: 'bold',
-          color: '#ff8800'
-        }}>
-          {language === 'tr' ? '🇹🇷 TR' : '🇺🇸 EN'}
-        </Box>
+        <FormControl size="small">
+          <Select
+            value={language}
+            onChange={(e) => changeLanguage(e.target.value)}
+            renderValue={(value) => (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {value === 'tr' ? (
+                  <>
+                    <img src="https://flagcdn.com/w20/tr.png" alt="TR" style={{ width: 20, height: 13, borderRadius: 2 }} />
+                    TR
+                  </>
+                ) : (
+                  <>
+                    <img src="https://flagcdn.com/w20/us.png" alt="EN" style={{ width: 20, height: 13, borderRadius: 2 }} />
+                    EN
+                  </>
+                )}
+              </Box>
+            )}
+            sx={{ 
+              bgcolor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 136, 0, 0.3)',
+              borderRadius: '20px',
+              minWidth: 80,
+              height: 36,
+              fontSize: '0.9rem',
+              fontWeight: 'bold',
+              '& .MuiSelect-select': {
+                py: 0.5,
+                px: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5
+              },
+              '& .MuiOutlinedInput-notchedOutline': {
+                border: 'none'
+              },
+              '&:hover': {
+                bgcolor: 'rgba(255, 136, 0, 0.1)'
+              }
+            }}
+          >
+            <MenuItem value="tr" sx={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <img src="https://flagcdn.com/w20/tr.png" alt="TR" style={{ width: 20, height: 13, borderRadius: 2 }} />
+                TR
+              </Box>
+            </MenuItem>
+            <MenuItem value="en" sx={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <img src="https://flagcdn.com/w20/us.png" alt="EN" style={{ width: 20, height: 13, borderRadius: 2 }} />
+                EN
+              </Box>
+            </MenuItem>
+          </Select>
+        </FormControl>
       </Box>
+
+      {/* Forgot Password Modal */}
+      {forgotPasswordOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>
+              {forgotPasswordStep === 1 && t('resetPassword')}
+              {forgotPasswordStep === 2 && t('verificationCode')}
+              {forgotPasswordStep === 3 && t('newPassword')}
+            </h2>
+            
+            {forgotPasswordStep === 1 && (
+              <div>
+                <p>{t('resetPasswordInstruction')}</p>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder={t('phoneNumberMinimal')}
+                  value={forgotPasswordData.phone}
+                  onChange={(e) => handleForgotPasswordInputChange('phone', e.target.value)}
+                />
+                <p className="phone-helper">{t('phoneHelperText')}</p>
+              </div>
+            )}
+
+            {forgotPasswordStep === 2 && (
+              <div>
+                <p>+90{forgotPasswordData.phone} {t('resetCodeSent')}</p>
+                <div className="otp-input-container">
+                  {forgotPasswordData.otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`forgot-otp-${index}`}
+                      type="text"
+                      className="otp-input"
+                      value={digit}
+                      onChange={(e) => handleForgotPasswordOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleForgotPasswordOtpKeyDown(index, e)}
+                      maxLength="1"
+                      autoComplete="off"
+                    />
+                  ))}
+                </div>
+                {forgotPasswordTimer > 0 ? (
+                  <p className="resend-timer">
+                    {t('waitToResend', { time: forgotPasswordTimer })}
+                  </p>
+                ) : (
+                  <button 
+                    type="button" 
+                    className="btn-resend" 
+                    onClick={handleForgotPasswordResendCode}
+                  >
+                    {t('resendCode')}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {forgotPasswordStep === 3 && (
+              <div>
+                <p>{t('setNewPassword')}</p>
+                <input
+                  type="password"
+                  className="input-field"
+                  placeholder={t('newPassword')}
+                  value={forgotPasswordData.newPassword}
+                  onChange={(e) => handleForgotPasswordInputChange('newPassword', e.target.value)}
+                  style={{ marginBottom: '1rem' }}
+                />
+                <input
+                  type="password"
+                  className="input-field"
+                  placeholder={t('confirmNewPassword')}
+                  value={forgotPasswordData.confirmNewPassword}
+                  onChange={(e) => handleForgotPasswordInputChange('confirmNewPassword', e.target.value)}
+                />
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem' }}>
+              <button className="btn-secondary" onClick={handleForgotPasswordClose}>
+                {t('cancel')}
+              </button>
+              {forgotPasswordStep === 1 && (
+                <button className="btn-orange" onClick={handleForgotPasswordPhoneSubmit}>
+                  {t('sendCode')}
+                </button>
+              )}
+              {forgotPasswordStep === 2 && (
+                <button className="btn-orange" onClick={handleForgotPasswordOtpSubmit}>
+                  {t('verify')}
+                </button>
+              )}
+              {forgotPasswordStep === 3 && (
+                <button className="btn-orange" onClick={handleForgotPasswordNewPasswordSubmit}>
+                  {t('changePasswordButton')}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Snackbar */}
       <Snackbar
         open={snackbar.open}

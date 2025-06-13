@@ -26,14 +26,7 @@ function BusinessMenu() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
   const navigate = useNavigate();
-
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-
-  useEffect(() => {
-    if (!user.isBusiness) {
-      navigate('/menu');
-    }
-  }, [user, navigate]);
 
   const fetchMenuItems = async () => {
     try {

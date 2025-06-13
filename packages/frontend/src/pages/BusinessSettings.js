@@ -13,7 +13,11 @@ import {
   FormControlLabel,
   CircularProgress,
   CardMedia,
-  IconButton
+  IconButton,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import ResponsivePageTitle from '../components/ResponsivePageTitle';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -29,8 +33,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Paper from '@mui/material/Paper';
+import { useLanguage } from '../contexts/LanguageContext';
 
-function BusinessSettings() {  const [businessData, setBusinessData] = useState({
+function BusinessSettings() {
+  const { t, language, changeLanguage } = useLanguage();
+  const [businessData, setBusinessData] = useState({
     name: '',
     openingTime: '09:00',
     closingTime: '22:00',
@@ -90,7 +97,7 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
         setError(null);
       } catch (err) {
         console.error('Error fetching business settings:', err);
-        setError('İşletme ayarları yüklenemedi. Lütfen daha sonra tekrar deneyin.');
+        setError(t('settingsLoadError'));
       } finally {
         setLoading(false);
       }
@@ -201,17 +208,15 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
         ...prev,
         imageUrl: response.data.imageUrl
       }));
-      
-      setSnackbar({
+        setSnackbar({
         open: true,
-        message: 'İşletme resmi başarıyla güncellendi',
+        message: t('businessImageUpdated'),
         severity: 'success'
       });
     } catch (err) {
-      console.error('Error uploading image:', err);
-      setSnackbar({
+      console.error('Error uploading image:', err);      setSnackbar({
         open: true,
-        message: 'Resim yüklenirken bir hata oluştu',
+        message: t('imageUploadError'),
         severity: 'error'
       });
     } finally {
@@ -253,10 +258,10 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
       await axios.put('/api/auth/updatepassword', pwForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setPwSuccess('Şifre başarıyla değiştirildi.');
+      setPwSuccess(t('passwordUpdated'));
       setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
-      setPwError(err.response?.data?.message || 'Şifre değiştirilemedi.');
+      setPwError(err.response?.data?.message || t('passwordChangeFailed'));
     } finally {
       setPwLoading(false);
     }
@@ -271,7 +276,7 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
       await axios.delete('/api/auth/delete', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setDeleteSuccess('Hesabınız silindi. Oturum kapatılıyor...');
+      setDeleteSuccess(t('accountDeleted'));
       setTimeout(() => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -284,9 +289,8 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
 
   return (
     <BusinessLayout>
-      <Box sx={{ maxWidth: 800, mx: 'auto', px: 2 }}>
-        <ResponsivePageTitle sx={{ color: '#333' }}>
-          İŞLETME AYARLARI
+      <Box sx={{ maxWidth: 800, mx: 'auto', px: 2 }}>        <ResponsivePageTitle sx={{ color: '#333' }}>
+          {t('businessSettingsTitle')}
         </ResponsivePageTitle>
         
         {error && (
@@ -304,9 +308,8 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
             {/* Restaurant Image */}
             <Grid item xs={12}>
               <Card sx={{ mb: 3, borderRadius: 2, overflow: 'hidden', border: '2px solid #80cbc4' }}>
-                <CardContent>
-                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: '#333' }}>
-                    İşletme Fotoğrafı
+                <CardContent>                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: '#333' }}>
+                    {t('businessImage')}
                   </Typography>
                   
                   <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', gap: 2 }}>
@@ -362,7 +365,7 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
                             disabled={uploading}
                             sx={{ backgroundColor: '#ff8800', '&:hover': { backgroundColor: '#ff7700' } }}
                           >
-                            {uploading ? 'Yükleniyor...' : 'Fotoğraf Yükle'}
+                            {uploading ? t('loading') : t('uploadImage')}
                           </Button>
                         </label>
                       </Box>
@@ -371,17 +374,16 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
                 </CardContent>
               </Card>
             </Grid>
-            
-            {/* Business Info */}
+              {/* Business Info */}
             <Grid item xs={12}>
               <Card sx={{ mb: 3, borderRadius: 2, border: '2px solid #80cbc4' }}>
                 <CardContent>
                   <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: '#333' }}>
-                    İşletme Bilgileri
+                    {t('businessName')}
                   </Typography>
                     <TextField
                     fullWidth
-                    label="İşletme Adı"
+                    label={t('businessName')}
                     name="name"
                     value={businessData.name}
                     onChange={handleInputChange}
@@ -391,17 +393,38 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
               </Card>
             </Grid>
             
-            {/* Business Hours */}
+            {/* Language Settings */}
+            <Grid item xs={12}>
+              <Card sx={{ mb: 3, borderRadius: 2, border: '2px solid #80cbc4' }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: '#333' }}>
+                    {t('languageSettings')}
+                  </Typography>
+                  <FormControl fullWidth sx={{ mb: 3 }}>
+                    <InputLabel>{t('selectLanguage')}</InputLabel>
+                    <Select
+                      value={language}
+                      label={t('selectLanguage')}
+                      onChange={(e) => changeLanguage(e.target.value)}
+                    >
+                      <MenuItem value="tr">🇹🇷 {t('turkish')}</MenuItem>
+                      <MenuItem value="en">🇺🇸 {t('english')}</MenuItem>
+                    </Select>
+                  </FormControl>
+                </CardContent>
+              </Card>
+            </Grid>
+              {/* Business Hours */}
             <Grid item xs={12}>
               <Card sx={{ borderRadius: 2, border: '2px solid #80cbc4' }}>
                 <CardContent>
                   <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: '#333' }}>
-                    Çalışma Saatleri
+                    {t('businessHours')}
                   </Typography>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 3 }}>
                       <TimePicker
-                        label="Açılış Saati"
+                        label={t('openingTime')}
                         value={openingTimeDate}
                         onChange={handleOpeningTimeChange}
                         ampm={false}
@@ -409,7 +432,7 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
                       />
                       
                       <TimePicker
-                        label="Kapanış Saati"
+                        label={t('closingTime')}
                         value={closingTimeDate}
                         onChange={handleClosingTimeChange}
                         ampm={false}
@@ -418,7 +441,65 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
                     </Box>
                   </LocalizationProvider>
                 </CardContent>
+              </Card>            </Grid>
+              {/* Change Password Section */}
+            <Grid item xs={12}>
+              <Card sx={{ borderRadius: 2, border: '2px solid #80cbc4' }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: '#333' }}>
+                    {t('changePassword')}
+                  </Typography>
+                  {pwSuccess && <Alert severity="success" sx={{ mb: 2 }}>{pwSuccess}</Alert>}
+                  {pwError && <Alert severity="error" sx={{ mb: 2 }}>{pwError}</Alert>}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField
+                      label={t('currentPassword')}
+                      name="currentPassword"
+                      type="password"
+                      value={pwForm.currentPassword}
+                      onChange={handlePwInput}
+                      fullWidth
+                    />
+                    <TextField
+                      label={t('newPassword')}
+                      name="newPassword"
+                      type="password"
+                      value={pwForm.newPassword}
+                      onChange={handlePwInput}
+                      fullWidth
+                    />
+                    <TextField
+                      label={t('confirmNewPassword')}
+                      name="confirmPassword"
+                      type="password"
+                      value={pwForm.confirmPassword}
+                      onChange={handlePwInput}
+                      fullWidth
+                    />
+                    <Button
+                      variant="contained"
+                      sx={{ bgcolor: '#ff8800', '&:hover': { bgcolor: '#ff6600' }, fontWeight: 'bold', mt: 1 }}
+                      onClick={handleChangePassword}
+                      disabled={pwLoading}
+                      fullWidth
+                    >
+                      {pwLoading ? t('changing') : t('changePasswordButton')}
+                    </Button>
+                  </Box>
+                </CardContent>
               </Card>
+            </Grid>
+            
+            {/* Delete Account Section */}
+            <Grid item xs={12} sx={{ textAlign: 'center', mt: 2 }}>
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={() => setDeleteDialog(true)}
+              >
+                {t('deleteAccount')}
+              </Button>
             </Grid>
             
             {/* Save Button */}
@@ -435,7 +516,7 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
                   '&:hover': { backgroundColor: '#ff7700' } 
                 }}
               >
-                {saving ? <CircularProgress size={24} /> : 'KAYDET'}
+                {saving ? <CircularProgress size={24} /> : t('saveSettings')}
               </Button>
             </Grid>
           </Grid>
@@ -450,84 +531,27 @@ function BusinessSettings() {  const [businessData, setBusinessData] = useState(
           </Alert>
         </Snackbar>
 
+        {/* Delete Account Dialog */}
+        <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)}>
+          <DialogTitle>{t('deleteAccount')}</DialogTitle>
+          <DialogContent>
+            <Typography>{t('deleteAccountConfirm')}</Typography>
+            {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
+            {deleteSuccess && <Alert severity="success" sx={{ mt: 2 }}>{deleteSuccess}</Alert>}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialog(false)}>{t('cancel')}</Button>
+            <Button color="error" onClick={handleDeleteAccount}>{t('yesDelete')}</Button>
+          </DialogActions>
+        </Dialog>
+
         {/* Image Crop Dialog */}
         <ImageCropDialog
           open={cropDialogOpen}
           onClose={handleCropDialogClose}
-          onCropComplete={handleCroppedImageUpload}
-          imageUrl={selectedImageUrl}
+          onCropComplete={handleCroppedImageUpload}          imageUrl={selectedImageUrl}
           aspectRatio={16 / 9} // Restaurant kartları için ideal oran
         />
-
-        <Box sx={{ mt: 6, display: 'flex', justifyContent: 'center' }}>
-          <Paper elevation={2} sx={{ p: 4, maxWidth: 360, width: '100%', bgcolor: '#fff8f0', borderRadius: 3 }}>
-            <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, fontFamily: 'Alata, sans-serif', textAlign: 'center', color: '#222' }}>
-              Change Password
-            </Typography>
-            {pwSuccess && <Alert severity="success" sx={{ mb: 2 }}>{pwSuccess}</Alert>}
-            {pwError && <Alert severity="error" sx={{ mb: 2 }}>{pwError}</Alert>}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
-              <TextField
-                label="Current Password"
-                name="currentPassword"
-                type="password"
-                value={pwForm.currentPassword}
-                onChange={handlePwInput}
-                fullWidth
-                size="small"
-              />
-              <TextField
-                label="New Password"
-                name="newPassword"
-                type="password"
-                value={pwForm.newPassword}
-                onChange={handlePwInput}
-                fullWidth
-                size="small"
-              />
-              <TextField
-                label="Confirm New Password"
-                name="confirmPassword"
-                type="password"
-                value={pwForm.confirmPassword}
-                onChange={handlePwInput}
-                fullWidth
-                size="small"
-              />
-              <Button
-                variant="contained"
-                sx={{ bgcolor: '#ff8800', '&:hover': { bgcolor: '#ff6600' }, fontWeight: 'bold', fontSize: '1.1rem', borderRadius: 2, mt: 1 }}
-                onClick={handleChangePassword}
-                disabled={pwLoading}
-                fullWidth
-              >
-                {pwLoading ? 'Changing...' : 'Change Password'}
-              </Button>
-            </Box>
-          </Paper>
-        </Box>
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteIcon />}
-            onClick={() => setDeleteDialog(true)}
-          >
-            Delete Account
-          </Button>
-          <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)}>
-            <DialogTitle>Hesabı Sil</DialogTitle>
-            <DialogContent>
-              <Typography>Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.</Typography>
-              {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
-              {deleteSuccess && <Alert severity="success" sx={{ mt: 2 }}>{deleteSuccess}</Alert>}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDeleteDialog(false)}>İptal</Button>
-              <Button color="error" onClick={handleDeleteAccount}>Evet, Sil</Button>
-            </DialogActions>
-          </Dialog>
-        </Box>
       </Box>
     </BusinessLayout>
   );
