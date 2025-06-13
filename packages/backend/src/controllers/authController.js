@@ -173,7 +173,7 @@ exports.signup = async (req, res) => {
 // Kullanıcı girişi (login)
 exports.login = async (req, res) => {
   try {
-    const { phone, password } = req.body;
+    let { phone, password } = req.body;
 
     // Telefon numarası ve şifre kontrolü
     if (!phone || !password) {
@@ -181,6 +181,11 @@ exports.login = async (req, res) => {
         success: false,
         message: 'Lütfen telefon numarası ve şifre girin'
       });
+    }
+
+    // Telefon numarasını formatla (535... -> +90535...)
+    if (phone.startsWith('5') && phone.length === 10) {
+      phone = '+90' + phone;
     }
 
     // Kullanıcıyı bul
@@ -620,8 +625,196 @@ exports.updateNotificationSettings = async (req, res) => {
       allowPushNotifications: user.allowPushNotifications,
       allowPullNotifications: user.allowPullNotifications,
       allowPromotionNotifications: user.allowPromotionNotifications
-    }});
-  } catch (error) {
+    }});  } catch (error) {
     res.status(500).json({ success: false, message: 'Bildirim ayarları güncellenemedi.', error: error.message });
+  }
+};
+
+// Telefon ile şifre sıfırlama kodu gönder
+exports.sendResetCode = async (req, res) => {
+  try {
+    let { phone } = req.body;
+    
+    if (!phone) {
+      return res.status(400).json({ success: false, message: 'Telefon numarası gerekli.' });
+    }
+
+    // Telefon numarasını formatla (535... -> +90535...)
+    if (phone.startsWith('5') && phone.length === 10) {
+      phone = '+90' + phone;
+    } else if (!phone.startsWith('+90')) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Geçersiz telefon numarası formatı. 10 haneli format kullanın (örn: 5551234567).' 
+      });
+    }
+
+    // Kullanıcının var olup olmadığını kontrol et
+    const user = await User.findOne({ where: { phone } });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Bu telefon numarasına sahip bir kullanıcı bulunamadı.' });
+    }
+
+    // Şifre sıfırlama kodu oluştur
+    const resetCode = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      specialChars: false,
+      lowerCaseAlphabets: false,
+    });
+
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 dakika    // OTP tablosunda şifre sıfırlama kodu kaydet
+    await Otp.upsert({ 
+      phone, 
+      otp: resetCode, 
+      expiresAt
+    });
+
+    // Twilio ile SMS gönder
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    await client.messages.create({
+      body: `Gülbahçe Yemek şifre sıfırlama kodunuz: ${resetCode}`,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: phone,
+    });
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Şifre sıfırlama kodu telefonunuza gönderildi.' 
+    });
+  } catch (error) {
+    console.error('Send reset code error:', error);
+    if (error.code === 21211) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Geçersiz telefon numarası. Lütfen ülke koduyla birlikte E.164 formatında girin (örn: +905551234567).' 
+      });
+    }
+    res.status(500).json({ 
+      success: false, 
+      message: 'Kod gönderilirken bir hata oluştu.', 
+      error: error.message 
+    });
+  }
+};
+
+// Şifre sıfırlama kodunu doğrula
+exports.verifyResetCode = async (req, res) => {
+  try {
+    let { phone, resetCode } = req.body;
+
+    if (!phone || !resetCode) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Telefon numarası ve sıfırlama kodu gerekli.' 
+      });
+    }
+
+    // Telefon numarasını formatla (535... -> +90535...)
+    if (phone.startsWith('5') && phone.length === 10) {
+      phone = '+90' + phone;
+    }
+
+    // OTP kaydını bul
+    const otpRecord = await Otp.findOne({ where: { phone } });
+
+    if (!otpRecord) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Sıfırlama kodu bulunamadı. Lütfen tekrar kod isteyin.' 
+      });
+    }
+
+    if (otpRecord.otp !== resetCode) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Geçersiz sıfırlama kodu.' 
+      });
+    }
+
+    if (new Date() > new Date(otpRecord.expiresAt)) {
+      await otpRecord.destroy();
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Sıfırlama kodunun süresi dolmuş. Lütfen tekrar kod isteyin.' 
+      });
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Sıfırlama kodu doğrulandı.' 
+    });
+  } catch (error) {
+    console.error('Verify reset code error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Kod doğrulanırken bir hata oluştu.', 
+      error: error.message 
+    });
+  }
+};
+
+// Telefon ile şifre sıfırla
+exports.resetPasswordWithPhone = async (req, res) => {
+  try {
+    let { phone, resetCode, newPassword } = req.body;
+
+    if (!phone || !resetCode || !newPassword) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Telefon numarası, sıfırlama kodu ve yeni şifre gerekli.' 
+      });
+    }
+
+    // Telefon numarasını formatla (535... -> +90535...)
+    if (phone.startsWith('5') && phone.length === 10) {
+      phone = '+90' + phone;
+    }
+
+    // OTP kaydını tekrar kontrol et
+    const otpRecord = await Otp.findOne({ where: { phone } });
+
+    if (!otpRecord || otpRecord.otp !== resetCode) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Geçersiz sıfırlama kodu.' 
+      });
+    }
+
+    if (new Date() > new Date(otpRecord.expiresAt)) {
+      await otpRecord.destroy();
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Sıfırlama kodunun süresi dolmuş.' 
+      });
+    }
+
+    // Kullanıcıyı bul
+    const user = await User.findOne({ where: { phone } });
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Kullanıcı bulunamadı.' 
+      });
+    }    // Şifreyi güncelle (hook'lar otomatik hashleme yapacak)
+    console.log('Updating password for user:', user.phone);
+    console.log('New password (plain):', newPassword);
+    user.password = newPassword;
+    await user.save();
+    console.log('Password updated successfully');
+
+    // OTP kaydını sil
+    await otpRecord.destroy();
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Şifre başarıyla sıfırlandı.' 
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Şifre sıfırlanırken bir hata oluştu.', 
+      error: error.message 
+    });
   }
 };
