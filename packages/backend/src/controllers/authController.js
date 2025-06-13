@@ -4,6 +4,10 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { Op } = require('sequelize');
 const User = require('../models/User');
+const Otp = require('../models/Otp');
+const otpGenerator = require('otp-generator');
+const twilio = require('twilio');
+require('dotenv').config();
 
 // JWT token oluşturma fonksiyonu
 const generateToken = (userId) => {
@@ -14,17 +18,80 @@ const generateToken = (userId) => {
   );
 };
 
+// OTP kodu gönder
+exports.sendOtp = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone) {
+      return res.status(400).json({ success: false, message: 'Telefon numarası gerekli.' });
+    }
+
+    // Kullanıcının zaten var olup olmadığını kontrol et
+    const existingUser = await User.findOne({ where: { phone } });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Bu telefon numarası zaten kayıtlı.' });
+    }
+
+    const otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      specialChars: false,
+      lowerCaseAlphabets: false,
+    });
+
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 dakika
+
+    // Varolan kaydı güncelle veya yenisini oluştur
+    await Otp.upsert({ phone, otp, expiresAt });
+
+    // Twilio ile SMS gönder
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    await client.messages.create({
+      body: `Gülbahçe Yemek doğrulama kodunuz: ${otp}`,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: phone, // Telefon numarasının E.164 formatında olması beklenir, örn: +905551234567
+    });
+
+    res.status(200).json({ success: true, message: 'Doğrulama kodu telefonunuza gönderildi.' });
+  } catch (error) {
+    console.error('Send OTP error:', error);
+    if (error.code === 21211) {
+        return res.status(400).json({ success: false, message: 'Geçersiz telefon numarası. Lütfen ülke koduyla birlikte E.164 formatında girin (örn: +905551234567).' });
+    }
+    res.status(500).json({ success: false, message: 'Kod gönderilirken bir hata oluştu.', error: error.message });
+  }
+};
+
 // Kullanıcı kaydı (sign up)
 exports.signup = async (req, res) => {
   try {
     console.log('Signup request body:', req.body);
-    const { name, phone, email, password, confirmPassword, isBusiness } = req.body;
+    const { name, phone, email, password, confirmPassword, isBusiness, otp } = req.body;
+
+    // OTP kontrolü
+    if (!otp) {
+        return res.status(400).json({ success: false, message: 'Doğrulama kodu (OTP) gerekli.' });
+    }
+
+    const otpRecord = await Otp.findOne({ where: { phone } });
+
+    if (!otpRecord) {
+        return res.status(400).json({ success: false, message: 'Doğrulama kodu bulunamadı. Lütfen tekrar kod isteyin.' });
+    }
+
+    if (otpRecord.otp !== otp) {
+        return res.status(400).json({ success: false, message: 'Geçersiz doğrulama kodu.' });
+    }
+
+    if (new Date() > new Date(otpRecord.expiresAt)) {
+        await otpRecord.destroy();
+        return res.status(400).json({ success: false, message: 'Doğrulama kodunun süresi dolmuş. Lütfen tekrar kod isteyin.' });
+    }
 
     // Gerekli alanların kontrolü
     if (!name || !phone || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Lütfen tüm zorunlu alanları doldurun (isim, telefon, şifre)'
+        message: 'Lütfen tüm zorunlu alanları doldurun (isim, telefon, şifre).'
       });
     }
 
@@ -33,16 +100,16 @@ exports.signup = async (req, res) => {
       console.log('Şifreler eşleşmiyor:', { password, confirmPassword });
       return res.status(400).json({
         success: false,
-        message: 'Şifreler eşleşmiyor'
+        message: 'Şifreler eşleşmiyor.'
       });
     }
 
-    // Telefon numarası kontrolü
+    // Telefon numarası kontrolü (OTP gönderiminde zaten yapıldı ama yine de kontrol edelim)
     const existingUserByPhone = await User.findOne({ where: { phone } });
     if (existingUserByPhone) {
       return res.status(400).json({
         success: false,
-        message: 'Bu telefon numarası zaten kayıtlı'
+        message: 'Bu telefon numarası zaten kayıtlı.'
       });
     }
 
@@ -52,7 +119,7 @@ exports.signup = async (req, res) => {
       if (existingUserByEmail) {
         return res.status(400).json({
           success: false,
-          message: 'Bu e-posta adresi zaten kayıtlı'
+          message: 'Bu e-posta adresi zaten kayıtlı.'
         });
       }
     }
@@ -65,6 +132,9 @@ exports.signup = async (req, res) => {
       password,
       isBusiness: !!isBusiness
     });
+
+    // Başarılı kayıttan sonra OTP kaydını sil
+    await otpRecord.destroy();
 
     // Token oluştur
     const token = generateToken(user.id);
@@ -94,7 +164,7 @@ exports.signup = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: 'Kayıt olurken bir hata oluştu',
+      message: 'Kayıt olurken bir hata oluştu.',
       error: error.message
     });
   }

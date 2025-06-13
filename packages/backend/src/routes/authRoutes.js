@@ -1,6 +1,7 @@
 const express = require('express');
 const {
   signup,
+  sendOtp,
   login,
   getMe,
   forgotPassword,
@@ -19,6 +20,7 @@ const router = express.Router();
 
 // Açık rotalar
 router.post('/signup', signup);
+router.post('/send-otp', sendOtp);
 router.post('/login', login);
 router.post('/forgotpassword', forgotPassword);
 router.put('/resetpassword/:resettoken', resetPassword);

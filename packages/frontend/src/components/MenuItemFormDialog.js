@@ -32,6 +32,8 @@ function MenuItemFormDialog({ open, handleClose, handleSave, menuItem }) {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [error, setError] = useState({ open: false, message: '' });
+  const [newCategory, setNewCategory] = useState('');
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
 
   // Fetch categories from the API
   useEffect(() => {
@@ -139,6 +141,53 @@ function MenuItemFormDialog({ open, handleClose, handleSave, menuItem }) {
     setError({ ...error, open: false });
   };
 
+  const handleNewCategoryChange = (e) => {
+    setNewCategory(e.target.value);
+  };
+
+  const handleAddNewCategory = async () => {
+    if (!newCategory.trim()) {
+      setError({
+        open: true,
+        message: 'Lütfen bir kategori adı giriniz.'
+      });
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Oturum açmanız gerekiyor');
+      
+      // Save the new category to the backend
+      const response = await axios.post(
+        'http://localhost:3001/api/categories',
+        { name: newCategory.trim() },
+        {
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      // Add the new category to the list from the response
+      setCategories(prev => [...prev, response.data]);
+      setForm(prev => ({
+        ...prev,
+        category: response.data.name
+      }));
+      setNewCategory('');
+      setShowNewCategoryInput(false);
+      
+    } catch (err) {
+      console.error('Error adding category:', err);
+      setError({
+        open: true,
+        message: 'Kategori eklenirken bir hata oluştu: ' + (err.response?.data?.message || err.message)
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle>{menuItem ? 'Menü Öğesini Düzenle' : 'Yeni Menü Öğesi Ekle'}</DialogTitle>
@@ -238,26 +287,69 @@ function MenuItemFormDialog({ open, handleClose, handleSave, menuItem }) {
             margin="normal"
             inputProps={{ min: 0 }}
           />
-          <TextField
-            select
-            label="Kategori"
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            fullWidth
-            required
-            margin="normal"
-          >
-            {loadingCategories ? (
-              <MenuItem disabled>Loading categories...</MenuItem>
-            ) : (
-              categories.map((cat) => (
-                <MenuItem key={cat.id || cat} value={cat.name || cat}>
-                  {cat.name || cat}
-                </MenuItem>
-              ))
+          <Box sx={{ mt: 2, mb: 1 }}>
+            <TextField
+              select
+              label="Kategori"
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              required
+              disabled={loadingCategories || showNewCategoryInput}
+              SelectProps={{
+                
+                renderValue: (selected) => selected || ''
+              }}
+            >
+              {loadingCategories ? (
+                <MenuItem disabled>Yükleniyor...</MenuItem>
+              ) : (
+                [
+                  ...categories.map((cat) => (
+                    <MenuItem key={cat.id || cat._id} value={cat.name}>
+                      {cat.name}
+                    </MenuItem>
+                  )),
+                  <MenuItem key="add-new" value="add-new" sx={{ color: 'primary.main', fontWeight: 'bold' }}
+                    onClick={() => setShowNewCategoryInput(true)}
+                  >
+                    + Yeni Kategori Ekle
+                  </MenuItem>
+                ]
+              )}
+            </TextField>
+            
+            {showNewCategoryInput && (
+              <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={newCategory}
+                  onChange={handleNewCategoryChange}
+                  placeholder="Yeni kategori adı"
+                  autoFocus
+                />
+                <Button 
+                  variant="contained" 
+                  onClick={handleAddNewCategory}
+                  disabled={!newCategory.trim()}
+                >
+                  Ekle
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  onClick={() => {
+                    setShowNewCategoryInput(false);
+                    setNewCategory('');
+                  }}
+                >
+                  İptal
+                </Button>
+              </Box>
             )}
-          </TextField>
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>İptal</Button>

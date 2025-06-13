@@ -11,6 +11,10 @@ const Login = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [formType, setFormType] = useState('user'); // 'user' or 'business'
   const [leftCardFlipped, setLeftCardFlipped] = useState(false); // Sol kart için flip durumu
+  const [isBusiness, setIsBusiness] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalOtp, setModalOtp] = useState(['', '', '', '', '', '']);
+
   const [showPassword, setShowPassword] = useState({
     password: false,
     confirmPassword: false,
@@ -22,7 +26,10 @@ const Login = () => {
     phone: '',
     password: '',
     confirmPassword: '',
+    isBusiness: false
   });
+  const [otpSent, setOtpSent] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
   
   // Snackbar state
   const [snackbar, setSnackbar] = useState({
@@ -53,10 +60,32 @@ const Login = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Telefon numarası formatlaması
+    if (name === 'phone') {
+      // Sadece rakamları al
+      let phoneNumber = value.replace(/\D/g, '');
+      
+      // 5 ile başlaması zorunlu ve maksimum 10 hane
+      if (phoneNumber.length > 0) {
+        // İlk rakam 5 değilse, 5 ile başlat
+        if (!phoneNumber.startsWith('5')) {
+          phoneNumber = '5' + phoneNumber.slice(0, 9);
+        }
+        // Maksimum 10 haneli olacak şekilde kısalt
+        phoneNumber = phoneNumber.slice(0, 10);
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        [name]: phoneNumber
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleFlip = (type) => {
@@ -117,68 +146,133 @@ const Login = () => {
     }
   };
 
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      showSnackbar('Parolalar eşleşmiyor!', 'error');
+  const handleSendOtp = async () => {
+    if (!formData.name || !formData.phone || !formData.password || !formData.confirmPassword) {
+      showSnackbar('Lütfen tüm alanları doldurun.', 'error');
       return;
     }
 
+    if (formData.password !== formData.confirmPassword) {
+      showSnackbar('Şifreler eşleşmiyor.', 'error');
+      return;
+    }
+
+    // Telefon numarasını E.164 formatına dönüştür
+    let formattedPhone = `+90${formData.phone}`;
+
     try {
-      console.log('Gönderilen kayıt bilgileri:', {
-        name: formData.name,
-        phone: formData.phone,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-        isBusiness: formType === 'business'
-      });
+      showSnackbar('Doğrulama kodu gönderiliyor...', 'info');
+      await axios.post('http://localhost:3001/api/auth/send-otp', { phone: formattedPhone });
+      setOtpSent(true);
+      setIsModalOpen(true);
+      setResendTimer(60); // 60 saniye timer
       
-      // Backend'e signup isteği gönder
+      // Timer countdown
+      const timerInterval = setInterval(() => {
+        setResendTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(timerInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      showSnackbar('Doğrulama kodu telefonunuza gönderildi.', 'success');
+    } catch (error) {
+      console.error('Send OTP error:', error.response?.data || error.message);
+      showSnackbar(error.response?.data?.message || 'Kod gönderilemedi.', 'error');
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
+    
+    let formattedPhone = `+90${formData.phone}`;
+    
+    try {
+      showSnackbar('Yeni kod gönderiliyor...', 'info');
+      await axios.post('http://localhost:3001/api/auth/send-otp', { phone: formattedPhone });
+      setResendTimer(60);
+      
+      const timerInterval = setInterval(() => {
+        setResendTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(timerInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      showSnackbar('Yeni doğrulama kodu gönderildi.', 'success');
+    } catch (error) {
+      showSnackbar(error.response?.data?.message || 'Kod gönderilemedi.', 'error');
+    }
+  };
+
+  const handleOtpChange = (index, value) => {
+    // Sadece rakam kabul et
+    if (!/^\d*$/.test(value)) return;
+    
+    const newOtp = [...modalOtp];
+    newOtp[index] = value;
+    setModalOtp(newOtp);
+    
+    // Otomatik bir sonraki kutuya geç
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    // Backspace ile önceki kutuya geç
+    if (e.key === 'Backspace' && !modalOtp[index] && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      if (prevInput) prevInput.focus();
+    }
+  };
+
+  const handleVerifyAndCreateAccount = async (e) => {
+    e.preventDefault();
+    const { name, phone, password, confirmPassword } = formData;
+
+    if (!modalOtp.join('') || modalOtp.join('').length !== 6) {
+      showSnackbar('Lütfen 6 haneli doğrulama kodunu tam olarak girin.', 'error');
+      return;
+    }
+
+    let formattedPhone = `+90${formData.phone}`;
+
+    try {
       const response = await axios.post('http://localhost:3001/api/auth/signup', {
-        name: formData.name,
-        phone: formData.phone,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-        isBusiness: formType === 'business'
+        name,
+        phone: formattedPhone,
+        password,
+        confirmPassword,
+        isBusiness: formType === 'business',
+        otp: modalOtp.join('')
       });
-      
-      // Token'ı localStorage'a kaydet
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      
-      // Başarı mesajı göster
-      showSnackbar('Kayıt işlemi başarılı! Adresler sayfasına yönlendiriliyorsunuz.', 'success');
-      
-      if (formType === 'user') {
-        console.log('User sign up successful:', response.data);
-        // Başarılı kayıt sonrası ana sayfaya yönlendir
-        setTimeout(() => {
-          navigate('/addresses');
-        }, 500); // Kısa bir gecikme ekleyerek alert'in görünmesini sağla
+
+      if (response.data.success) {
+        showSnackbar('Kayıt başarılı!', 'success');
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        setIsModalOpen(false);
+        
+        if (formType === 'business') {
+          navigate('/business-orders');
+        } else {
+          navigate('/restaurants');
+        }
       } else {
-        console.log('Business sign up successful:', response.data);
-        // İşletme kaydı sonrası işletme paneline yönlendir
-        setTimeout(() => {
-          navigate('/addresses');
-        }, 500);
+        showSnackbar(response.data.message || 'Kayıt başarısız.', 'error');
       }
     } catch (error) {
       console.error('Signup error:', error);
-      console.error('Error details:', error.response?.data);
-      console.error('Error message:', error.message);
-      
-      // Daha detaylı hata mesajı göster
-      let errorMessage = 'Kayıt oluşturulamadı: ';
-      
-      if (error.response?.data?.message) {
-        errorMessage += error.response.data.message;
-      } else if (error.message) {
-        errorMessage += error.message;
-      } else {
-        errorMessage += 'Bilinmeyen bir hata oluştu';
-      }
-      
-      showSnackbar(errorMessage, 'error');
+      showSnackbar(error.response?.data?.message || 'Bir hata oluştu.', 'error');
     }
   };
 
@@ -210,7 +304,7 @@ const Login = () => {
           <p className="subtitle business-subtitle">Business</p>
           <input 
             type="text" 
-            placeholder="Phone Number" 
+            placeholder="Telefon Numarası" 
             className="input-field" 
             name="phone"
             value={formData.phone}
@@ -223,7 +317,7 @@ const Login = () => {
       );
     } else if (formType === 'business' && isFlipped) {
       return (
-        <form onSubmit={handleSignUp}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }}>
           <h1 className="signin-title">SIGN UP</h1>
           <input 
             type="text" 
@@ -232,14 +326,16 @@ const Login = () => {
             name="name"
             value={formData.name}
             onChange={handleInputChange}
+            required
           />
           <input 
             type="text" 
-            placeholder="Phone Number" 
+            placeholder="Telefon Numarası (5XX XXX XX XX)" 
             className="input-field" 
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
+            required
           />
           {renderPasswordInput("Password", "password")}
           {renderPasswordInput("Confirm Password", "confirmPassword")}
@@ -248,7 +344,7 @@ const Login = () => {
       );
     } else if (isFlipped) {
       return (
-        <form onSubmit={handleSignUp}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }}>
           <h1 className="signin-title">SIGN UP</h1>
           <input 
             type="text" 
@@ -257,14 +353,16 @@ const Login = () => {
             name="name"
             value={formData.name}
             onChange={handleInputChange}
+            required
           />
           <input 
             type="text" 
-            placeholder="Phone Number" 
+            placeholder="Telefon Numarası (5XX XXX XX XX)" 
             className="input-field" 
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
+            required
           />
           {renderPasswordInput("Password", "password")}
           {renderPasswordInput("Confirm Password", "confirmPassword")}
@@ -278,7 +376,7 @@ const Login = () => {
           <p className="subtitle user-subtitle">Gülbahçe Yemek</p>
           <input 
             type="text" 
-            placeholder="Phone number" 
+            placeholder="Telefon Numarası" 
             className="input-field" 
             name="phone"
             value={formData.phone}
@@ -300,6 +398,10 @@ const Login = () => {
       password: '',
       confirmPassword: ''
     });
+    setModalOtp(['', '', '', '', '', '']);
+    setOtpSent(false);
+    setResendTimer(0);
+    setIsModalOpen(false);
   };
   
   // Business moduna geçiş
@@ -348,6 +450,55 @@ const Login = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Telefon Doğrulama</h2>
+            <p>
+              +90{formData.phone.substring(0,3)}***{formData.phone.substring(7)} numarasına gönderilen 6 haneli kodu girin
+            </p>
+            <form onSubmit={handleVerifyAndCreateAccount}>
+              <div className="otp-input-container">
+                {modalOtp.map((digit, index) => (
+                  <input
+                    key={index}
+                    id={`otp-${index}`}
+                    type="text"
+                    className="otp-input"
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    maxLength="1"
+                    autoComplete="off"
+                  />
+                ))}
+              </div>
+              <button type="submit" className="btn-orange">Doğrula ve Hesabı Oluştur</button>
+              
+              {resendTimer > 0 ? (
+                <p className="resend-timer">
+                  Yeni kod gönderebilmek için {resendTimer} saniye bekleyin
+                </p>
+              ) : (
+                <button 
+                  type="button" 
+                  className="btn-resend" 
+                  onClick={handleResendOtp}
+                >
+                  Kodu Tekrar Gönder
+                </button>
+              )}
+              
+              <button type="button" className="btn-secondary" onClick={() => {
+                setIsModalOpen(false);
+                setModalOtp(['', '', '', '', '', '']);
+                setOtpSent(false);
+                setResendTimer(0);
+              }}>İptal</button>
+            </form>
+          </div>
+        </div>
+      )}
       <div className={`login-card-container ${formType === 'business' ? 'business-mode' : ''}`}>
         <div className={`left-card ${leftCardFlipped ? 'flipped' : ''}`}>
           <div className="left-card-front">
