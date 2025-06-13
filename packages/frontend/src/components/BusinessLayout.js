@@ -60,16 +60,19 @@ function BusinessLayout({ children }) {
         </Box>
       )}
       {/* İşletme Adı */}
-      <Box sx={{ px: 2, mb: 4, textAlign: 'center' }}>
+      <Box sx={{ px: 2, mb: 4, textAlign: 'center', mt: { xs: 4, md: 0 } }}>
         <Typography 
           variant="h6" 
           component="div" 
           sx={{ 
-            fontWeight: 'bold',
-            color: '#ff8800'
+            fontWeight: 900,
+            color: '#ff8800',
+            letterSpacing: 1.5,
+            textTransform: 'uppercase',
+            mt: { xs: 2, md: 0 }
           }}
         >
-          {user.name || 'İşletme Adı'}
+          {(user.name || 'İşletme Adı').toUpperCase()}
         </Typography>
       </Box>
       {/* Menü Butonları */}
@@ -174,7 +177,7 @@ function BusinessLayout({ children }) {
             borderBottom: '1px solid #e0e0e0'
           }}
         >
-          <Toolbar>
+          <Toolbar sx={{ minHeight: 72 }}>
             <IconButton
               color="inherit"
               aria-label="toggle drawer"
@@ -248,7 +251,7 @@ function BusinessLayout({ children }) {
               boxSizing: 'border-box', 
               width: '100%', // Full width
               top: '56px', // Start below AppBar
-              backgroundColor: '#fef3e2',
+              backgroundColor: '#fff', // Arka planı beyaz yap
               height: 'calc(100% - 56px)', // Adjust height to account for AppBar
               position: 'fixed',
             },
