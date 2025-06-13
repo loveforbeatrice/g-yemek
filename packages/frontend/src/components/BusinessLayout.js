@@ -9,6 +9,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
 import MenuIcon from '@mui/icons-material/Menu';
 import RestaurantStatusWidget from './RestaurantStatusWidget';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function BusinessLayout({ children }) {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ function BusinessLayout({ children }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { t } = useLanguage();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -26,13 +28,12 @@ function BusinessLayout({ children }) {
     localStorage.removeItem('user');
     navigate('/login');
   };
-
   const menuItems = [
-    { label: 'Orders', icon: <ShoppingBasketIcon />, path: '/business-orders' },
-    { label: 'Order History', icon: <HistoryIcon />, path: '/business-order-history' },
-    { label: 'Menu', icon: <RestaurantMenuIcon />, path: '/business-menu' },
-    { label: 'Performance', icon: <BarChartIcon />, path: '/business-performance' },
-    { label: 'Settings', icon: <SettingsIcon />, path: '/business-settings' },
+    { label: t('businessLayout.orders'), icon: <ShoppingBasketIcon />, path: '/business-orders' },
+    { label: t('businessLayout.orderHistory'), icon: <HistoryIcon />, path: '/business-order-history' },
+    { label: t('businessLayout.menu'), icon: <RestaurantMenuIcon />, path: '/business-menu' },
+    { label: t('businessLayout.performance'), icon: <BarChartIcon />, path: '/business-performance' },
+    { label: t('businessLayout.settings'), icon: <SettingsIcon />, path: '/business-settings' },
   ];
 
   const sidebarContent = (
@@ -72,7 +73,7 @@ function BusinessLayout({ children }) {
             mt: { xs: 2, md: 0 }
           }}
         >
-          {(user.name || 'İşletme Adı').toUpperCase()}
+          {user.name || t('businessLayout.businessName')}
         </Typography>
       </Box>
       {/* Menü Butonları */}
@@ -152,13 +153,12 @@ function BusinessLayout({ children }) {
               backgroundColor: '#e67a00',
             }
           }}
-        >
-          {isMobile ? (
+        >          {isMobile ? (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <LogoutIcon sx={{ mr: 1 }} />
-              Exit
+              {t('businessLayout.exit')}
             </Box>
-          ) : 'Exit'}
+          ) : t('businessLayout.exit')}
         </Button>
       </Box>
     </>

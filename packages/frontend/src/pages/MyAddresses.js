@@ -19,12 +19,14 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import axios from 'axios';
 import AddressFormDialog from '../components/AddressFormDialog';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function MyAddresses() {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {    const fetchAddresses = async () => {
       try {
@@ -38,7 +40,7 @@ function MyAddresses() {
         setLoading(false);
       } catch (error) {
         console.error('Error fetching addresses:', error);
-        setError('Could not load addresses. Please try again later.');
+        setError(t('addresses.loadError'));
         setLoading(false);
         
         // Geliştirme sırasında örnek veriler kullanılabilir
@@ -109,10 +111,10 @@ function MyAddresses() {
       });
       
       setAddresses(prev => [response.data, ...prev]);
-      showMessage('Adres başarıyla eklendi.');
+      showMessage(t('addresses.addSuccess'));
     } catch (error) {
       console.error('Error adding address:', error);
-      showMessage('Adres eklenirken bir hata oluştu.', 'error');
+      showMessage(t('addresses.addError'), 'error');
     }
   };
 
@@ -125,22 +127,22 @@ function MyAddresses() {
       setAddresses(prev => 
         prev.map(addr => addr.id === currentAddress.id ? response.data : addr)
       );
-      showMessage('Adres başarıyla güncellendi.');
+      showMessage(t('addresses.updateSuccess'));
     } catch (error) {
       console.error('Error updating address:', error);
-      showMessage('Adres güncellenirken bir hata oluştu.', 'error');
+      showMessage(t('addresses.updateError'), 'error');
     }
   };
 
   const handleDeleteAddress = async (id) => {
-    if (window.confirm('Bu adresi silmek istediğinizden emin misiniz?')) {
+    if (window.confirm(t('addresses.deleteConfirm'))) {
       try {
         await axios.delete(`http://localhost:3001/api/addresses/${id}`);
         setAddresses(prev => prev.filter(addr => addr.id !== id));
-        showMessage('Adres başarıyla silindi.');
+        showMessage(t('addresses.deleteSuccess'));
       } catch (error) {
         console.error('Error deleting address:', error);
-        showMessage('Adres silinirken bir hata oluştu.', 'error');
+        showMessage(t('addresses.deleteError'), 'error');
       }
     }
   };
@@ -161,9 +163,8 @@ function MyAddresses() {
             textAlign: 'center',
             width: '100%',
             mb: 0
-          }}
-        >
-          MY ADDRESSES
+          }}        >
+          {t('addresses.title')}
         </Typography>
       </Box>
 
@@ -177,7 +178,7 @@ function MyAddresses() {
         </Box>
       ) : addresses.length === 0 ? (
         <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Typography>Henüz adres eklenmemiş. Yeni bir adres ekleyin.</Typography>
+          <Typography>{t('addresses.noAddresses')}</Typography>
         </Box>
       ) : (
         <Box sx={{ mb: 2 }}>
@@ -245,12 +246,11 @@ function MyAddresses() {
         </IconButton>
       </Box>
       
-      {/* Adres Ekleme Diyaloğu */}
-      <AddressFormDialog 
+      {/* Adres Ekleme Diyaloğu */}      <AddressFormDialog 
         open={openAddDialog}
         handleClose={() => setOpenAddDialog(false)}
         handleSave={handleSaveNewAddress}
-        title="Yeni Adres Ekle"
+        title={t('addresses.addNew')}
       />
       
       {/* Adres Düzenleme Diyaloğu */}
@@ -259,7 +259,7 @@ function MyAddresses() {
         handleClose={() => setOpenEditDialog(false)}
         address={currentAddress}
         handleSave={handleUpdateAddress}
-        title="Adresi Düzenle"
+        title={t('addresses.edit')}
       />
       
       {/* Bildirim Snackbar */}

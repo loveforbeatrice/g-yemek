@@ -3,12 +3,14 @@ import axios from 'axios';
 import { Box, Typography, Card, CardContent, Grid, Divider, Snackbar, Alert, Button } from '@mui/material';
 import BusinessLayout from '../components/BusinessLayout';
 import ResponsivePageTitle from '../components/ResponsivePageTitle';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function BusinessOrderHistory() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const { t } = useLanguage();
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -19,7 +21,7 @@ function BusinessOrderHistory() {
       setOrders(res.data);
       setError(null);
     } catch (err) {
-      setError('Sipariş geçmişi yüklenemedi.');
+      setError(t('businessOrderHistory.loadError'));
     } finally {
       setLoading(false);
     }
@@ -35,10 +37,10 @@ function BusinessOrderHistory() {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
       ));
-      setSnackbar({ open: true, message: 'Siparişler teslim edildi olarak işaretlendi.', severity: 'success' });
+      setSnackbar({ open: true, message: t('businessOrderHistory.delivered'), severity: 'success' });
       fetchOrders();
     } catch (err) {
-      setSnackbar({ open: true, message: 'Siparişler teslim edilemedi.', severity: 'error' });
+      setSnackbar({ open: true, message: t('businessOrderHistory.notDelivered'), severity: 'error' });
     }
   };
 
@@ -72,14 +74,14 @@ function BusinessOrderHistory() {
 
   return (
     <BusinessLayout>
-      <ResponsivePageTitle>ORDER HISTORY</ResponsivePageTitle>
+      <ResponsivePageTitle>{t('businessOrderHistory.title')}</ResponsivePageTitle>
       {error && <Alert severity="error">{error}</Alert>}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 6 }}><Typography>Yükleniyor...</Typography></Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 6 }}><Typography>{t('loading')}</Typography></Box>
       ) : (
         <Grid container direction="column" spacing={3}>
           {orders.length === 0 ? (
-            <Typography align="center" color="text.secondary">Geçmiş sipariş yok.</Typography>
+            <Typography align="center" color="text.secondary">{t('businessOrderHistory.noHistory')}</Typography>
           ) : (
             groupOrders(orders).map((group, idx) => (
               <Grid item key={group.ids.join('-')}>
@@ -101,20 +103,18 @@ function BusinessOrderHistory() {
                           ))}
                         </Box>
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{group.address}</Typography>
-                        {(group.notes && group.notes.filter(Boolean).length > 0) && (
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                            Not: {group.notes.filter(Boolean).join(', ')}
+                        {(group.notes && group.notes.filter(Boolean).length > 0) && (                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                            {t('businessOrderHistory.note')}: {group.notes.filter(Boolean).join(', ')}
                           </Typography>
                         )}
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>{new Date(group.createdAt).toLocaleString('tr-TR')}</Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                            Total: ₺{typeof group.total === 'number' ? group.total.toFixed(2) : '0.00'}
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                            {t('businessOrderHistory.total')}: ₺{typeof group.total === 'number' ? group.total.toFixed(2) : '0.00'}
                           </Typography>
                         </Box>
                       </Box>
                       <Box sx={{ ml: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Button variant="contained" color="success" onClick={() => handleDone(group.ids)} disabled={group.isCompleted}>Done</Button>
+                        <Button variant="contained" color="success" onClick={() => handleDone(group.ids)} disabled={group.isCompleted}>{t('businessOrderHistory.done')}</Button>
                       </Box>
                     </Box>
                   </CardContent>

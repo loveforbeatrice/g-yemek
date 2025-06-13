@@ -460,6 +460,18 @@ p.subtitle.business-subtitle {
   box-shadow: 0 0 0 3px rgba(255, 136, 0, 0.1);
 }
 
+.input-field:focus::placeholder {
+  opacity: 0;
+}
+
+.input-field::placeholder {
+  color: #999;
+  font-size: 1rem;
+  font-weight: normal;
+  letter-spacing: normal;
+  transition: opacity 0.3s ease;
+}
+
 /* Password input container - genel stil */
 .password-input-container {
   position: relative;
@@ -621,9 +633,9 @@ p.subtitle.business-subtitle {
   border: 2px solid #e0e0e0;
   border-radius: 12px;
   font-size: 1.1rem;
-  text-align: center;
-  letter-spacing: 0.3em;
-  font-weight: bold;
+  text-align: left;
+  letter-spacing: normal;
+  font-weight: normal;
   background: rgba(255, 255, 255, 0.9);
   transition: all 0.3s ease;
 }
@@ -633,6 +645,18 @@ p.subtitle.business-subtitle {
   border-color: #ff8800;
   box-shadow: 0 0 0 3px rgba(255, 136, 0, 0.1);
   background: #ffffff;
+}
+
+.modal-content .input-field:focus::placeholder {
+  opacity: 0;
+}
+
+.modal-content .input-field::placeholder {
+  color: #999;
+  font-size: 1rem;
+  font-weight: normal;
+  letter-spacing: normal;
+  transition: opacity 0.3s ease;
 }
 
 .modal-content .btn-orange {
@@ -677,25 +701,19 @@ p.subtitle.business-subtitle {
 }
 
 .modal-content .btn-resend {
-  background: transparent;
-  color: #ff8800;
-  border: 2px solid #ff8800;
-  padding: 0.8rem 1.5rem;
-  border-radius: 10px;
-  font-size: 0.9rem;
-  font-weight: bold;
+  background-color: #ff8800;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+  transition: background-color 0.3s ease;
 }
 
 .modal-content .btn-resend:hover {
-  background: #ff8800;
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(255, 136, 0, 0.2);
+  background-color: #ff6600;
 }
 
 .modal-content .resend-timer {
@@ -703,6 +721,13 @@ p.subtitle.business-subtitle {
   font-size: 0.9rem;
   margin: 1rem 0;
   font-style: italic;
+}
+
+.phone-helper {
+  color: #666;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 /* OTP Input Container */

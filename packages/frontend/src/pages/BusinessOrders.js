@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Box, Typography, Card, CardContent, Button, Grid, Divider, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import BusinessLayout from '../components/BusinessLayout';
 import ResponsivePageTitle from '../components/ResponsivePageTitle';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function BusinessOrders() {
   const [orders, setOrders] = useState([]);
@@ -10,6 +11,7 @@ function BusinessOrders() {
   const [error, setError] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [rejectDialog, setRejectDialog] = useState({ open: false, orderId: null });
+  const { t } = useLanguage();
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -20,7 +22,7 @@ function BusinessOrders() {
       setOrders(res.data);
       setError(null);
     } catch (err) {
-      setError('Siparişler yüklenemedi.');
+      setError(t('businessOrders.loadError'));
     } finally {
       setLoading(false);
     }
@@ -36,10 +38,10 @@ function BusinessOrders() {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         })
       ));
-      setSnackbar({ open: true, message: 'Siparişler onaylandı.', severity: 'success' });
+      setSnackbar({ open: true, message: t('businessOrders.ordersConfirmed'), severity: 'success' });
       fetchOrders();
     } catch {
-      setSnackbar({ open: true, message: 'Siparişler onaylanamadı.', severity: 'error' });
+      setSnackbar({ open: true, message: t('businessOrders.ordersNotConfirmed'), severity: 'error' });
     }
   };
 
@@ -48,11 +50,11 @@ function BusinessOrders() {
       await axios.patch(`http://localhost:3001/api/orders/${rejectDialog.orderId}/reject`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      setSnackbar({ open: true, message: 'Sipariş reddedildi.', severity: 'success' });
+      setSnackbar({ open: true, message: t('businessOrders.orderRejected'), severity: 'success' });
       setRejectDialog({ open: false, orderId: null });
       fetchOrders();
     } catch {
-      setSnackbar({ open: true, message: 'Sipariş reddedilemedi.', severity: 'error' });
+      setSnackbar({ open: true, message: t('businessOrders.orderNotRejected'), severity: 'error' });
     }
   };
 
@@ -67,7 +69,7 @@ function BusinessOrders() {
       if (!groups[minuteKey]) {
         groups[minuteKey] = {
           userId,
-          userName: order.userName || order.user?.name || 'Müşteri',
+          userName: order.userName || order.user?.name || t('businessOrders.customer'),
           address: order.address,
           createdAt: order.createdAt,
           orders: [],
@@ -86,14 +88,14 @@ function BusinessOrders() {
 
   return (
     <BusinessLayout>
-      <ResponsivePageTitle>ORDERS</ResponsivePageTitle>
+      <ResponsivePageTitle>{t('businessOrders.title')}</ResponsivePageTitle>
       {error && <Alert severity="error">{error}</Alert>}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 6 }}><Typography>Yükleniyor...</Typography></Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 6 }}><Typography>{t('loading')}</Typography></Box>
       ) : (
         <Grid container direction="column" spacing={3}>
           {orders.length === 0 ? (
-            <Typography align="center" color="text.secondary">Aktif sipariş yok.</Typography>
+            <Typography align="center" color="text.secondary">{t('businessOrders.noActiveOrders')}</Typography>
           ) : (
             groupOrders(orders).map((group, idx) => (
               <Grid item key={group.ids.join('-')}>
@@ -115,20 +117,17 @@ function BusinessOrders() {
                           ))}
                         </Box>
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{group.address}</Typography>
-                        {(group.notes && group.notes.filter(Boolean).length > 0) && (
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                            Not: {group.notes.filter(Boolean).join(', ')}
+                        {(group.notes && group.notes.filter(Boolean).length > 0) && (                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                            {t('businessOrders.note')}: {group.notes.filter(Boolean).join(', ')}
                           </Typography>
                         )}
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>{new Date(group.createdAt).toLocaleString('tr-TR')}</Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                            Total: ₺{typeof group.total === 'number' ? group.total.toFixed(2) : '0.00'}
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                            {t('businessOrders.total')}: ₺{typeof group.total === 'number' ? group.total.toFixed(2) : '0.00'}
                           </Typography>
                         </Box>
-                        <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1, mt: 2, justifyContent: 'flex-end' }}>
-                          <Button size="small" variant="contained" sx={{ bgcolor: '#1ed760', color: '#fff', fontWeight: 'bold', minWidth: 60, px: 2 }} onClick={() => handleConfirm(group.ids)}>CONFIRM</Button>
-                          <Button size="small" variant="contained" sx={{ bgcolor: '#ff4d4f', color: '#fff', fontWeight: 'bold', minWidth: 60, px: 2 }} onClick={() => setRejectDialog({ open: true, orderId: group.ids[0] })}>REJECT</Button>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1, mt: 2, justifyContent: 'flex-end' }}>                          <Button size="small" variant="contained" sx={{ bgcolor: '#1ed760', color: '#fff', fontWeight: 'bold', minWidth: 60, px: 2 }} onClick={() => handleConfirm(group.ids)}>{t('businessOrders.confirm')}</Button>
+                          <Button size="small" variant="contained" sx={{ bgcolor: '#ff4d4f', color: '#fff', fontWeight: 'bold', minWidth: 60, px: 2 }} onClick={() => setRejectDialog({ open: true, orderId: group.ids[0] })}>{t('businessOrders.reject')}</Button>
                         </Box>
                       </Box>
                     </Box>
@@ -141,13 +140,12 @@ function BusinessOrders() {
       )}
       <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
         <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity}>{snackbar.message}</Alert>
-      </Snackbar>
-      <Dialog open={rejectDialog.open} onClose={() => setRejectDialog({ open: false, orderId: null })}>
-        <DialogTitle>Are you sure you want to reject?</DialogTitle>
+      </Snackbar>      <Dialog open={rejectDialog.open} onClose={() => setRejectDialog({ open: false, orderId: null })}>
+        <DialogTitle>{t('businessOrders.rejectConfirm')}</DialogTitle>
         <DialogContent></DialogContent>
         <DialogActions>
-          <Button onClick={handleReject} color="primary">Yes</Button>
-          <Button onClick={() => setRejectDialog({ open: false, orderId: null })} color="secondary">No</Button>
+          <Button onClick={handleReject} color="primary">{t('businessOrders.yes')}</Button>
+          <Button onClick={() => setRejectDialog({ open: false, orderId: null })} color="secondary">{t('businessOrders.no')}</Button>
         </DialogActions>
       </Dialog>
     </BusinessLayout>

@@ -11,7 +11,10 @@ const {
   getAllBusinesses,
   deleteAccount,
   getNotificationSettings,
-  updateNotificationSettings
+  updateNotificationSettings,
+  sendResetCode,
+  verifyResetCode,
+  resetPasswordWithPhone
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 const favoritesRouter = require('./favorites');
@@ -24,6 +27,11 @@ router.post('/send-otp', sendOtp);
 router.post('/login', login);
 router.post('/forgotpassword', forgotPassword);
 router.put('/resetpassword/:resettoken', resetPassword);
+
+// Telefon tabanlı şifre sıfırlama
+router.post('/forgot-password', sendResetCode);
+router.post('/verify-reset-code', verifyResetCode);
+router.post('/reset-password', resetPasswordWithPhone);
 
 // Korumalı rotalar
 router.get('/me', protect, getMe);
