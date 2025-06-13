@@ -5,8 +5,10 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import SortIcon from '@mui/icons-material/Sort';
 import axios from 'axios';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
+  const { t } = useLanguage();
   const [menuItems, setMenuItems] = useState([]);
   const [search, setSearch] = useState('');
   const [favorites, setFavorites] = useState({});
@@ -189,12 +191,12 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
       pb: 6
     }}>
       <Typography variant="h2" align="center" fontWeight="bold" sx={{ mb: 3, fontFamily: 'Alata, sans-serif' }}>
-        {businessName ? businessName.toUpperCase() : 'TÜM ÜRÜNLER'}
+        {businessName ? businessName.toUpperCase() : t('menu').toUpperCase()}
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3, gap: 2 }}>
         <TextField
           variant="outlined"
-          placeholder="Ürün ara..."
+          placeholder={t('search') + '...'}
           value={search}
           onChange={e => setSearch(e.target.value)}
           sx={{ 
@@ -252,9 +254,9 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
         }}
       >
         <Box sx={{ p: 2, width: 280 }}>
-          <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>Filtrele</Typography>
+          <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>{t('filter')}</Typography>
           
-          <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>Kategori</Typography>
+          <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>{t('category')}</Typography>
           <TextField
             select
             fullWidth
@@ -263,17 +265,17 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
             onChange={e => setTempFilters({...tempFilters, category: e.target.value})}
             sx={{ mb: 2 }}
           >
-            <MenuItem value="all">Tüm Kategoriler</MenuItem>
+            <MenuItem value="all">{t('all')}</MenuItem>
             {categories.map(category => (
               <MenuItem key={category} value={category}>{category}</MenuItem>
             ))}
           </TextField>
           
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Fiyat Aralığı</Typography>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('price')} {t('range')}</Typography>
           <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
             <TextField
               type="number"
-              placeholder="Min"
+              placeholder={t('min')}
               size="small"
               value={tempFilters.minPrice}
               onChange={e => setTempFilters({...tempFilters, minPrice: e.target.value})}
@@ -284,7 +286,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
             />
             <TextField
               type="number"
-              placeholder="Max"
+              placeholder={t('max')}
               size="small"
               value={tempFilters.maxPrice}
               onChange={e => setTempFilters({...tempFilters, maxPrice: e.target.value})}
@@ -296,8 +298,8 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
           </Box>
           
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-            <Button onClick={resetFilters} color="inherit">Sıfırla</Button>
-            <Button onClick={applyFilters} variant="contained" color="primary">Uygula</Button>
+            <Button onClick={resetFilters} color="inherit">{t('reset')}</Button>
+            <Button onClick={applyFilters} variant="contained" color="primary">{t('apply')}</Button>
           </Box>
         </Box>
       </Popover>
@@ -324,7 +326,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
               handleClose();
             }}
           >
-            İsme göre (A-Z)
+            {t('sortByNameAsc')}
           </MenuItem>
           <MenuItem 
             selected={filters.sortBy === 'name_desc'}
@@ -333,7 +335,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
               handleClose();
             }}
           >
-            İsme göre (Z-A)
+            {t('sortByNameDesc')}
           </MenuItem>
           <Divider />
           <MenuItem 
@@ -343,7 +345,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
               handleClose();
             }}
           >
-            Fiyata göre (Artan)
+            {t('sortByPriceAsc')}
           </MenuItem>
           <MenuItem 
             selected={filters.sortBy === 'price_desc'}
@@ -352,7 +354,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
               handleClose();
             }}
           >
-            Fiyata göre (Azalan)
+            {t('sortByPriceDesc')}
           </MenuItem>
         </Box>
       </Popover>
@@ -360,7 +362,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
         {filtered.length === 0 ? (
           <Grid item xs={12}>
             <Typography align="center" color="text.secondary" sx={{ mt: 6, fontSize: '1.3rem' }}>
-              {businessName ? 'Bu işletmeye ait menü bulunamadı.' : 'Ürün bulunamadı.'}
+              {businessName ? t('noMenuItems') : t('noResultsFound')}
             </Typography>
           </Grid>
         ) : (
@@ -514,13 +516,13 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                                   addToCart({ ...item, businessId: businessMap[item.businessName] });
                                   setSnackbar({ 
                                     open: true, 
-                                    message: `${item.productName} has been added to your cart!`, 
+                                    message: t('addedToCart'), 
                                     severity: 'success' 
                                   });
                                 } else {
                                   setSnackbar({ 
                                     open: true, 
-                                    message: `İşletme şu anda kapalı olduğu için sipariş veremezsiniz.`, 
+                                    message: t('restaurantClosedCannotOrder'), 
                                     severity: 'error' 
                                   });
                                 }

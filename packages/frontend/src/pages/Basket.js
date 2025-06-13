@@ -12,8 +12,10 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { keyframes } from '@mui/system';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [orderNote, setOrderNote] = React.useState('');
   const [addresses, setAddresses] = React.useState([]);
@@ -114,7 +116,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
             position: 'relative'
           }}
         >
-          My Cart
+          {t('cartTitle')}
         </Typography>
       </Box>
 
@@ -135,13 +137,13 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
             fontWeight: 'bold',
             mb: 1
           }}>
-            Your cart is empty
+            {t('emptyCartMessage')}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ 
             fontFamily: '"Alata", sans-serif', 
             mb: 4
           }}>
-            Looks like you haven't added anything to your cart yet.
+            {t('emptyCartSubtext')}
           </Typography>
           <Button
             variant="contained"
@@ -166,7 +168,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
             href="/restaurants"
             startIcon={<ShoppingBasketIcon />}
           >
-            Start Shopping
+            {t('backToMenu')}
           </Button>
         </Paper>
       ) : (

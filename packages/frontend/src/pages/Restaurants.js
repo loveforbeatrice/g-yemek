@@ -4,8 +4,10 @@ import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function Restaurants({ onSelectBusiness }) {
+  const { t } = useLanguage();
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,7 +34,7 @@ function Restaurants({ onSelectBusiness }) {
         }));
         setBusinesses(withMockData);
       } catch (err) {
-        setError('Restoranlar yüklenemedi.');
+        setError(t('restaurantsNotLoaded'));
       } finally {
         setLoading(false);
       }
@@ -58,12 +60,12 @@ function Restaurants({ onSelectBusiness }) {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, minHeight: '100vh', pb: 6, borderRadius: 3, background: 'transparent' }}>
       <Typography variant="h4" component="h1" align="center" gutterBottom fontWeight="bold" sx={{ color: '#222', fontFamily: 'Alata, sans-serif' }}>
-        Restoranlar
+        {t('restaurants')}
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
         <TextField
           variant="outlined"
-          placeholder="Search for a restaurant"
+          placeholder={t('searchRestaurant')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           sx={{
@@ -231,7 +233,7 @@ function Restaurants({ onSelectBusiness }) {
                         letterSpacing: '1px',
                       }}
                     >
-                      Şu an kapalı
+                      {t('closedNow')}
                     </Typography>
                   </Box>
                 </Box>
@@ -279,7 +281,7 @@ function Restaurants({ onSelectBusiness }) {
                   </Box>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1.05rem', fontWeight: 500 }}>
-                  Telefon: {business.phone}
+                  {t('phone')}: {business.phone}
                 </Typography>
                 {business.openingTime && business.closingTime && (
                   <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
@@ -297,7 +299,7 @@ function Restaurants({ onSelectBusiness }) {
                 )}
                 {business.email && (
                   <Typography variant="body2" color="text.secondary">
-                    E-posta: {business.email}
+                    {t('email')}: {business.email}
                   </Typography>
                 )}
               </CardContent>
@@ -307,7 +309,7 @@ function Restaurants({ onSelectBusiness }) {
         {filteredBusinesses.length === 0 && (
           <Grid item xs={12}>
             <Typography align="center" color="text.secondary" sx={{ mt: 6 }}>
-              Sonuç bulunamadı.
+              {t('noResultsFound')}
             </Typography>
           </Grid>
         )}

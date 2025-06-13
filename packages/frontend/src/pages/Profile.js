@@ -20,10 +20,12 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 axios.defaults.baseURL = 'http://localhost:3001';
 
 function Profile() {
+  const { t } = useLanguage();
   const [user, setUser] = useState({ name: '', email: '', phone: '' });
   const [editField, setEditField] = useState(null); // 'name', 'email', 'phone' veya null
   const [editValue, setEditValue] = useState('');
@@ -52,7 +54,7 @@ function Profile() {
         });
         setUser(res.data.user);
       } catch (err) {
-        setErrorMsg('Kullanıcı bilgileri alınamadı.');
+        setErrorMsg(t('userInfoNotLoaded'));
       } finally {
         setLoading(false);
       }
@@ -81,11 +83,11 @@ function Profile() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(res.data.user);
-      setSuccessMsg('Bilgi güncellendi.');
+      setSuccessMsg(t('profileUpdated'));
       setEditField(null);
       setEditValue('');
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Güncelleme başarısız.');
+      setErrorMsg(err.response?.data?.message || t('updateFailed'));
     }
   };
 
@@ -101,10 +103,10 @@ function Profile() {
       await axios.put('/api/auth/updatepassword', pwForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setPwSuccess('Şifre başarıyla değiştirildi.');
+      setPwSuccess(t('passwordUpdated'));
       setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
-      setPwError(err.response?.data?.message || 'Şifre değiştirilemedi.');
+      setPwError(err.response?.data?.message || t('passwordChangeFailed'));
     } finally {
       setPwLoading(false);
     }
@@ -118,18 +120,18 @@ function Profile() {
       await axios.delete('/api/auth/delete', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setDeleteSuccess('Hesabınız silindi. Oturum kapatılıyor...');
+      setDeleteSuccess(t('accountDeleted'));
       setTimeout(() => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = '/login';
       }, 2000);
     } catch (err) {
-      setDeleteError(err.response?.data?.message || 'Hesap silinemedi.');
+      setDeleteError(err.response?.data?.message || t('deleteAccountFailed'));
     }
   };
 
-  if (loading) return <Box sx={{ p: 6, textAlign: 'center' }}>Yükleniyor...</Box>;
+  if (loading) return <Box sx={{ p: 6, textAlign: 'center' }}>{t('loading')}</Box>;
 
   return (
     <Box sx={{ width: '100%', maxWidth: 500, mx: 'auto', px: { xs: 1, sm: 2 }, pt: { xs: 2, sm: 4 }, pb: { xs: 3, sm: 6 } }}>
@@ -149,7 +151,7 @@ function Profile() {
             mb: 0
           }}
         >
-          Account Details
+          {t('accountDetails')}
         </Typography>
       </Box>
 
@@ -159,7 +161,7 @@ function Profile() {
       <Stack spacing={3} mb={4}>
         {/* Name */}
         <Box sx={{ display: 'flex', alignItems: 'center', px: { xs: 2, sm: 3 }, py: { xs: 0.5, sm: 1 } }}>
-          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>Full Name:</Typography>
+          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>{t('fullName')}:</Typography>
           {editField === 'name' ? (
             <>
               <TextField size="small" value={editValue} onChange={handleEditChange} autoFocus />
@@ -175,7 +177,7 @@ function Profile() {
         </Box>
         {/* Email */}
         <Box sx={{ display: 'flex', alignItems: 'center', px: { xs: 2, sm: 3 }, py: { xs: 0.5, sm: 1 } }}>
-          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>Email:</Typography>
+          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>{t('email')}:</Typography>
           {editField === 'email' ? (
             <>
               <TextField size="small" value={editValue} onChange={handleEditChange} autoFocus />
@@ -191,7 +193,7 @@ function Profile() {
         </Box>
         {/* Phone */}
         <Box sx={{ display: 'flex', alignItems: 'center', px: { xs: 2, sm: 3 }, py: { xs: 0.5, sm: 1 } }}>
-          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>Phone:</Typography>
+          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>{t('phone')}:</Typography>
           {editField === 'phone' ? (
             <>
               <TextField size="small" value={editValue} onChange={handleEditChange} autoFocus />
@@ -211,13 +213,13 @@ function Profile() {
 
       {/* Şifre değiştirme alanı */}
       <Typography variant="h5" fontWeight="bold" sx={{ mb: 2, fontFamily: 'Alata, sans-serif' }}>
-        Change Password
+        {t('changePassword')}
       </Typography>
       {pwSuccess && <Alert severity="success" sx={{ mb: 2 }}>{pwSuccess}</Alert>}
       {pwError && <Alert severity="error" sx={{ mb: 2 }}>{pwError}</Alert>}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
         <TextField
-          label="Current Password"
+          label={t('currentPassword')}
           name="currentPassword"
           type="password"
           value={pwForm.currentPassword}
@@ -225,7 +227,7 @@ function Profile() {
           fullWidth
         />
         <TextField
-          label="New Password"
+          label={t('newPassword')}
           name="newPassword"
           type="password"
           value={pwForm.newPassword}
@@ -233,7 +235,7 @@ function Profile() {
           fullWidth
         />
         <TextField
-          label="Confirm New Password"
+          label={t('confirmNewPassword')}
           name="confirmPassword"
           type="password"
           value={pwForm.confirmPassword}
@@ -246,7 +248,7 @@ function Profile() {
           onClick={handleChangePassword}
           disabled={pwLoading}
         >
-          {pwLoading ? 'Changing...' : 'Change Password'}
+          {pwLoading ? t('changing') : t('changePassword')}
         </Button>
       </Box>
 
@@ -259,18 +261,16 @@ function Profile() {
           startIcon={<DeleteIcon />}
           onClick={() => setDeleteDialog(true)}
         >
-          Delete Account
+          {t('deleteAccount')}
         </Button>
-        <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)}>
-          <DialogTitle>Hesabı Sil</DialogTitle>
+        <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)}>          <DialogTitle>{t('deleteAccountTitle')}</DialogTitle>
           <DialogContent>
-            <Typography>Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.</Typography>
+            <Typography>{t('deleteAccountWarning')}</Typography>
             {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
             {deleteSuccess && <Alert severity="success" sx={{ mt: 2 }}>{deleteSuccess}</Alert>}
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDeleteDialog(false)}>İptal</Button>
-            <Button color="error" onClick={handleDeleteAccount}>Evet, Sil</Button>
+          <DialogActions>            <Button onClick={() => setDeleteDialog(false)}>{t('cancel')}</Button>
+            <Button color="error" onClick={handleDeleteAccount}>{t('confirmDelete')}</Button>
           </DialogActions>
         </Dialog>
       </Box>

@@ -2,11 +2,14 @@ import React, { useState } from "react";
 import "../styles/login.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Snackbar, Alert, Slide } from "@mui/material";
+import { Snackbar, Alert, Slide, IconButton, Box } from "@mui/material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import LanguageIcon from '@mui/icons-material/Language';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Login = () => {
+  const { language, changeLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const [isFlipped, setIsFlipped] = useState(false);
   const [formType, setFormType] = useState('user'); // 'user' or 'business'
@@ -123,7 +126,7 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify(response.data.user));
       
       // Başarı mesajı göster
-      showSnackbar('Giriş başarılı! Restoranlar sayfasına yönlendiriliyorsunuz.', 'success');
+      showSnackbar(t('loginSuccess'), 'success');
       
       // Normal kullanıcı girişi işlemi
       if (formType === 'user') {
@@ -142,18 +145,18 @@ const Login = () => {
       }
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
-      showSnackbar('Giriş yapılamadı: ' + (error.response?.data?.message || 'Bir hata oluştu'), 'error');
+      showSnackbar(t('loginFailed') + ': ' + (error.response?.data?.message || t('loginFailed')), 'error');
     }
   };
 
   const handleSendOtp = async () => {
     if (!formData.name || !formData.phone || !formData.password || !formData.confirmPassword) {
-      showSnackbar('Lütfen tüm alanları doldurun.', 'error');
+      showSnackbar(t('fillAllFields'), 'error');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      showSnackbar('Şifreler eşleşmiyor.', 'error');
+      showSnackbar(t('passwordsNotMatch'), 'error');
       return;
     }
 
@@ -161,7 +164,7 @@ const Login = () => {
     let formattedPhone = `+90${formData.phone}`;
 
     try {
-      showSnackbar('Doğrulama kodu gönderiliyor...', 'info');
+      showSnackbar(t('verificationCodeSending'), 'info');
       await axios.post('http://localhost:3001/api/auth/send-otp', { phone: formattedPhone });
       setOtpSent(true);
       setIsModalOpen(true);
@@ -178,10 +181,10 @@ const Login = () => {
         });
       }, 1000);
       
-      showSnackbar('Doğrulama kodu telefonunuza gönderildi.', 'success');
+      showSnackbar(t('verificationCodeSentMsg'), 'success');
     } catch (error) {
       console.error('Send OTP error:', error.response?.data || error.message);
-      showSnackbar(error.response?.data?.message || 'Kod gönderilemedi.', 'error');
+      showSnackbar(error.response?.data?.message || t('error'), 'error');
     }
   };
 
@@ -205,9 +208,9 @@ const Login = () => {
         });
       }, 1000);
       
-      showSnackbar('Yeni doğrulama kodu gönderildi.', 'success');
+      showSnackbar(t('newVerificationCodeSent'), 'success');
     } catch (error) {
-      showSnackbar(error.response?.data?.message || 'Kod gönderilemedi.', 'error');
+      showSnackbar(error.response?.data?.message || t('error'), 'error');
     }
   };
 
@@ -239,7 +242,7 @@ const Login = () => {
     const { name, phone, password, confirmPassword } = formData;
 
     if (!modalOtp.join('') || modalOtp.join('').length !== 6) {
-      showSnackbar('Lütfen 6 haneli doğrulama kodunu tam olarak girin.', 'error');
+      showSnackbar(t('enterVerificationCode'), 'error');
       return;
     }
 
@@ -256,7 +259,7 @@ const Login = () => {
       });
 
       if (response.data.success) {
-        showSnackbar('Kayıt başarılı!', 'success');
+        showSnackbar(t('signupSuccess'), 'success');
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
@@ -268,11 +271,11 @@ const Login = () => {
           navigate('/restaurants');
         }
       } else {
-        showSnackbar(response.data.message || 'Kayıt başarısız.', 'error');
+        showSnackbar(response.data.message || t('error'), 'error');
       }
     } catch (error) {
       console.error('Signup error:', error);
-      showSnackbar(error.response?.data?.message || 'Bir hata oluştu.', 'error');
+      showSnackbar(error.response?.data?.message || t('error'), 'error');
     }
   };
 
@@ -300,28 +303,28 @@ const Login = () => {
     if (formType === 'business' && !isFlipped) {
       return (
         <form onSubmit={handleSignIn}>
-          <h1 className="signin-title">SIGN IN</h1>
-          <p className="subtitle business-subtitle">Business</p>
+          <h1 className="signin-title">{t('signIn')}</h1>
+          <p className="subtitle business-subtitle">{t('business')}</p>
           <input 
             type="text" 
-            placeholder="Telefon Numarası" 
+            placeholder={t('phoneNumber')} 
             className="input-field" 
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
           />
-          {renderPasswordInput("Password", "password")}
-          <button type="submit" className="btn-blue">SIGN IN</button>
-          <a href="#" className="forgot-link">Forgot password?</a>
+          {renderPasswordInput(t('password'), "password")}
+          <button type="submit" className="btn-blue">{t('signIn')}</button>
+          <a href="#" className="forgot-link">{t('forgotPassword')}</a>
         </form>
       );
     } else if (formType === 'business' && isFlipped) {
       return (
         <form onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }}>
-          <h1 className="signin-title">SIGN UP</h1>
+          <h1 className="signin-title">{t('signUp')}</h1>
           <input 
             type="text" 
-            placeholder="Business Name" 
+            placeholder={t('businessName')} 
             className="input-field" 
             name="name"
             value={formData.name}
@@ -330,25 +333,25 @@ const Login = () => {
           />
           <input 
             type="text" 
-            placeholder="Telefon Numarası (5XX XXX XX XX)" 
+            placeholder={t('phoneNumberPlaceholder')} 
             className="input-field" 
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
             required
           />
-          {renderPasswordInput("Password", "password")}
-          {renderPasswordInput("Confirm Password", "confirmPassword")}
-          <button type="submit" className="btn-blue">CREATE ACCOUNT</button>
+          {renderPasswordInput(t('password'), "password")}
+          {renderPasswordInput(t('confirmPassword'), "confirmPassword")}
+          <button type="submit" className="btn-blue">{t('createAccount')}</button>
         </form>
       );
     } else if (isFlipped) {
       return (
         <form onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }}>
-          <h1 className="signin-title">SIGN UP</h1>
+          <h1 className="signin-title">{t('signUp')}</h1>
           <input 
             type="text" 
-            placeholder="Full Name" 
+            placeholder={t('fullName')} 
             className="input-field" 
             name="name"
             value={formData.name}
@@ -357,34 +360,34 @@ const Login = () => {
           />
           <input 
             type="text" 
-            placeholder="Telefon Numarası (5XX XXX XX XX)" 
+            placeholder={t('phoneNumberPlaceholder')} 
             className="input-field" 
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
             required
           />
-          {renderPasswordInput("Password", "password")}
-          {renderPasswordInput("Confirm Password", "confirmPassword")}
-          <button type="submit" className="btn-orange">CREATE ACCOUNT</button>
+          {renderPasswordInput(t('password'), "password")}
+          {renderPasswordInput(t('confirmPassword'), "confirmPassword")}
+          <button type="submit" className="btn-orange">{t('createAccount')}</button>
         </form>
       );
     } else {
       return (
         <form onSubmit={handleSignIn}>
-          <h1 className="signin-title">SIGN IN</h1>
+          <h1 className="signin-title">{t('signIn')}</h1>
           <p className="subtitle user-subtitle">Gülbahçe Yemek</p>
           <input 
             type="text" 
-            placeholder="Telefon Numarası" 
+            placeholder={t('phoneNumber')} 
             className="input-field" 
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
           />
-          {renderPasswordInput("Password", "password")}
-          <button type="submit" className="btn-orange">SIGN IN</button>
-          <a href="#" className="forgot-link">Forgot password?</a>
+          {renderPasswordInput(t('password'), "password")}
+          <button type="submit" className="btn-orange">{t('signIn')}</button>
+          <a href="#" className="forgot-link">{t('forgotPassword')}</a>
         </form>
       );
     }
@@ -422,6 +425,44 @@ const Login = () => {
 
   return (
     <div className="login-page">
+      {/* Language Toggle Button */}
+      <Box sx={{ 
+        position: 'absolute', 
+        top: 20, 
+        right: 20, 
+        zIndex: 1000,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1
+      }}>
+        <IconButton 
+          onClick={() => changeLanguage(language === 'tr' ? 'en' : 'tr')}
+          sx={{ 
+            bgcolor: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 136, 0, 0.3)',
+            '&:hover': {
+              bgcolor: '#ff8800',
+              color: 'white'
+            }
+          }}
+        >
+          <LanguageIcon />
+        </IconButton>
+        <Box sx={{ 
+          bgcolor: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 136, 0, 0.3)',
+          borderRadius: '20px',
+          px: 1.5,
+          py: 0.5,
+          fontSize: '0.8rem',
+          fontWeight: 'bold',
+          color: '#ff8800'
+        }}>
+          {language === 'tr' ? '🇹🇷 TR' : '🇺🇸 EN'}
+        </Box>
+      </Box>
       {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
@@ -453,9 +494,9 @@ const Login = () => {
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h2>Telefon Doğrulama</h2>
+            <h2>{t('phoneVerification')}</h2>
             <p>
-              +90{formData.phone.substring(0,3)}***{formData.phone.substring(7)} numarasına gönderilen 6 haneli kodu girin
+              +90{formData.phone.substring(0,3)}***{formData.phone.substring(7)} {t('verificationCodeSent')}
             </p>
             <form onSubmit={handleVerifyAndCreateAccount}>
               <div className="otp-input-container">
@@ -473,11 +514,11 @@ const Login = () => {
                   />
                 ))}
               </div>
-              <button type="submit" className="btn-orange">Doğrula ve Hesabı Oluştur</button>
+              <button type="submit" className="btn-orange">{t('verifyAndCreate')}</button>
               
               {resendTimer > 0 ? (
                 <p className="resend-timer">
-                  Yeni kod gönderebilmek için {resendTimer} saniye bekleyin
+                  {t('waitToResend', { time: resendTimer })}
                 </p>
               ) : (
                 <button 
@@ -485,7 +526,7 @@ const Login = () => {
                   className="btn-resend" 
                   onClick={handleResendOtp}
                 >
-                  Kodu Tekrar Gönder
+                  {t('resendCode')}
                 </button>
               )}
               
@@ -494,7 +535,7 @@ const Login = () => {
                 setModalOtp(['', '', '', '', '', '']);
                 setOtpSent(false);
                 setResendTimer(0);
-              }}>İptal</button>
+              }}>{t('cancel')}</button>
             </form>
           </div>
         </div>
@@ -502,10 +543,10 @@ const Login = () => {
       <div className={`login-card-container ${formType === 'business' ? 'business-mode' : ''}`}>
         <div className={`left-card ${leftCardFlipped ? 'flipped' : ''}`}>
           <div className="left-card-front">
-            <h2 className="left-heading">WELCOME TO</h2>
-            <h2 className="left-heading">GÜLBAHÇE'S #1</h2>
-            <h2 className="left-heading">FOOD ORDERING PLATFORM</h2>
-            <p className="account-warning">{isFlipped ? 'Already Have An Account?' : 'If You Don\'t Have An Account'}</p>
+            <h2 className="left-heading">{t('welcome')}</h2>
+            <h2 className="left-heading">{t('gülbahce')}</h2>
+            <h2 className="left-heading">{t('foodPlatform')}</h2>
+            <p className="account-warning">{isFlipped ? t('alreadyHaveAccount') : t('dontHaveAccount')}</p>
             <button 
               type="button"
               className="btn-orange" 
@@ -519,16 +560,16 @@ const Login = () => {
                 }
               }}
             >
-              {isFlipped ? 'SIGN IN' : 'SIGN UP'}
+              {isFlipped ? t('signIn') : t('signUp')}
             </button>
-            <p className="or-text">— or —</p>
-            <p className="business-text">Are You A Business?</p>
+            <p className="or-text">{t('or')}</p>
+            <p className="business-text">{t('areYouBusiness')}</p>
             <button 
               type="button"
               className="btn-blue" 
               onClick={switchToBusiness}
             >
-              BUSINESS PORTAL
+              {t('businessPortal')}
             </button>
           </div>
           <div className="left-card-back">

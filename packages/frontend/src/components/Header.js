@@ -18,8 +18,10 @@ import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function Header({ cartItems, resetCart }) {
+  const { t } = useLanguage();
   // Backdrop state for blur effect
   const [backdropOpen, setBackdropOpen] = useState(false);
   const navigate = useNavigate();
@@ -53,9 +55,8 @@ function Header({ cartItems, resetCart }) {
     
     // Aktif sekmeyi belirle
     if (location === '/' || location === '/menu') {
-      setActiveTab('menu');
-    } else if (location === '/basket') {
-      setActiveTab('basket');
+      setActiveTab('menu');    } else if (location === '/basket') {
+      setActiveTab('cart');
     } else if (location === '/favorites') {
       setActiveTab('favorites');
     } else if (location === '/profile') {
@@ -67,9 +68,8 @@ function Header({ cartItems, resetCart }) {
   const goToMenu = () => {
     setActiveTab('menu');
     navigate('/restaurants');
-  };
-  const goToBasket = () => {
-    setActiveTab('basket');
+  };  const goToCart = () => {
+    setActiveTab('cart');
     navigate('/basket');
   };
   const goToFavorites = () => {
@@ -95,7 +95,7 @@ function Header({ cartItems, resetCart }) {
   
   // Sepet menüsü fonksiyonları
   const handleCartClick = (event) => {
-    setActiveTab('basket');
+    setActiveTab('cart');
     setCartAnchorEl(event.currentTarget);
     setBackdropOpen(true);
     // Close profile menu if open
@@ -258,19 +258,18 @@ function Header({ cartItems, resetCart }) {
               >
                 <Badge badgeContent={cartCount > 0 ? cartCount : null} color="error" overlap="circular" sx={{ '& .MuiBadge-badge': { fontWeight: 'bold', fontSize: '0.85rem', minWidth: 20, height: 20, right: -4, top: 2 } }}>
                   <Box sx={{ 
-                    backgroundColor: (activeTab === 'basket' || cartOpen) ? '#ff8800' : 'white', 
+                    backgroundColor: (activeTab === 'cart' || cartOpen) ? '#ff8800' : 'white', 
                     borderRadius: '50%', 
                     width: 32, 
                     height: 32, 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
-                    boxShadow: (activeTab === 'basket' || cartOpen) ? '0 0 0 2px #ff8800, 0 0 0 4px rgba(255, 136, 0, 0.3)' : 'none',
+                    boxShadow: (activeTab === 'cart' || cartOpen) ? '0 0 0 2px #ff8800, 0 0 0 4px rgba(255, 136, 0, 0.3)' : 'none',
                     transition: 'all 0.3s ease'
-                  }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M8.25 20.25C8.66421 20.25 9 19.9142 9 19.5C9 19.0858 8.66421 18.75 8.25 18.75C7.83579 18.75 7.5 19.0858 7.5 19.5C7.5 19.9142 7.83579 20.25 8.25 20.25Z" fill={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} stroke={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} />
-                      <path d="M18.75 20.25C19.1642 20.25 19.5 19.9142 19.5 19.5C19.5 19.0858 19.1642 18.75 18.75 18.75C18.3358 18.75 18 19.0858 18 19.5C18 19.9142 18.3358 20.25 18.75 20.25Z" fill={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} stroke={(activeTab === 'basket' || cartOpen) ? 'white' : '#9d8df1'} />
+                  }}>                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={(activeTab === 'cart' || cartOpen) ? 'white' : '#9d8df1'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8.25 20.25C8.66421 20.25 9 19.9142 9 19.5C9 19.0858 8.66421 18.75 8.25 18.75C7.83579 18.75 7.5 19.0858 7.5 19.5C7.5 19.9142 7.83579 20.25 8.25 20.25Z" fill={(activeTab === 'cart' || cartOpen) ? 'white' : '#9d8df1'} stroke={(activeTab === 'cart' || cartOpen) ? 'white' : '#9d8df1'} />
+                      <path d="M18.75 20.25C19.1642 20.25 19.5 19.9142 19.5 19.5C19.5 19.0858 19.1642 18.75 18.75 18.75C18.3358 18.75 18 19.0858 18 19.5C18 19.9142 18.3358 20.25 18.75 20.25Z" fill={(activeTab === 'cart' || cartOpen) ? 'white' : '#9d8df1'} stroke={(activeTab === 'cart' || cartOpen) ? 'white' : '#9d8df1'} />
                       <path d="M3.75 4.5H5.25L7.5 15.75H19.5" />
                       <path d="M7.5 12H19.1925C19.2792 12 19.3633 11.9653 19.4235 11.9033C19.4838 11.8412 19.5154 11.7564 19.5123 11.6697L19.2825 7.41975C19.2766 7.25013 19.1348 7.125 18.9647 7.125H6" />
                     </svg>
@@ -323,7 +322,7 @@ function Header({ cartItems, resetCart }) {
                 {/* Sepet Başlığı */}
                 <Box sx={{ px: 2, py: 2, borderBottom: '1px solid #f0f0f0', textAlign: 'center' }}>
                   <Typography sx={{ fontWeight: 'bold', color: '#9d8df1', fontSize: '1.3rem', fontFamily: '"Alata", sans-serif' }}>
-                    Sepetim
+                    {t('myCart')}
                   </Typography>
                 </Box>
                 
@@ -350,7 +349,7 @@ function Header({ cartItems, resetCart }) {
                     <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #f0f0f0' }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography sx={{ fontWeight: 'bold', color: '#333', fontSize: '1.1rem', fontFamily: '"Alata", sans-serif', flex: '1' }}>
-                          Toplam:
+                          {t('total')}:
                         </Typography>
                         <Typography sx={{ color: '#ff8800', fontWeight: 'bold', fontSize: '1.1rem', fontFamily: '"Alata", sans-serif', textAlign: 'right', flex: '1' }}>
                           ₺ {cartItems.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2)}
@@ -376,14 +375,14 @@ function Header({ cartItems, resetCart }) {
                           }
                         }}
                       >
-                        SEPETE GİT
+                        {t('goToCart')}
                       </Button>
                     </Box>
                   </>
                 ) : (
                   <Box sx={{ p: 3, textAlign: 'center' }}>
                     <Typography sx={{ color: '#666', fontSize: '1rem', fontFamily: '"Alata", sans-serif' }}>
-                      Sepetiniz boş
+                      {t('emptyCart')}
                     </Typography>
                   </Box>
                 )}
@@ -492,32 +491,32 @@ function Header({ cartItems, resetCart }) {
                 {/* Kullanıcı Bilgileri */}
                 <Box sx={{ px: 2, py: 2, borderBottom: '1px solid #f0f0f0', textAlign: 'center' }}>
                   <Typography sx={{ fontWeight: 'bold', color: '#9d8df1', fontSize: '1.3rem', fontFamily: '"Alata", sans-serif' }}>
-                    {user ? user.name : 'Misafir Kullanıcı'}
+                    {user ? user.name : t('guestUser')}
                   </Typography>
                   <Typography sx={{ color: 'text.secondary', fontSize: '1rem', fontFamily: '"Alata", sans-serif' }}>
-                    {user ? user.phone : 'Giriş yapınız'}
+                    {user ? user.phone : t('pleaseLogin')}
                   </Typography>
                 </Box>
                 
                 {/* Menü Öğeleri */}
                 <MenuItem onClick={() => navigateAndClose('/profile')} sx={{ color: '#ff8800' }}>
-                  Account Details
+                  {t('accountDetails')}
                 </MenuItem>
                 
                 <MenuItem onClick={() => navigateAndClose('/settings')} sx={{ color: '#ff8800' }}>
-                  Settings
+                  {t('settings')}
                 </MenuItem>
                 
                 <MenuItem onClick={() => navigateAndClose('/addresses')} sx={{ color: '#ff8800' }}>
-                  My Addresses
+                  {t('myAddresses')}
                 </MenuItem>
                 
                 <MenuItem onClick={() => navigateAndClose('/orders')} sx={{ color: '#ff8800' }}>
-                  Order History
+                  {t('orderHistory')}
                 </MenuItem>
                 
                 <MenuItem onClick={handleLogout} sx={{ color: '#ff8800' }}>
-                  Log Out
+                  {t('logOut')}
                 </MenuItem>
               </Menu>
             </Box>
@@ -551,10 +550,9 @@ function Header({ cartItems, resetCart }) {
               <Box sx={{ color: activeTab === 'menu' ? '#ff8800' : '#fff' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
               </Box>
-            </IconButton>
-            <IconButton color="inherit" onClick={goToBasket}>
+            </IconButton>            <IconButton color="inherit" onClick={goToCart}>
               <Badge badgeContent={cartCount > 0 ? cartCount : null} color="error" overlap="circular" sx={{ '& .MuiBadge-badge': { fontWeight: 'bold', fontSize: '0.85rem', minWidth: 20, height: 20, right: -4, top: 2 } }}>
-                <Box sx={{ color: activeTab === 'basket' ? '#ff8800' : '#fff' }}>
+                <Box sx={{ color: activeTab === 'cart' ? '#ff8800' : '#fff' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                 </Box>
               </Badge>
@@ -580,14 +578,13 @@ function Header({ cartItems, resetCart }) {
         >
           <Box sx={{ width: 250, p: 2 }}>
             <Typography variant="h6" sx={{ mb: 2, textAlign: 'center', color: '#9d8df1', fontFamily: 'Alata, sans-serif' }}>
-              {user ? user.name : 'Misafir Kullanıcı'}
+              {user ? user.name : t('guestUser')}
             </Typography>
-            <Divider sx={{ mb: 1 }} />
-            <MenuItem onClick={() => { navigate('/profile'); setDrawerOpen(false); }}>Account Details</MenuItem>
-            <MenuItem onClick={() => { navigate('/settings'); setDrawerOpen(false); }}>Settings</MenuItem>
-            <MenuItem onClick={() => { navigate('/addresses'); setDrawerOpen(false); }}>My Addresses</MenuItem>
-            <MenuItem onClick={() => { navigate('/orders'); setDrawerOpen(false); }}>Order History</MenuItem>
-            <MenuItem onClick={() => { handleLogout(); setDrawerOpen(false); }} sx={{ background: '#ff8800', color: 'white', borderRadius: 2, fontWeight: 700, mt: 2, '&:hover': { background: '#e67a00', color: 'white' } }}>Log Out</MenuItem>
+            <Divider sx={{ mb: 1 }} />            <MenuItem onClick={() => { navigate('/profile'); setDrawerOpen(false); }}>{t('accountDetails')}</MenuItem>
+            <MenuItem onClick={() => { navigate('/settings'); setDrawerOpen(false); }}>{t('settings')}</MenuItem>
+            <MenuItem onClick={() => { navigate('/addresses'); setDrawerOpen(false); }}>{t('myAddresses')}</MenuItem>
+            <MenuItem onClick={() => { navigate('/orders'); setDrawerOpen(false); }}>{t('orderHistory')}</MenuItem>
+            <MenuItem onClick={() => { handleLogout(); setDrawerOpen(false); }} sx={{ background: '#ff8800', color: 'white', borderRadius: 2, fontWeight: 700, mt: 2, '&:hover': { background: '#e67a00', color: 'white' } }}>{t('logOut')}</MenuItem>
           </Box>
         </Drawer>
       )}

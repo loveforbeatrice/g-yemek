@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box } from '@mui/material';
+import { LanguageProvider } from './contexts/LanguageContext';
 import Header from './components/Header';
 import Menu from './pages/Menu';
 import MyAddresses from './pages/MyAddresses';
@@ -228,11 +229,16 @@ function App() {
             <Layout isAuthenticated={isAuthenticated} cartItems={cartItems} resetCart={resetCart}>
               <AccountMenu />
             </Layout>
-          } />
-        </Routes>
+          } />        </Routes>
       </Router>
     </ThemeProvider>
   );
 }
 
-export default App;
+export default function AppWithLanguage() {
+  return (
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
+  );
+}
