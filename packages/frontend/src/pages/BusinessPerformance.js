@@ -14,6 +14,7 @@ import StarIcon from '@mui/icons-material/Star';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import BusinessLayout from '../components/BusinessLayout';
+import { useLanguage } from '../contexts/LanguageContext';
 import axios from 'axios';
 
 const COLORS = ['#ff8800', '#80cbc4', '#9d8df1', '#ff6b6b', '#4ecdc4', '#45b7d1'];
@@ -31,6 +32,7 @@ function BusinessPerformance() {
     averageOrderValue: 0
   });
   const [productSortBy, setProductSortBy] = useState('sales');
+  const { t } = useLanguage();
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -115,7 +117,7 @@ function BusinessPerformance() {
         
         setError(null);
       } catch (err) {
-        setError('Veriler yüklenirken bir hata oluştu');
+        setError(t('businessPerformance.loadError'));
         console.error('Data fetch error:', err);
       } finally {
         setLoading(false);
@@ -160,18 +162,8 @@ function BusinessPerformance() {
       </BusinessLayout>
     );
   }
-
   return (
     <BusinessLayout>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#ff8800', fontWeight: 'bold' }}>
-          Performance Analytics
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          {user.name} - Business Performance Dashboard
-        </Typography>
-      </Box>
-
       {/* Time Range Toggle */}
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
         <ToggleButtonGroup
@@ -192,10 +184,9 @@ function BusinessPerformance() {
               }
             }
           }}
-        >
-          <ToggleButton value="daily">Daily</ToggleButton>
-          <ToggleButton value="weekly">Weekly</ToggleButton>
-          <ToggleButton value="monthly">Monthly</ToggleButton>
+        >          <ToggleButton value="daily">{t('businessPerformance.daily')}</ToggleButton>
+          <ToggleButton value="weekly">{t('businessPerformance.weekly')}</ToggleButton>
+          <ToggleButton value="monthly">{t('businessPerformance.monthly')}</ToggleButton>
         </ToggleButtonGroup>
       </Box>
 
@@ -203,10 +194,9 @@ function BusinessPerformance() {
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} md={4}>
           <Card sx={{ backgroundColor: '#ff8800', color: 'white' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <CardContent>              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <TrendingUpIcon sx={{ mr: 1 }} />
-                <Typography variant="h6">Total Revenue</Typography>
+                <Typography variant="h6">{t('businessPerformance.totalRevenue')}</Typography>
               </Box>
               <Typography variant="h4" fontWeight="bold">
                 {salesStats.totalSales?.toLocaleString('tr-TR') || '0'} ₺
@@ -216,10 +206,9 @@ function BusinessPerformance() {
         </Grid>
         <Grid item xs={12} md={4}>
           <Card sx={{ backgroundColor: '#80cbc4', color: 'white' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <CardContent>              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <LocalFireDepartmentIcon sx={{ mr: 1 }} />
-                <Typography variant="h6">Total Orders</Typography>
+                <Typography variant="h6">{t('businessPerformance.totalOrders')}</Typography>
               </Box>
               <Typography variant="h4" fontWeight="bold">
                 {salesStats.totalOrders || 0}
@@ -229,10 +218,9 @@ function BusinessPerformance() {
         </Grid>
         <Grid item xs={12} md={4}>
           <Card sx={{ backgroundColor: '#9d8df1', color: 'white' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <CardContent>              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <StarIcon sx={{ mr: 1 }} />
-                <Typography variant="h6">Avg. Order Value</Typography>
+                <Typography variant="h6">{t('businessPerformance.avgOrderValue')}</Typography>
               </Box>
               <Typography variant="h4" fontWeight="bold">
                 {salesStats.averageOrderValue?.toFixed(0) || '0'} ₺
@@ -243,28 +231,26 @@ function BusinessPerformance() {
       </Grid>
 
       {/* Sales Chart */}
-      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h5" gutterBottom sx={{ color: '#ff8800', fontWeight: 'bold' }}>
-          Sales Trends
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>        <Typography variant="h5" gutterBottom sx={{ color: '#ff8800', fontWeight: 'bold' }}>
+          {t('businessPerformance.salesTrends')}
         </Typography>
         {salesData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={salesData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip formatter={(value, name) => [
+              <YAxis />              <Tooltip formatter={(value, name) => [
                 name === 'revenue' ? `${value.toLocaleString('tr-TR')} ₺` : value,
-                name === 'revenue' ? 'Revenue' : 'Orders'
+                name === 'revenue' ? t('businessPerformance.revenue') : t('businessPerformance.orders')
               ]} />
               <Legend />
-              <Line type="monotone" dataKey="revenue" stroke="#ff8800" strokeWidth={3} name="Revenue (₺)" />
-              <Line type="monotone" dataKey="orders" stroke="#80cbc4" strokeWidth={3} name="Orders" />
+              <Line type="monotone" dataKey="revenue" stroke="#ff8800" strokeWidth={3} name={t('businessPerformance.revenueChart')} />
+              <Line type="monotone" dataKey="orders" stroke="#80cbc4" strokeWidth={3} name={t('businessPerformance.ordersChart')} />
             </LineChart>
           </ResponsiveContainer>
         ) : (
           <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Typography color="text.secondary">No sales data available for the selected period</Typography>
+            <Typography color="text.secondary">{t('businessPerformance.noSalesData')}</Typography>
           </Box>
         )}
       </Paper>
@@ -272,9 +258,8 @@ function BusinessPerformance() {
       <Grid container spacing={3}>
         {/* Top Selling Products */}
         <Grid item xs={12} md={8}>
-          <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h5" gutterBottom sx={{ color: '#ff8800', fontWeight: 'bold' }}>
-              Top Selling Products
+          <Paper elevation={3} sx={{ p: 3, height: '100%' }}>            <Typography variant="h5" gutterBottom sx={{ color: '#ff8800', fontWeight: 'bold' }}>
+              {t('businessPerformance.topProducts')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
               <ToggleButtonGroup
@@ -292,9 +277,8 @@ function BusinessPerformance() {
                     }
                   }
                 }}
-              >
-                <ToggleButton value="sales">En Çok Satılan</ToggleButton>
-                <ToggleButton value="revenue">En Çok Kazandıran</ToggleButton>
+              >                <ToggleButton value="sales">{t('businessPerformance.bestSelling')}</ToggleButton>
+                <ToggleButton value="revenue">{t('businessPerformance.highestRevenue')}</ToggleButton>
               </ToggleButtonGroup>
             </Box>
             {topProducts.length > 0 ? (
@@ -328,10 +312,9 @@ function BusinessPerformance() {
                           </Box>
                         }
                         secondary={
-                          <Box sx={{ mt: 1 }}>
-                            <Typography variant="body2" component="span">
-                              Sales: <strong>{product.sales}</strong> | 
-                              Revenue: <strong>{product.revenue?.toLocaleString('tr-TR')} ₺</strong>
+                          <Box sx={{ mt: 1 }}>                            <Typography variant="body2" component="span">
+                              {t('businessPerformance.sales')}: <strong>{product.sales}</strong> | 
+                              {t('businessPerformance.revenue')}: <strong>{product.revenue?.toLocaleString('tr-TR')} ₺</strong>
                             </Typography>
                           </Box>
                         }
@@ -343,7 +326,7 @@ function BusinessPerformance() {
               </List>
             ) : (
               <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Typography color="text.secondary">No product sales data available</Typography>
+                <Typography color="text.secondary">{t('businessPerformance.noProductData')}</Typography>
               </Box>
             )}
           </Paper>
@@ -351,10 +334,9 @@ function BusinessPerformance() {
 
         {/* Favorites Analysis */}
         <Grid item xs={12} md={4}>
-          <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h5" gutterBottom sx={{ color: '#ff8800', fontWeight: 'bold' }}>
+          <Paper elevation={3} sx={{ p: 3, height: '100%' }}>            <Typography variant="h5" gutterBottom sx={{ color: '#ff8800', fontWeight: 'bold' }}>
               <FavoriteIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-              Favorites Analysis
+              {t('businessPerformance.favoritesAnalysis')}
             </Typography>
             {favoritesData.length > 0 ? (
               <>
@@ -400,7 +382,7 @@ function BusinessPerformance() {
               </>
             ) : (
               <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Typography color="text.secondary">No favorites data available</Typography>
+                <Typography color="text.secondary">{t('businessPerformance.noFavoritesData')}</Typography>
               </Box>
             )}
           </Paper>

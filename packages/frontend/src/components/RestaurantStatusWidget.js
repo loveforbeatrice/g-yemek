@@ -5,6 +5,7 @@ import {
   CircularProgress 
 } from '@mui/material';
 import axios from 'axios';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const RestaurantStatusWidget = () => {
   const [businessData, setBusinessData] = useState({
@@ -14,6 +15,7 @@ const RestaurantStatusWidget = () => {
   });
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const { t } = useLanguage();
 
   // Fetch business data
   useEffect(() => {
@@ -241,7 +243,7 @@ const RestaurantStatusWidget = () => {
             : '1px 1px 3px rgba(0,0,0,0.3)' // Aynı gölge her iki durum için
         }}
       >
-        {businessData.isOpen ? 'OPEN' : 'CLOSED'}
+        {businessData.isOpen ? t('restaurantStatus.open') : t('restaurantStatus.closed')}
       </Typography>
       
       <Typography 
@@ -257,7 +259,7 @@ const RestaurantStatusWidget = () => {
           letterSpacing: '0.2px' // Hafif letter spacing
         }}
       >
-        {businessData.isOpen ? 'Click to change CLOSED' : 'Click to change OPEN'}
+        {businessData.isOpen ? t('restaurantStatus.clickToClose') : t('restaurantStatus.clickToOpen')}
       </Typography>
 
       {/* Animated background overlay for state change */}

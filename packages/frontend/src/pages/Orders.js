@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function Orders({ addToCart }) {
   const [orders, setOrders] = useState({});
@@ -23,6 +24,7 @@ function Orders({ addToCart }) {
   const [error, setError] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -34,8 +36,7 @@ function Orders({ addToCart }) {
         });
         setOrders(response.data);
         setLoading(false);
-      } catch (err) {
-        setError('Sipariş geçmişi yüklenirken bir hata oluştu.');
+      } catch (err) {        setError(t('orders.loadError'));
         setLoading(false);
       }
     };
@@ -48,7 +49,7 @@ function Orders({ addToCart }) {
         addToCart({ ...order.menuItem, businessId: order.business?.id });
       }
     });
-    setSnackbar({ open: true, message: 'Tüm ürünler sepete eklendi!', severity: 'success' });
+    setSnackbar({ open: true, message: t('orders.addedToCart'), severity: 'success' });
   };
 
   const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
@@ -86,23 +87,20 @@ function Orders({ addToCart }) {
             textAlign: 'center',
             width: '100%',
             mb: 0
-          }}
-        >
-          Sipariş Geçmişim
+          }}        >
+          {t('orders.title')}
         </Typography>
       </Box>
       {Object.keys(orders).length === 0 ? (
-        <Card sx={{ borderRadius: 2, border: '1px solid #ff8800', boxShadow: 'none', p: 3, textAlign: 'center' }}>
-          <Typography variant="h6" color="text.secondary">
-            Henüz sipariş geçmişiniz bulunmamaktadır.
+        <Card sx={{ borderRadius: 2, border: '1px solid #ff8800', boxShadow: 'none', p: 3, textAlign: 'center' }}>          <Typography variant="h6" color="text.secondary">
+            {t('orders.noOrders')}
           </Typography>
         </Card>
-      ) : (
-        Object.entries(orders).map(([groupKey, orderGroup]) => {
+      ) : (        Object.entries(orders).map(([groupKey, orderGroup]) => {
           // Şirketlere göre grupla
           const businessGroups = {};
           orderGroup.forEach(order => {
-            const businessName = order.business?.name || 'Bilinmeyen İşletme';
+            const businessName = order.business?.name || t('orders.unknownBusiness');
             if (!businessGroups[businessName]) businessGroups[businessName] = [];
             businessGroups[businessName].push(order);
           });
@@ -128,10 +126,9 @@ function Orders({ addToCart }) {
                             sx={{ width: 44, height: 44, borderRadius: 1, objectFit: 'cover', mr: 1.2 }}
                           />
                           <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{order.menuItem?.productName}</Typography>
-                            <Typography variant="caption" color="text.secondary">{order.quantity} adet</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{order.menuItem?.productName}</Typography>                            <Typography variant="caption" color="text.secondary">{order.quantity} {t('orders.pieces')}</Typography>
                             {order.note && (
-                              <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block' }}>Not: {order.note}</Typography>
+                              <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block' }}>{t('orders.note')}: {order.note}</Typography>
                             )}
                           </Box>
                           <Typography variant="body2" sx={{ color: '#ff8800', fontWeight: 'bold', minWidth: 60, textAlign: 'right', fontSize: '0.95rem' }}>
@@ -143,14 +140,13 @@ function Orders({ addToCart }) {
                   );
                 })}
                 <Divider sx={{ my: 1 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
-                  <Typography variant="subtitle2" sx={{ color: '#ff8800', fontWeight: 'bold', fontSize: '1rem' }}>Toplam: ₺ {cardTotal.toFixed(2)}</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>                  <Typography variant="subtitle2" sx={{ color: '#ff8800', fontWeight: 'bold', fontSize: '1rem' }}>{t('orders.total')}: ₺ {cardTotal.toFixed(2)}</Typography>
                   <Button
                     variant="outlined"
                     sx={{ borderColor: '#ff8800', color: '#ff8800', fontWeight: 'bold', fontSize: '0.9rem', py: 0.5, px: 1.5, minWidth: 0 }}
                     onClick={() => handleAddGroupToCart(orderGroup)}
                   >
-                    Tümünü Sepete Ekle
+                    {t('orders.addAllToCart')}
                   </Button>
                 </Box>
               </CardContent>

@@ -7,12 +7,14 @@ import {
   TextField, 
   Button 
 } from '@mui/material';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function AddressFormDialog({ open, handleClose, address, handleSave, title }) {
   const [formData, setFormData] = useState({
     name: '',
     address: ''
   });
+  const { t } = useLanguage();
 
   // address prop'u değiştiğinde form verilerini güncelle
   useEffect(() => {
@@ -56,8 +58,7 @@ function AddressFormDialog({ open, handleClose, address, handleSave, title }) {
         <TextField
           autoFocus
           margin="dense"
-          name="name"
-          label="Adres Başlığı"
+          name="name"          label={t('addressForm.nameLabel')}
           type="text"
           fullWidth
           variant="outlined"
@@ -69,7 +70,7 @@ function AddressFormDialog({ open, handleClose, address, handleSave, title }) {
         <TextField
           margin="dense"
           name="address"
-          label="Adres Detayı"
+          label={t('addressForm.detailLabel')}
           type="text"
           fullWidth
           multiline
@@ -79,9 +80,8 @@ function AddressFormDialog({ open, handleClose, address, handleSave, title }) {
           onChange={handleChange}
         />
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} sx={{ color: 'gray' }}>
-          İptal
+      <DialogActions>        <Button onClick={handleClose} sx={{ color: 'gray' }}>
+          {t('addressForm.cancel')}
         </Button>
         <Button 
           onClick={handleSubmit} 
@@ -93,7 +93,7 @@ function AddressFormDialog({ open, handleClose, address, handleSave, title }) {
             }
           }}
         >
-          Kaydet
+          {t('addressForm.save')}
         </Button>
       </DialogActions>
     </Dialog>

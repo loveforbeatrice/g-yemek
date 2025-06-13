@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import "../styles/login.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Snackbar, Alert, Slide, IconButton, Box } from "@mui/material";
+import { Snackbar, Alert, Slide, IconButton, Box, Select, MenuItem, FormControl } from "@mui/material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import LanguageIcon from '@mui/icons-material/Language';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const Login = () => {
@@ -430,38 +429,65 @@ const Login = () => {
         position: 'absolute', 
         top: 20, 
         right: 20, 
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1
+        zIndex: 1000
       }}>
-        <IconButton 
-          onClick={() => changeLanguage(language === 'tr' ? 'en' : 'tr')}
-          sx={{ 
-            bgcolor: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 136, 0, 0.3)',
-            '&:hover': {
-              bgcolor: '#ff8800',
-              color: 'white'
-            }
-          }}
-        >
-          <LanguageIcon />
-        </IconButton>
-        <Box sx={{ 
-          bgcolor: 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 136, 0, 0.3)',
-          borderRadius: '20px',
-          px: 1.5,
-          py: 0.5,
-          fontSize: '0.8rem',
-          fontWeight: 'bold',
-          color: '#ff8800'
-        }}>
-          {language === 'tr' ? '🇹🇷 TR' : '🇺🇸 EN'}
-        </Box>
+        <FormControl size="small">
+          <Select
+            value={language}
+            onChange={(e) => changeLanguage(e.target.value)}
+            renderValue={(value) => (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {value === 'tr' ? (
+                  <>
+                    <img src="https://flagcdn.com/w20/tr.png" alt="TR" style={{ width: 20, height: 13, borderRadius: 2 }} />
+                    TR
+                  </>
+                ) : (
+                  <>
+                    <img src="https://flagcdn.com/w20/us.png" alt="EN" style={{ width: 20, height: 13, borderRadius: 2 }} />
+                    EN
+                  </>
+                )}
+              </Box>
+            )}
+            sx={{ 
+              bgcolor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 136, 0, 0.3)',
+              borderRadius: '20px',
+              minWidth: 80,
+              height: 36,
+              fontSize: '0.9rem',
+              fontWeight: 'bold',
+              '& .MuiSelect-select': {
+                py: 0.5,
+                px: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5
+              },
+              '& .MuiOutlinedInput-notchedOutline': {
+                border: 'none'
+              },
+              '&:hover': {
+                bgcolor: 'rgba(255, 136, 0, 0.1)'
+              }
+            }}
+          >
+            <MenuItem value="tr" sx={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <img src="https://flagcdn.com/w20/tr.png" alt="TR" style={{ width: 20, height: 13, borderRadius: 2 }} />
+                TR
+              </Box>
+            </MenuItem>
+            <MenuItem value="en" sx={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <img src="https://flagcdn.com/w20/us.png" alt="EN" style={{ width: 20, height: 13, borderRadius: 2 }} />
+                EN
+              </Box>
+            </MenuItem>
+          </Select>
+        </FormControl>
       </Box>
       {/* Snackbar */}
       <Snackbar

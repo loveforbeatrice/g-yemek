@@ -61,16 +61,31 @@ const translations = {
     cart: 'Sepet',
     favorites: 'Favoriler',
     profile: 'Profil',
-    addresses: 'Adresler',
-    orders: 'Siparişler',
+    addresses: 'Adresler',    orders: 'Siparişler',
     settings: 'Ayarlar',
-    
-    // Business Portal
+      // Business Portal
     businessOrders: 'İşletme Siparişleri',
     businessMenu: 'İşletme Menüsü',
     businessSettings: 'İşletme Ayarları',
-    businessPerformance: 'İşletme Performansı',
     orderHistory: 'Sipariş Geçmişi',
+    
+    // Business Settings
+    businessSettingsTitle: 'İŞLETME AYARLARI',
+    businessName: 'İşletme Adı',
+    businessHours: 'Çalışma Saatleri',
+    openingTime: 'Açılış Saati',
+    closingTime: 'Kapanış Saati',
+    businessImage: 'İşletme Resmi',
+    uploadImage: 'Resim Yükle',
+    languageSettings: 'Dil Ayarları',
+    selectLanguage: 'Dil Seçin',
+    saveSettings: 'KAYDET',    businessImageUpdated: 'İşletme resmi başarıyla güncellendi',
+    imageUploadError: 'Resim yüklenirken bir hata oluştu',
+    settingsLoadError: 'İşletme ayarları yüklenemedi. Lütfen daha sonra tekrar deneyin.',
+    businessSettingsUpdated: 'İşletme ayarları başarıyla güncellendi',
+    changePasswordButton: 'ŞİFREYİ DEĞİŞTİR',
+    deleteAccountConfirm: 'Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+    yesDelete: 'Evet, Sil',
     
     // Settings
     notifications: 'Bildirimler',
@@ -182,7 +197,7 @@ const translations = {
     // Cart/Basket Page
     cartTitle: 'Sepetim',
     emptyCartMessage: 'Sepetiniz boş',
-    emptyCartSubtext: 'Siparişinizi tamamlamak için menüden ürün ekleyin',
+    emptyCartSubtext: 'Siparişinizi tamamlamak için menüdan ürün ekleyin',
     backToMenu: 'Menüye Dön',
     orderSummary: 'Sipariş Özeti',
     subtotal: 'Ara Toplam',
@@ -195,7 +210,119 @@ const translations = {
     orderNotePlaceholder: 'Siparişiniz hakkında özel bir isteğiniz varsa buraya yazabilirsiniz...',
     completeOrder: 'Siparişi Tamamla',
     orderSuccess: 'Sipariş Başarılı',
-    orderSuccessMessage: 'Siparişiniz başarıyla alındı!'
+    orderSuccessMessage: 'Siparişiniz başarıyla alındı!',
+    
+    // Orders Page
+    orders: {
+      title: 'Sipariş Geçmişim',
+      noOrders: 'Henüz sipariş geçmişiniz bulunmamaktadır.',
+      loadError: 'Sipariş geçmişi yüklenirken bir hata oluştu.',
+      addedToCart: 'Tüm ürünler sepete eklendi!',
+      unknownBusiness: 'Bilinmeyen İşletme',
+      pieces: 'adet',
+      note: 'Not',
+      total: 'Toplam',
+      addAllToCart: 'Tümünü Sepete Ekle'
+    },
+    
+    // Addresses Page
+    addresses: {
+      title: 'Adreslerim',
+      noAddresses: 'Henüz adres eklenmemiş. Yeni bir adres ekleyin.',
+      loadError: 'Adresler yüklenemedi. Lütfen daha sonra tekrar deneyin.',
+      addNew: 'Yeni Adres Ekle',
+      edit: 'Adresi Düzenle',
+      addSuccess: 'Adres başarıyla eklendi.',
+      addError: 'Adres eklenirken bir hata oluştu.',
+      updateSuccess: 'Adres başarıyla güncellendi.',
+      updateError: 'Adres güncellenirken bir hata oluştu.',
+      deleteConfirm: 'Bu adresi silmek istediğinizden emin misiniz?',
+      deleteSuccess: 'Adres başarıyla silindi.',
+      deleteError: 'Adres silinirken bir hata oluştu.'
+    },
+    
+    // Business Orders Page
+    businessOrders: {
+      title: 'SİPARİŞLER',
+      loadError: 'Siparişler yüklenemedi.',
+      ordersConfirmed: 'Siparişler onaylandı.',
+      ordersNotConfirmed: 'Siparişler onaylanamadı.',
+      orderRejected: 'Sipariş reddedildi.',
+      orderNotRejected: 'Sipariş reddedilemedi.',
+      customer: 'Müşteri',
+      note: 'Not',
+      total: 'Toplam',
+      confirm: 'ONAYLA',
+      reject: 'REDDET',
+      rejectConfirm: 'Reddetmek istediğinizden emin misiniz?',
+      yes: 'Evet',
+      no: 'Hayır',
+      noActiveOrders: 'Aktif sipariş yok.'
+    },
+      // Business Performance Page
+    businessPerformance: {
+      title: 'Performans Analizi',
+      subtitle: 'İşletme Performans Panosu',
+      loadError: 'Veriler yüklenirken bir hata oluştu',
+      daily: 'Günlük',
+      weekly: 'Haftalık',
+      monthly: 'Aylık',
+      totalRevenue: 'Toplam Gelir',
+      totalOrders: 'Toplam Sipariş',
+      avgOrderValue: 'Ort. Sipariş Değeri',
+      salesTrends: 'Satış Trendleri',
+      revenue: 'Gelir',
+      orders: 'Siparişler',
+      revenueChart: 'Gelir (₺)',
+      ordersChart: 'Siparişler',
+      noSalesData: 'Seçilen dönem için satış verisi bulunmuyor',
+      topProducts: 'En Çok Satan Ürünler',
+      bestSelling: 'En Çok Satılan',
+      highestRevenue: 'En Çok Kazandıran',
+      sales: 'Satış',
+      noProductData: 'Ürün satış verisi bulunmuyor',
+      favoritesAnalysis: 'Favori Analizi',
+      noFavoritesData: 'Favori verisi bulunmuyor'
+    },
+    
+    // Address Form Dialog
+    addressForm: {
+      nameLabel: 'Adres Başlığı',
+      detailLabel: 'Adres Detayı',
+      cancel: 'İptal',
+      save: 'Kaydet'
+    },
+    
+    // Business Order History Page
+    businessOrderHistory: {
+      title: 'SİPARİŞ GEÇMİŞİ',
+      loadError: 'Sipariş geçmişi yüklenemedi.',
+      delivered: 'Siparişler teslim edildi olarak işaretlendi.',
+      notDelivered: 'Siparişler teslim edilemedi.',
+      noHistory: 'Geçmiş sipariş yok.',
+      note: 'Not',
+      total: 'Toplam',
+      done: 'Teslim Edildi'
+    },
+    
+    // Business Layout (Sidebar Menu)
+    businessLayout: {
+      orders: 'Siparişler',
+      orderHistory: 'Sipariş Geçmişi',
+      menu: 'Menü',
+      performance: 'Performans',
+      settings: 'Ayarlar',
+      exit: 'Çıkış',
+      businessName: 'İşletme Adı'
+    },
+    
+    // Restaurant Status Widget
+    restaurantStatus: {
+      open: 'AÇIK',
+      closed: 'KAPALI',
+      clickToClose: 'Kapatmak için tıklayın',
+      clickToOpen: 'Açmak için tıklayın'
+    }
   },  en: {
     // Auth & Login
     welcome: 'WELCOME TO',
@@ -249,13 +376,27 @@ const translations = {
     addresses: 'Addresses',
     orders: 'Orders',
     settings: 'Settings',
-    
-    // Business Portal
-    businessOrders: 'Business Orders',
-    businessMenu: 'Business Menu',
+      // Business Portal
+    businessOrders: 'Business Orders',    businessMenu: 'Business Menu',
     businessSettings: 'Business Settings',
-    businessPerformance: 'Business Performance',
     orderHistory: 'Order History',
+    
+    // Business Settings
+    businessSettingsTitle: 'BUSINESS SETTINGS',
+    businessName: 'Business Name',
+    businessHours: 'Business Hours',
+    openingTime: 'Opening Time',
+    closingTime: 'Closing Time',
+    businessImage: 'Business Image',
+    uploadImage: 'Upload Image',
+    languageSettings: 'Language Settings',
+    selectLanguage: 'Select Language',
+    saveSettings: 'SAVE',    businessImageUpdated: 'Business image updated successfully',    imageUploadError: 'An error occurred while uploading the image',
+    settingsLoadError: 'Business settings could not be loaded. Please try again later.',
+    businessSettingsUpdated: 'Business settings updated successfully',
+    changePasswordButton: 'CHANGE PASSWORD',
+    deleteAccountConfirm: 'Are you sure you want to delete your account? This action cannot be undone.',
+    yesDelete: 'Yes, Delete',
     
     // Settings
     notifications: 'Notifications',
@@ -380,7 +521,119 @@ const translations = {
     orderNotePlaceholder: 'If you have any special requests for your order, you can write them here...',
     completeOrder: 'Complete Order',
     orderSuccess: 'Order Successful',
-    orderSuccessMessage: 'Your order has been successfully placed!'
+    orderSuccessMessage: 'Your order has been successfully placed!',
+    
+    // Orders Page
+    orders: {
+      title: 'My Order History',
+      noOrders: 'You have no order history yet.',
+      loadError: 'An error occurred while loading order history.',
+      addedToCart: 'All items added to cart!',
+      unknownBusiness: 'Unknown Business',
+      pieces: 'pcs',
+      note: 'Note',
+      total: 'Total',
+      addAllToCart: 'Add All to Cart'
+    },
+    
+    // Addresses Page
+    addresses: {
+      title: 'My Addresses',
+      noAddresses: 'No addresses added yet. Add a new address.',
+      loadError: 'Could not load addresses. Please try again later.',
+      addNew: 'Add New Address',
+      edit: 'Edit Address',
+      addSuccess: 'Address added successfully.',
+      addError: 'An error occurred while adding address.',
+      updateSuccess: 'Address updated successfully.',
+      updateError: 'An error occurred while updating address.',
+      deleteConfirm: 'Are you sure you want to delete this address?',
+      deleteSuccess: 'Address deleted successfully.',
+      deleteError: 'An error occurred while deleting address.'
+    },
+    
+    // Business Orders Page
+    businessOrders: {
+      title: 'ORDERS',
+      loadError: 'Orders could not be loaded.',
+      ordersConfirmed: 'Orders confirmed.',
+      ordersNotConfirmed: 'Orders could not be confirmed.',
+      orderRejected: 'Order rejected.',
+      orderNotRejected: 'Order could not be rejected.',
+      customer: 'Customer',
+      note: 'Note',
+      total: 'Total',
+      confirm: 'CONFIRM',
+      reject: 'REJECT',
+      rejectConfirm: 'Are you sure you want to reject?',
+      yes: 'Yes',
+      no: 'No',
+      noActiveOrders: 'No active orders.'
+    },
+    
+    // Business Performance Page
+    businessPerformance: {
+      title: 'Performance Analytics',
+      subtitle: 'Business Performance Dashboard',
+      loadError: 'An error occurred while loading data',
+      daily: 'Daily',
+      weekly: 'Weekly',
+      monthly: 'Monthly',
+      totalRevenue: 'Total Revenue',
+      totalOrders: 'Total Orders',
+      avgOrderValue: 'Avg. Order Value',
+      salesTrends: 'Sales Trends',
+      revenue: 'Revenue',
+      orders: 'Orders',
+      revenueChart: 'Revenue (₺)',
+      ordersChart: 'Orders',
+      noSalesData: 'No sales data available for the selected period',
+      topProducts: 'Top Selling Products',
+      bestSelling: 'Best Selling',
+      highestRevenue: 'Highest Revenue',
+      sales: 'Sales',
+      noProductData: 'No product sales data available',
+      favoritesAnalysis: 'Favorites Analysis',      noFavoritesData: 'No favorites data available'
+    },
+    
+    // Address Form Dialog
+    addressForm: {
+      nameLabel: 'Address Title',
+      detailLabel: 'Address Details',
+      cancel: 'Cancel',
+      save: 'Save'
+    },
+    
+    // Business Order History Page
+    businessOrderHistory: {
+      title: 'ORDER HISTORY',
+      loadError: 'Order history could not be loaded.',
+      delivered: 'Orders marked as delivered.',
+      notDelivered: 'Orders could not be delivered.',
+      noHistory: 'No order history.',
+      note: 'Note',
+      total: 'Total',
+      done: 'Done'
+    },
+    
+    // Business Layout (Sidebar Menu)
+    businessLayout: {
+      orders: 'Orders',
+      orderHistory: 'Order History',
+      menu: 'Menu',
+      performance: 'Performance',
+      settings: 'Settings',
+      exit: 'Exit',
+      businessName: 'Business Name'
+    },
+    
+    // Restaurant Status Widget
+    restaurantStatus: {
+      open: 'OPEN',
+      closed: 'CLOSED',
+      clickToClose: 'Click to change CLOSED',
+      clickToOpen: 'Click to change OPEN'
+    }
   }
 };
 
@@ -392,14 +645,32 @@ export const LanguageProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('language', language);
   }, [language]);
-
   const t = (key, params = {}) => {
-    let translation = translations[language]?.[key] || key;
+    // Handle nested keys like 'businessPerformance.title'
+    const keys = key.split('.');
+    let translation = translations[language];
+    
+    // Navigate through nested object
+    for (const k of keys) {
+      if (translation && typeof translation === 'object' && k in translation) {
+        translation = translation[k];
+      } else {
+        translation = key; // Return original key if not found
+        break;
+      }
+    }
+    
+    // If translation is still an object, return the key
+    if (typeof translation === 'object') {
+      translation = key;
+    }
     
     // Replace parameters in translation (e.g., {time} -> actual time)
-    Object.keys(params).forEach(param => {
-      translation = translation.replace(`{${param}}`, params[param]);
-    });
+    if (typeof translation === 'string') {
+      Object.keys(params).forEach(param => {
+        translation = translation.replace(`{${param}}`, params[param]);
+      });
+    }
     
     return translation;
   };
