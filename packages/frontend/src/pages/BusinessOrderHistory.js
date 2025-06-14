@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Box, Typography, Card, CardContent, Grid, Divider, Snackbar, Alert, Button } from '@mui/material';
+import { Box, Typography, Card, CardContent, Grid, Divider, Snackbar, Alert } from '@mui/material';
 import BusinessLayout from '../components/BusinessLayout';
 import ResponsivePageTitle from '../components/ResponsivePageTitle';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -29,21 +29,6 @@ function BusinessOrderHistory() {
 
   useEffect(() => { fetchOrders(); }, []);
 
-  const handleDone = async (orderIds) => {
-    try {
-      if (!Array.isArray(orderIds)) orderIds = [orderIds];
-      await Promise.all(orderIds.map(orderId =>
-        axios.patch(`http://localhost:3001/api/orders/${orderId}/done`, {}, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-      ));
-      setSnackbar({ open: true, message: t('businessOrderHistory.delivered'), severity: 'success' });
-      fetchOrders();
-    } catch (err) {
-      setSnackbar({ open: true, message: t('businessOrderHistory.notDelivered'), severity: 'error' });
-    }
-  };
-
   function groupOrders(orders) {
     const groups = {};
     orders.forEach(order => {
@@ -61,6 +46,7 @@ function BusinessOrderHistory() {
           total: 0,
           ids: [],
           isCompleted: order.isCompleted,
+          isDelivered: order.isDelivered
         };
       }
       groups[minuteKey].orders.push(order);
@@ -68,6 +54,7 @@ function BusinessOrderHistory() {
       groups[minuteKey].total += (order.menuItem?.price || 0) * order.quantity;
       groups[minuteKey].ids.push(order.id);
       if (!order.isCompleted) groups[minuteKey].isCompleted = false;
+      if (!order.isDelivered) groups[minuteKey].isDelivered = false;
     });
     return Object.values(groups);
   }
@@ -85,7 +72,13 @@ function BusinessOrderHistory() {
           ) : (
             groupOrders(orders).map((group, idx) => (
               <Grid item key={group.ids.join('-')}>
-                <Card sx={{ border: '1px solid #80cbc4', borderRadius: 2, p: 2, backgroundColor: group.isCompleted ? '#e0e0e0' : '#fff', opacity: group.isCompleted ? 0.7 : 1 }}>
+                <Card sx={{ 
+                  border: '1px solid #80cbc4', 
+                  borderRadius: 2, 
+                  p: 2, 
+                  backgroundColor: group.isCompleted && group.isDelivered ? '#e0e0e0' : '#fff',
+                  opacity: group.isCompleted && group.isDelivered ? 0.7 : 1 
+                }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <Box sx={{ flex: 1 }}>
@@ -103,18 +96,24 @@ function BusinessOrderHistory() {
                           ))}
                         </Box>
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{group.address}</Typography>
-                        {(group.notes && group.notes.filter(Boolean).length > 0) && (                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                        {(group.notes && group.notes.filter(Boolean).length > 0) && (
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
                             {t('businessOrderHistory.note')}: {group.notes.filter(Boolean).join(', ')}
                           </Typography>
                         )}
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>{new Date(group.createdAt).toLocaleString('tr-TR')}</Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                          {new Date(group.createdAt).toLocaleString('tr-TR')}
+                        </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                             {t('businessOrderHistory.total')}: ₺{typeof group.total === 'number' ? group.total.toFixed(2) : '0.00'}
                           </Typography>
                         </Box>
-                      </Box>
-                      <Box sx={{ ml: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Button variant="contained" color="success" onClick={() => handleDone(group.ids)} disabled={group.isCompleted}>{t('businessOrderHistory.done')}</Button>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            {group.isCompleted && group.isDelivered ? t('businessOrderHistory.delivered') : t('businessOrderHistory.pending')}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
                   </CardContent>
