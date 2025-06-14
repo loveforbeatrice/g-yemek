@@ -623,8 +623,7 @@ const translations = {
       awaitingDelivery: 'Awaiting Delivery',
       markAsDelivered: 'Mark as Delivered'
     },
-    
-    // Business Performance Page
+      // Business Performance Page
     businessPerformance: {
       title: 'Performance Analytics',
       subtitle: 'Business Performance Dashboard',
@@ -637,8 +636,8 @@ const translations = {
       avgOrderValue: 'Avg. Order Value',
       salesTrends: 'Sales Trends',
       revenue: 'Revenue',
-      orders: 'Siparişler',
-      revenueChart: 'Gelir (₺)',
+      orders: 'Orders',
+      revenueChart: 'Revenue (₺)',
       ordersChart: 'Orders',
       noSalesData: 'No sales data available for the selected period',
       topProducts: 'Top Selling Products',
@@ -646,7 +645,8 @@ const translations = {
       highestRevenue: 'Highest Revenue',
       sales: 'Sales',
       noProductData: 'No product sales data available',
-      favoritesAnalysis: 'Favorites Analysis',      noFavoritesData: 'No favorites data available'
+      favoritesAnalysis: 'Favorites Analysis',
+      noFavoritesData: 'No favorites data available'
     },
     
     // Address Form Dialog
@@ -678,13 +678,12 @@ const translations = {
       exit: 'Exit',
       businessName: 'Business Name'
     },
-    
-    // Restaurant Status Widget
+      // Restaurant Status Widget
     restaurantStatus: {
       open: 'OPEN',
       closed: 'CLOSED',
-      clickToClose: 'Click to change CLOSED',
-      clickToOpen: 'Click to change OPEN'
+      clickToClose: 'Click to close',
+      clickToOpen: 'Click to open'
     }
   }
 };
