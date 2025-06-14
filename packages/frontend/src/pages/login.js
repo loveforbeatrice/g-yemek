@@ -131,6 +131,20 @@ const Login = () => {
         password: formData.password
       });
       
+      // Kullanıcı tipini kontrol et
+      const userType = response.data.user.isBusiness ? 'business' : 'user';
+      
+      // Yanlış portalda giriş yapılmaya çalışılıyorsa engelle
+      if (userType !== formType) {
+        showSnackbar(
+          userType === 'business' 
+            ? 'Bu hesap bir işletme hesabıdır. Lütfen işletme girişi yapın.' 
+            : 'Bu hesap bir kullanıcı hesabıdır. Lütfen normal giriş yapın.',
+          'error'
+        );
+        return;
+      }
+      
       // Token'ı localStorage'a kaydet
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
