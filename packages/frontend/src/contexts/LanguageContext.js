@@ -13,9 +13,15 @@ export const useLanguage = () => {
 const translations = {
   tr: {
     // Auth & Login
-    welcome: 'HOŞGELDİNİZ',
-    gülbahce: 'GÜLBAHÇE\'NİN 1 NUMARALI',
-    foodPlatform: 'YEMEK SİPARİŞ PLATFORMUNA',
+    welcome: 'GÜLBAHÇE\'NİN 1 NUMARALI',
+    gülbahce: 'YEMEK SİPARİŞ PLATFORMUNA',
+    foodPlatform: 'HOŞ GELDİNİZ',    welcomeTo: 'HOŞ GELDİNİZ', 
+    businessPortalLine1: 'GÜLBAHÇE YEMEK', // Üç satırlı başlık - satır 1 
+    businessPortalLine2: 'İŞLETME PORTALINA', // Üç satırlı başlık - satır 2
+    businessPortalLine3: 'HOŞ GELDİNİZ', // Üç satırlı başlık - satır 3
+    gülbahceYemek: 'GÜLBAHÇE YEMEK',
+    ifYouDontHaveAccount: 'Hesabınız Yoksa',
+    notABusiness: 'İşletme Değil misiniz?',
     signIn: 'GİRİŞ YAP',
     signUp: 'KAYIT OL',
     alreadyHaveAccount: 'Zaten Hesabınız Var Mı?',
@@ -342,7 +348,13 @@ const translations = {
     // Auth & Login
     welcome: 'WELCOME TO',
     gülbahce: 'GÜLBAHÇE\'S #1',
-    foodPlatform: 'FOOD ORDERING PLATFORM',
+    foodPlatform: 'FOOD ORDERING PLATFORM',    welcomeTo: 'WELCOME TO',
+    businessPortalLine1: 'WELCOME TO', // Üç satırlı başlık - satır 1
+    businessPortalLine2: 'GÜLBAHÇE YEMEK', // Üç satırlı başlık - satır 2
+    businessPortalLine3: 'BUSINESS PORTAL', // Üç satırlı başlık - satır 3
+    gülbahceYemek: 'GÜLBAHÇE YEMEK',
+    ifYouDontHaveAccount: 'If You Don\'t Have An Account',
+    notABusiness: 'Not A Business?',
     signIn: 'SIGN IN',
     signUp: 'SIGN UP',
     alreadyHaveAccount: 'Already Have An Account?',
@@ -612,8 +624,8 @@ const translations = {
       avgOrderValue: 'Avg. Order Value',
       salesTrends: 'Sales Trends',
       revenue: 'Revenue',
-      orders: 'Orders',
-      revenueChart: 'Revenue (₺)',
+      orders: 'Siparişler',
+      revenueChart: 'Gelir (₺)',
       ordersChart: 'Orders',
       noSalesData: 'No sales data available for the selected period',
       topProducts: 'Top Selling Products',

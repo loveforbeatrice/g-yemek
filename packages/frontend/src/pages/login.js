@@ -915,12 +915,11 @@ const Login = () => {
             >
               {t('businessPortal')}
             </button>
-          </div>
-          <div className="left-card-back">
-            <h2 className="left-heading">WELCOME TO</h2>
-            <h2 className="left-heading">BUSINESS PORTAL</h2>
-            <h2 className="left-heading">GÜLBAHÇE YEMEK</h2>
-            <p className="account-warning">{isFlipped ? 'Already Have An Account?' : 'If You Don\'t Have An Account'}</p>
+          </div>          <div className="left-card-back">            
+            <h2 className="left-heading">{t('businessPortalLine1')}</h2>
+            <h2 className="left-heading">{t('businessPortalLine2')}</h2>
+            <h2 className="left-heading">{t('businessPortalLine3')}</h2>
+            <p className="account-warning">{isFlipped ? t('alreadyHaveAccount') : t('ifYouDontHaveAccount')}</p>
             <button 
               type="button"
               className="btn-blue" 
@@ -935,16 +934,16 @@ const Login = () => {
                 }
               }}
             >
-              {isFlipped ? 'SIGN IN' : 'SIGN UP'}
+              {isFlipped ? t('signIn') : t('signUp')}
             </button>
-            <p className="or-text">— or —</p>
-            <p className="business-text">Not A Business?</p>
+            <p className="or-text">{t('or')}</p>
+            <p className="business-text">{t('notABusiness')}</p>
             <button 
               type="button"
               className="btn-orange" 
               onClick={switchToUser}
             >
-              USER PORTAL
+              {t('userPortal')}
             </button>
           </div>
         </div>
