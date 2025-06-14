@@ -13,6 +13,22 @@ router.post('/', async (req, res) => {
     if (!userId || !orders || !Array.isArray(orders) || orders.length === 0 || !address) {
       return res.status(400).json({ message: 'Eksik sipariş verisi' });
     }
+    // Sepetteki tüm ürünler aynı işletmeden mi kontrol et
+    const businessId = orders[0].businessId;
+    const business = await User.findByPk(businessId);
+    if (!business || !business.isBusiness) {
+      return res.status(400).json({ message: 'Geçersiz işletme.' });
+    }
+    // Sepet toplamını hesapla
+    let total = 0;
+    for (const item of orders) {
+      const menuItem = await MenuItem.findByPk(item.productId);
+      if (!menuItem) return res.status(400).json({ message: 'Ürün bulunamadı.' });
+      total += parseFloat(menuItem.price) * item.quantity;
+    }
+    if (parseFloat(total) < parseFloat(business.min_basket_total)) {
+      return res.status(400).json({ message: `Minimum sepet tutarı ${business.min_basket_total} TL olmalıdır.` });
+    }
     const createdOrders = await Promise.all(
       orders.map(item =>
         Order.create({

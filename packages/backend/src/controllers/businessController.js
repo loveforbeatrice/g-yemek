@@ -64,7 +64,7 @@ exports.getBusinessSettings = async (req, res) => {
 exports.updateBusinessSettings = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, openingTime, closingTime, isOpen } = req.body;
+    const { name, openingTime, closingTime, isOpen, min_basket_total } = req.body;
 
     const user = await User.findByPk(userId);
 
@@ -82,6 +82,7 @@ exports.updateBusinessSettings = async (req, res) => {
     if (openingTime) updateData.openingTime = openingTime;
     if (closingTime) updateData.closingTime = closingTime;
     if (isOpen !== undefined) updateData.isOpen = isOpen;
+    if (min_basket_total !== undefined) updateData.min_basket_total = min_basket_total;
 
     await user.update(updateData);
 
