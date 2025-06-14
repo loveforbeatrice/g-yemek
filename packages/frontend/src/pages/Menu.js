@@ -178,6 +178,30 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
     }))
     .filter(group => group.items.length > 0); // Sadece öğesi olan kategorileri göster
 
+  // Sepete ürün ekleme fonksiyonu
+  const handleAddToCart = (item) => {
+    // Sepette başka bir işletmenin ürünü var mı kontrol et
+    if (cartItems.length > 0) {
+      const firstItem = cartItems[0];
+      if (firstItem.businessName !== businessName) {
+        setSnackbar({
+          open: true,
+          message: 'Sepetinizde başka bir işletmenin ürünü bulunmaktadır. Önce sepetinizi boşaltın.',
+          severity: 'error'
+        });
+        return;
+      }
+    }
+
+    // Ürünü sepete ekle
+    addToCart({ ...item, businessName });
+    setSnackbar({ 
+      open: true, 
+      message: t('addedToCart'), 
+      severity: 'success' 
+    });
+  };
+
   return (
     <Box sx={{ 
       width: '100%', 
@@ -478,15 +502,30 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                               variant="text" 
                               sx={{ 
                                 minWidth: 0, 
-                                color: '#ff8800', 
+                                color: (cartItems.find(i => i.id === item.id)?.quantity || 0) === 0 ? '#ccc' : '#ff8800', 
                                 fontSize: '2rem', 
                                 fontWeight: 700, 
                                 p: 0, 
-                                lineHeight: 1 
+                                lineHeight: 1, 
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                verticalAlign: 'middle',
                               }} 
-                              onClick={() => removeFromCart(item.id)}
+                              onClick={() => {
+                                const quantity = cartItems.find(i => i.id === item.id)?.quantity || 0;
+                                if (quantity === 0) {
+                                  setSnackbar({
+                                    open: true,
+                                    message: 'Ürün miktarı zaten 0. Sepetten daha fazla çıkarılamaz.',
+                                    severity: 'warning'
+                                  });
+                                  return;
+                                }
+                                removeFromCart(item.id);
+                              }}
                             >
-                              –
+                              -
                             </Button>
                             <Typography 
                               variant="h5" 
@@ -513,12 +552,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                               }} 
                               onClick={() => {
                                 if (businessIsOpen) {
-                                  addToCart({ ...item, businessId: businessMap[item.businessName] });
-                                  setSnackbar({ 
-                                    open: true, 
-                                    message: t('addedToCart'), 
-                                    severity: 'success' 
-                                  });
+                                  handleAddToCart(item);
                                 } else {
                                   setSnackbar({ 
                                     open: true, 
