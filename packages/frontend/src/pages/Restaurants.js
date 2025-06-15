@@ -282,7 +282,13 @@ function Restaurants({ onSelectBusiness }) {
                   {t('phone')}: {business.phone}
                 </Typography>
                 {business.openingTime && business.closingTime && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    mt: 0.5,
+                    justifyContent: 'space-between',
+                    width: '100%'
+                  }}>
                     <Typography 
                       variant="body2" 
                       color="#4caf50"
@@ -293,6 +299,19 @@ function Restaurants({ onSelectBusiness }) {
                     >
                       {business.openingTime.substring(0,5)} - {business.closingTime.substring(0,5)}
                     </Typography>
+                    {business.min_basket_total !== undefined && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: '#888',
+                          fontWeight: 400,
+                          fontSize: '0.9rem'
+                        }}
+                        component="span"
+                      >
+                        {t('minBasketTotal')}: ₺{Number(business.min_basket_total).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                      </Typography>
+                    )}
                   </Box>
                 )}
                 {business.email && (

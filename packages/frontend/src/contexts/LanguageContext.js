@@ -107,7 +107,7 @@ const translations = {
     changePasswordButton: 'ŞİFREYİ DEĞİŞTİR',
     deleteAccountConfirm: 'Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
     yesDelete: 'Evet, Sil',
-    minBasketTotal: 'Minimum Sepet Tutarı',
+    minBasketTotal: 'Min. Sepet Tutarı',
     
     // Settings
     notifications: 'Bildirimler',
