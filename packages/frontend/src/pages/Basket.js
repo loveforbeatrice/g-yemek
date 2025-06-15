@@ -84,13 +84,47 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
     const userId = user?.id || user?._id || user?.userId || 'testuser';
     const addressObj = addresses.find(a => a.id === selectedAddressId);
     const addressText = addressObj ? (addressObj.name + (addressObj.address ? (': ' + addressObj.address) : '')) : '';
+    
+    // Debug sipariş bilgilerini konsola yazdır
+    console.log('cartItems:', cartItems);
+    
+    // İlk ürünün businessId'sini al
+    const firstBusinessId = cartItems[0]?.businessId || cartItems[0]?.business_id || cartItems[0]?.businessID;
+    console.log('First product businessId:', firstBusinessId);
+    
+    // İşletme ID'sini bul
+    let businessId = null;
+    if (cartItems[0]?.business?.id) {
+      businessId = cartItems[0].business.id;
+    } else if (cartItems[0]?.businessId) {
+      businessId = cartItems[0].businessId;
+    } else if (cartItems[0]?.business_id) {
+      businessId = cartItems[0].business_id;
+    } else {
+      // İşletme bilgilerini çekmeyi dene
+      try {
+        const businessRes = await axios.get('http://localhost:3001/api/auth/businesses');
+        const business = businessRes.data.businesses.find(b => b.name === cartItems[0].businessName);
+        if (business) {
+          businessId = business.id;
+          console.log('Found business by name:', business.name, 'ID:', business.id);
+        }
+      } catch (e) {
+        console.error('İşletme bilgileri alınamadı:', e);
+      }
+    }
+    
     // For each product: businessId, productId, quantity, note
     const orders = cartItems.map(item => ({
-      businessId: item.businessId || item.business_id || item.businessID || 1, // fallback
+      businessId: businessId || item.businessId || item.business_id || item.businessID || 1, // fallback
       productId: item.id,
       quantity: item.quantity,
       note: orderNote
     }));
+    
+    console.log('Sending order with business ID:', businessId || 'fallback to item level businessId');
+    console.log('Final orders payload:', orders);
+    
     try {
       await axios.post('http://localhost:3001/api/orders', {
         userId,

@@ -285,7 +285,18 @@ const translations = {
       noAwaitingDelivery: 'Teslim bekleyen sipariş yok.',
       idleOrders: 'Bekleyen Siparişler',
       awaitingDelivery: 'Teslim Bekleyenler',
-      markAsDelivered: 'Teslim Edildi'
+      markAsDelivered: 'Teslim Edildi',
+      soundNotifications: 'Sesli Bildirimler',
+      soundOn: 'Açık',
+      soundOff: 'Kapalı',
+      soundTip: 'Yeni siparişler için sesli bildirimleri aç/kapat',
+      newOrderArrived: 'Yeni sipariş alındı! Bekleyen siparişler: {count}',
+      browserBlockedSound: 'Tarayıcınız otomatik ses çalmayı engelliyor. Lütfen sayfada herhangi bir yere tıklayın ve tekrar deneyin.',
+      enableSoundNotifications: 'Sesli bildirimleri etkinleştirmek için tıklayın',
+      soundPermissionRequired: 'Ses İzni Gerekli',
+      soundPermissionMessage: 'Tarayıcınızın ses çalması için etkileşim gerektiriyor. Lütfen bildirimleri etkinleştirmek için sayfaya tıklayın.',
+      testNotification: 'Test Bildirimi',
+      enableNotifications: 'Bildirimleri Etkinleştir'
     },
       // Business Performance Page
     businessPerformance: {
@@ -621,7 +632,18 @@ const translations = {
       noAwaitingDelivery: 'No orders awaiting delivery.',
       idleOrders: 'Pending Orders',
       awaitingDelivery: 'Awaiting Delivery',
-      markAsDelivered: 'Mark as Delivered'
+      markAsDelivered: 'Mark as Delivered',
+      soundNotifications: 'Sound Notifications',
+      soundOn: 'On',
+      soundOff: 'Off',
+      soundTip: 'Toggle sound notifications for new orders',
+      newOrderArrived: 'New order received! Pending orders: {count}',
+      browserBlockedSound: 'Your browser is blocking automatic sound playback. Click anywhere on the page and try again.',
+      enableSoundNotifications: 'Click to enable sound notifications',
+      soundPermissionRequired: 'Sound Permission Required',
+      soundPermissionMessage: 'Your browser requires interaction before playing sounds. Please click on the page to enable notifications.',
+      testNotification: 'Test Notification',
+      enableNotifications: 'Enable Notifications'
     },
       // Business Performance Page
     businessPerformance: {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { 
   Box, 
@@ -16,8 +16,17 @@ import {
   DialogActions,
   Tabs,
   Tab,
-  Badge
+  Badge,
+  IconButton,
+  Switch,
+  FormControlLabel,
+  Tooltip,
+  Paper
 } from '@mui/material';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeMuteIcon from '@mui/icons-material/VolumeMute';
+import InfoIcon from '@mui/icons-material/Info';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import BusinessLayout from '../components/BusinessLayout';
 import ResponsivePageTitle from '../components/ResponsivePageTitle';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -30,70 +39,260 @@ function BusinessOrders() {
   const [rejectDialog, setRejectDialog] = useState({ open: false, orderId: null });
   const [activeTab, setActiveTab] = useState(0);
   const [orderCounts, setOrderCounts] = useState({ idleOrders: 0, awaitingDelivery: 0 });
+  const [previousCount, setPreviousCount] = useState(0);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const savedPreference = localStorage.getItem('orderSoundEnabled');
+    return savedPreference !== null ? savedPreference === 'true' : true;
+  });
+  const [knownOrderIds, setKnownOrderIds] = useState(new Set());
+  const [debugInfo, setDebugInfo] = useState({});
+  const audioRef = useRef(null);
   const { t } = useLanguage();
+  
+  // API isteklerinde kullanılacak token ve headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return { headers: { Authorization: `Bearer ${token}` } };
+  };
+
+  // Debug - kullanıcı bilgilerini göster
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('token');
+    setDebugInfo({
+      userId: user?.id,
+      userName: user?.name,
+      isBusiness: user?.isBusiness,
+      tokenExists: Boolean(token),
+      tokenSnippet: token ? token.substring(0, 15) + '...' : 'No token'
+    });
+  }, []);
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
       const endpoint = activeTab === 0 ? '/api/orders/business/idle' : '/api/orders/business/awaiting-delivery';
-      const res = await axios.get(`http://localhost:3001${endpoint}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const res = await axios.get(`http://localhost:3001${endpoint}`, getAuthHeaders());
+      console.log('Siparişler alındı:', res.data);
       setOrders(res.data);
       setError(null);
     } catch (err) {
-      setError(t('businessOrders.loadError'));
+      console.error('Siparişler yüklenirken hata:', err);
+      setError(`Hata: ${err.response?.status} - ${err.response?.data?.message || err.message}`);
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchOrderCounts = async () => {
+  };  // Son bildirim zamanını takip etmek için referans
+  const lastNotificationTime = useRef(0);
+  
+  // Sipariş sayısını ve yeni siparişleri kontrol eden fonksiyon
+  const fetchOrderCounts = async (skipSoundNotification = false) => {
     try {
-      const res = await axios.get('http://localhost:3001/api/orders/business/counts', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      // Sipariş sayılarını al
+      const res = await axios.get('http://localhost:3001/api/orders/business/counts', getAuthHeaders());
+      
+      // Bekleyen sipariş sayısını kaydet
+      const newIdleOrders = res.data.idleOrders;
+      
+      // Sipariş sayısı değiştiyse tüm siparişleri al 
+      if (newIdleOrders > 0) {
+        try {
+          // İşlenmemiş siparişleri al
+          const ordersResponse = await axios.get('http://localhost:3001/api/orders/business/idle', getAuthHeaders());
+          const currentOrders = ordersResponse.data;
+          
+          // Yeni siparişleri bul
+          const currentOrderIds = new Set(currentOrders.map(order => order.id));
+          const newOrders = currentOrders.filter(order => !knownOrderIds.has(order.id));
+          
+          // Yeni siparişler varsa ve ses çalma atlanmaması gerekiyorsa ses çal
+          const currentTime = Date.now();
+          const timeSinceLastNotification = currentTime - lastNotificationTime.current;
+          
+          if (newOrders.length > 0 && !skipSoundNotification) {
+            // En az 3 saniye geçtiyse bildirim ver (üst üste bildirimleri önle)
+            if (timeSinceLastNotification > 3000) {
+              console.log(`${newOrders.length} yeni sipariş algılandı`);
+              
+              // Bildirim göster
+              const message = `Yeni sipariş geldi! Bekleyen siparişler: ${newIdleOrders}`;
+              
+              // Ses çal ve bildirim göster
+              notifyNewOrder(message);
+              
+              // Son bildirim zamanını güncelle
+              lastNotificationTime.current = currentTime;
+            } else {
+              console.log('Kısa süre önce bildirim verildi, tekrar bildirim atlanıyor');
+            }
+            
+            // Siparişleri UI'da güncelle
+            setOrders(currentOrders);
+          }
+          
+          // Bilinen sipariş kimliklerini güncelle
+          setKnownOrderIds(currentOrderIds);
+        } catch (error) {
+          console.error('Siparişleri kontrol ederken hata:', error);
+        }
+      }
+      
+      // Sipariş sayısını güncelle
+      setPreviousCount(newIdleOrders);
       setOrderCounts(res.data);
     } catch (err) {
-      console.error('Error fetching order counts:', err);
+      console.error('Sipariş sayıları alınırken hata:', err);
+      // Hata bilgilerini göster
+      setDebugInfo(prevState => ({
+        ...prevState,
+        lastError: {
+          status: err.response?.status,
+          message: err.response?.data?.message || err.message
+        }
+      }));
     }
   };
+  // Manuel sipariş yenileme
+  const handleRefresh = () => {
+    fetchOrders();
+    fetchOrderCounts(true); // Ses bildirimi olmadan
+    setSnackbar({ open: true, message: 'Siparişler yenileniyor...', severity: 'info' });
+  };
 
+  // Sayfa yüklendiğinde siparişleri çek
   useEffect(() => { 
     fetchOrders();
-    fetchOrderCounts();
-  }, [activeTab]);
+    fetchOrderCounts(true); // İlk yüklemede ses bildirimi olmadan
+  }, [activeTab]);  // Periyodik olarak sipariş sayısını kontrol et
+  useEffect(() => {
+    // İlk açılışta hemen kontrol et (ses olmadan)
+    fetchOrderCounts(true);
+    
+    // İlk yükleme sonrası, bilinen sipariş IDs'i doldurmak için bir kez siparişleri yükle
+    const initializeKnownOrderIds = async () => {
+      try {
+        const res = await axios.get('http://localhost:3001/api/orders/business/idle', getAuthHeaders());
+        // Mevcut siparişleri kaydet
+        const ids = new Set(res.data.map(order => order.id));
+        setKnownOrderIds(ids);
+        console.log('Sipariş takibi başlatıldı, mevcut siparişler kaydedildi.');
+      } catch (err) {
+        console.error('Başlangıç siparişleri yüklenemedi:', err);
+      }
+    };
+    
+    initializeKnownOrderIds();
+    
+    // Düzenli olarak kontrol için iki farklı zamanlayıcı kullanacağız:
+    // 1. Normal polling (3 saniyelik - hızlı yanıt için)
+    // 2. Detaylı polling (15 saniyelik - normal güncellemeler için)
+    
+    // Normal polling - yeni sipariş kontrolü (ses bildirimli)
+    const normalIntervalId = setInterval(() => {
+      fetchOrderCounts(false); // Ses bildirimi açık
+    }, 3000); // Her 3 saniyede bir kontrol et
+    
+    // Detaylı polling - tam sipariş içeriği
+    const detailedIntervalId = setInterval(() => {
+      fetchOrders(); // Siparişlerin tam içeriğini güncelle
+    }, 15000); // Her 15 saniyede bir tam güncelleme
+    
+    // Kullanıcı sayfayı aktif olarak görüntülediğinde kontrol sıklığını artır
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Sayfa görünür olduğunda hemen güncelle
+        fetchOrderCounts(false); // Ses bildirimi açık
+        fetchOrders();
+      }
+    };
+    
+    // Sayfa görünürlük değişimlerini dinle
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      // Zamanlayıcıları ve dinleyicileri temizle
+      clearInterval(normalIntervalId);
+      clearInterval(detailedIntervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+  
+  // Ses ayarını localStorage'a kaydet
+  useEffect(() => {
+    localStorage.setItem('orderSoundEnabled', soundEnabled ? 'true' : 'false');
+  }, [soundEnabled]);  // Sayfa yüklendiğinde ses özelliğini hazırla
+  useEffect(() => {
+    // Ses API'sini başlatma
+    if (!audioRef.current) return;
+    
+    // Ses dosyasını yükle
+    audioRef.current.load();
+    
+    // Kullanıcı etkileşimi oluşursa ses API'sini kilidi aç
+    const unlockAudioOnUserInteraction = () => {
+      if (!audioRef.current) return;
+      
+      // Ses API'sini hazırla
+      audioRef.current.play()
+        .then(() => {
+          // Başarılı - sesi hemen durdur
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        })
+        .catch(() => {
+          // Başarısız - önemli değil, kullanıcı etkileşimi gerekiyor
+        });
+    };
+    
+    // Sayfadaki temel etkileşimlerde ses API'sini hazırlamaya çalış
+    document.addEventListener('click', unlockAudioOnUserInteraction);
+    document.addEventListener('touchstart', unlockAudioOnUserInteraction);
+    document.addEventListener('keydown', unlockAudioOnUserInteraction);
+    
+    // Ses dosyası yüklendiğinde
+    audioRef.current.addEventListener('canplaythrough', () => {
+      // Ses dosyası hazır, artık çalınabilir
+    });
+    
+    return () => {
+      // Temizlik
+      document.removeEventListener('click', unlockAudioOnUserInteraction);
+      document.removeEventListener('touchstart', unlockAudioOnUserInteraction);
+      document.removeEventListener('keydown', unlockAudioOnUserInteraction);
+    };
+  }, []);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
-
   const handleConfirm = async (orderIds) => {
     try {
       if (!Array.isArray(orderIds)) orderIds = [orderIds];
       await Promise.all(orderIds.map(orderId =>
-        axios.patch(`http://localhost:3001/api/orders/${orderId}/accept`, {}, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
+        axios.patch(`http://localhost:3001/api/orders/${orderId}/accept`, {}, getAuthHeaders())
       ));
       setSnackbar({ open: true, message: t('businessOrders.ordersConfirmed'), severity: 'success' });
+      
+      // Sipariş onaylama işleminden sonra siparişleri yenile
       fetchOrders();
-      fetchOrderCounts();
-    } catch {
+      
+      // Ses bildirimi olmadan sipariş sayılarını güncelle
+      // true parametresi ses bildirimini geçmek için
+      fetchOrderCounts(true);
+    } catch (err) {
+      console.error('Siparişler onaylanırken hata:', err);
       setSnackbar({ open: true, message: t('businessOrders.ordersNotConfirmed'), severity: 'error' });
     }
   };
-
   const handleReject = async () => {
     try {
-      await axios.patch(`http://localhost:3001/api/orders/${rejectDialog.orderId}/reject`, {}, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      await axios.patch(`http://localhost:3001/api/orders/${rejectDialog.orderId}/reject`, {}, getAuthHeaders());
       setSnackbar({ open: true, message: t('businessOrders.orderRejected'), severity: 'success' });
       setRejectDialog({ open: false, orderId: null });
       fetchOrders();
-      fetchOrderCounts();
-    } catch {
+      fetchOrderCounts(true); // Ses bildirimi olmadan
+    } catch (err) {
+      console.error('Sipariş reddedilirken hata:', err);
       setSnackbar({ open: true, message: t('businessOrders.orderNotRejected'), severity: 'error' });
     }
   };
@@ -102,16 +301,105 @@ function BusinessOrders() {
     try {
       if (!Array.isArray(orderIds)) orderIds = [orderIds];
       await Promise.all(orderIds.map(orderId =>
-        axios.patch(`http://localhost:3001/api/orders/${orderId}/done`, {}, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
+        axios.patch(`http://localhost:3001/api/orders/${orderId}/done`, {}, getAuthHeaders())
       ));
       setSnackbar({ open: true, message: t('businessOrders.ordersDelivered'), severity: 'success' });
       fetchOrders();
-      fetchOrderCounts();
-    } catch {
+      fetchOrderCounts(true); // Ses bildirimi olmadan
+    } catch (err) {
+      console.error('Siparişler teslim edildi olarak işaretlenirken hata:', err);
       setSnackbar({ open: true, message: t('businessOrders.ordersNotDelivered'), severity: 'error' });
     }
+  };
+
+  const handleSoundToggle = () => {
+    setSoundEnabled(!soundEnabled);
+  };  // Test ses çalma - butondan çağrıldığında ses çal (basitleştirilmiş)
+  const testSound = () => {
+    // Zaten bir ses çalınıyorsa çalma
+    if (audioRef.current && !audioRef.current.paused) {
+      console.log('Zaten bir ses çalınıyor');
+      return;
+    }
+    
+    if (!audioRef.current) return;
+    
+    // Ses durumunu kontrol et
+    if (audioRef.current.readyState < 2) {
+      audioRef.current.load();
+    }
+    
+    // Hazırlıkları yap
+    audioRef.current.muted = false;
+    audioRef.current.volume = 1.0;
+    audioRef.current.currentTime = 0;
+    
+    // Sesi çal
+    audioRef.current.play()
+      .then(() => {
+        console.log('Test sesi başarıyla çalındı');
+      })
+      .catch((error) => {
+        console.log('Ses çalma hatası:', error);
+        // Herhangi bir hata oluşursa bildirim göster
+        setSnackbar({
+          open: true,
+          message: 'Tarayıcınız ses çalmaya izin vermiyor. Gizlilik ayarlarınızı kontrol edin.',
+          severity: 'warning'
+        });
+      });
+  };// Bildirim sesi çalma fonksiyonu - basitleştirilmiş hali
+  const playNotificationSound = () => {
+    // Ses çalma işlemi devam ediyorsa çıkış yap (çakışmaları önle)
+    if (audioRef.current && !audioRef.current.paused) {
+      console.log('Zaten bir ses çalınıyor, tekrar çalma atlandı');
+      return;
+    }
+    
+    // Ses kapalıysa çıkış yap
+    if (!soundEnabled) {
+      return;
+    }
+    
+    if (!audioRef.current) {
+      return;
+    }
+    
+    // Ses ayarlarını yap
+    audioRef.current.muted = false;
+    audioRef.current.volume = 1.0;
+    audioRef.current.currentTime = 0;
+    
+    // Sesi çal
+    const playPromise = audioRef.current.play();
+    
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          console.log('Bildirim sesi çalındı');
+        })
+        .catch(error => {
+          console.log('Ses çalınamadı:', error);
+        });
+    }
+  };
+    // Bildirim gösterme fonksiyonu
+  const showNotification = (message, severity = 'info') => {
+    // Snackbar bildirimini göster
+    setSnackbar({
+      open: true,
+      message: message,
+      severity: severity,
+      autoHideDuration: 5000
+    });
+  };
+    // Hem ses çalma hem de bildirim gösterme işlemini birleştiren fonksiyon
+  const notifyNewOrder = (message) => {
+    // Ses çal
+    playNotificationSound();
+    
+    // Bildirim göster (başarılı bildirim olduğu için success severity)
+    showNotification(message, 'success');
   };
 
   function groupOrders(orders) {
@@ -139,11 +427,56 @@ function BusinessOrders() {
     });
     return Object.values(groups);
   }
-
+  
   return (
-    <BusinessLayout>
-      <ResponsivePageTitle>{t('businessOrders.title')}</ResponsivePageTitle>
-      {error && <Alert severity="error">{error}</Alert>}
+    <BusinessLayout>      {/* Ses dosyası - basitleştirilmiş */}
+      <audio 
+        ref={audioRef} 
+        src="/sounds/order-notification.mp3" 
+        preload="auto"
+      />
+      
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <ResponsivePageTitle>{t('businessOrders.title')}</ResponsivePageTitle>
+        
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Tooltip title="Siparişleri yenile">
+            <IconButton onClick={handleRefresh} sx={{ mr: 1 }}>
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={soundEnabled ? "Bildirimleri sessize al" : "Sesli bildirimleri aç"}>
+            <IconButton 
+              onClick={handleSoundToggle} 
+              color={soundEnabled ? "primary" : "default"}
+              sx={{ mr: 1 }}
+            >
+              {soundEnabled ? <VolumeUpIcon /> : <VolumeMuteIcon />}
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Ses bildirimini test et">
+            <Button 
+              variant="outlined" 
+              size="small" 
+              onClick={testSound} 
+              sx={{ 
+                mr: 1,
+                bgcolor: soundEnabled ? 'rgba(255, 136, 0, 0.08)' : 'transparent',
+                borderColor: soundEnabled ? '#ff8800' : 'rgba(0, 0, 0, 0.23)',
+                color: soundEnabled ? '#ff8800' : 'rgba(0, 0, 0, 0.38)',
+                '&:hover': {
+                  bgcolor: soundEnabled ? 'rgba(255, 136, 0, 0.15)' : 'transparent',
+                }
+              }}
+              startIcon={soundEnabled ? <VolumeUpIcon fontSize="small" /> : <VolumeMuteIcon fontSize="small" />}
+              disabled={!soundEnabled}
+            >
+              BİLDİRİMİ TEST ET
+            </Button>
+          </Tooltip>
+        </Box>
+      </Box>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={activeTab} onChange={handleTabChange} aria-label="order status tabs">
@@ -246,9 +579,22 @@ function BusinessOrders() {
           )}
         </Grid>
       )}
-      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity}>{snackbar.message}</Alert>
+      
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={3000} 
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })} 
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
       </Snackbar>
+      
       <Dialog 
         open={rejectDialog.open} 
         onClose={() => setRejectDialog({ open: false, orderId: null })}
@@ -299,4 +645,4 @@ function BusinessOrders() {
   );
 }
 
-export default BusinessOrders; 
+export default BusinessOrders;

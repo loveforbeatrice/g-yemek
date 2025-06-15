@@ -522,46 +522,69 @@ function Header({ cartItems, resetCart }) {
             </Box>
           </Toolbar>
         </AppBar>
-      )}
-      {/* Mobilde navbarı en alta sabitle */}
+      )}      {/* Mobilde navbarı en alta sabitle */}
       {isMobile && (
         <Box sx={{
           position: 'fixed',
           left: 0,
-          bottom: 16,
+          bottom: 0,
           width: '100%',
           display: 'flex',
           justifyContent: 'center',
           zIndex: 1300
-        }}>
-          <Box sx={{
+        }}>          <Box sx={{
             bgcolor: '#9d8df1',
-            borderRadius: 3,
-            width: '90%',
-            maxWidth: 400,
+            borderRadius: '20px 20px 0 0',
+            width: '100%',
+            maxWidth: '100%',
             py: 1.5,
             display: 'flex',
-            justifyContent: 'space-around',
+            justifyContent: 'space-evenly',
             alignItems: 'center',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+            boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+            paddingX: 1
           }}>
             {/* Menü ikonları burada */}
             <IconButton color="inherit" onClick={goToMenu}>
-              <Box sx={{ color: activeTab === 'menu' ? '#ff8800' : '#fff' }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+              <Box sx={{ color: activeTab === 'menu' ? '#ff8800' : '#fff' }}>                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
               </Box>
-            </IconButton>            <IconButton color="inherit" onClick={goToCart}>
+            </IconButton>
+            
+            <Box sx={{ 
+              height: 28, 
+              width: '1px', 
+              backgroundColor: 'rgba(255,255,255,0.3)',
+              mx: 0.5
+            }}/>
+            
+            <IconButton color="inherit" onClick={goToCart}>
               <Badge badgeContent={cartCount > 0 ? cartCount : null} color="error" overlap="circular" sx={{ '& .MuiBadge-badge': { fontWeight: 'bold', fontSize: '0.85rem', minWidth: 20, height: 20, right: -4, top: 2 } }}>
                 <Box sx={{ color: activeTab === 'cart' ? '#ff8800' : '#fff' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                 </Box>
               </Badge>
             </IconButton>
+            
+            <Box sx={{ 
+              height: 28, 
+              width: '1px', 
+              backgroundColor: 'rgba(255,255,255,0.3)',
+              mx: 0.5
+            }}/>
+            
             <IconButton color="inherit" onClick={goToFavorites}>
               <Box sx={{ color: activeTab === 'favorites' ? '#ff8800' : '#fff' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
               </Box>
             </IconButton>
+            
+            <Box sx={{ 
+              height: 28, 
+              width: '1px', 
+              backgroundColor: 'rgba(255,255,255,0.3)',
+              mx: 0.5
+            }}/>
+            
             <IconButton color="inherit" onClick={() => { setActiveTab('profile'); navigate('/account'); }}>
               <Box sx={{ color: activeTab === 'profile' ? '#ff8800' : '#fff' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" /><path d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z" /></svg>

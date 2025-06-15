@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Grid, Card, CardContent, Typography, Box, Button, IconButton, TextField, Chip, Snackbar, Alert, Popover, MenuItem, Divider } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import SortIcon from '@mui/icons-material/Sort';
+import TuneIcon from '@mui/icons-material/Tune';
+import SwapVertIcon from '@mui/icons-material/SwapVert';
 import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -241,11 +241,10 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
               background: openFilter ? 'rgba(0,0,0,0.05)' : 'transparent',
               '&:hover': { background: 'rgba(0,0,0,0.05)' },
               border: '1px solid rgba(0,0,0,0.23)',
-              borderRadius: '8px',
-              p: 1
+              borderRadius: '8px',              p: 1
             }}
           >
-            <FilterListIcon />
+            <TuneIcon />
           </IconButton>
           <IconButton 
             onClick={handleSortClick}
@@ -258,7 +257,7 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
               p: 1
             }}
           >
-            <SortIcon />
+            <SwapVertIcon />
           </IconButton>
         </Box>
       </Box>
@@ -421,23 +420,42 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                 </Box>
               </Grid>
               {group.items.map(item => (
-                <Grid item xs={12} sm={6} md={4} key={item.id || `${item.productName}-${item.category}`}>
-                  <Card sx={{
+                <Grid item xs={12} sm={6} md={4} key={item.id || `${item.productName}-${item.category}`}>                  <Card sx={{
                     border: '2px solid #ff8800',
                     borderRadius: '16px',
                     background: '#fff',
                     boxShadow: '0 2px 8px 0 rgba(0,0,0,0.07)',
                     position: 'relative',
+                    height: '100%',
                     minHeight: 240,
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'flex-start'
+                    justifyContent: 'space-between'
                   }}>
-                    <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', mb: 1 }}>
-                        <Typography variant="h3" fontWeight="bold" sx={{ fontFamily: 'Alata, sans-serif', fontSize: '2.3rem', lineHeight: 1.1 }}>
-                          {item.productName}
-                        </Typography>
+                    <CardContent sx={{ 
+                      p: { xs: 2, sm: 3 }, 
+                      flex: 1, 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      height: '100%',
+                      '&:last-child': { pb: { xs: 2, sm: 3 } }
+                    }}><Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%', mb: 1 }}>
+                        <Box sx={{ maxWidth: 'calc(100% - 50px)' }}>
+                          <Typography 
+                            variant="h3" 
+                            fontWeight="bold" 
+                            sx={{ 
+                              fontFamily: 'Alata, sans-serif', 
+                              fontSize: '2rem', 
+                              lineHeight: 1.2,
+                              mb: 0.5,
+                              wordBreak: 'break-word',
+                              overflowWrap: 'break-word'
+                            }}
+                          >
+                            {item.productName}
+                          </Typography>
+                        </Box>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 36 }}>
                           <IconButton 
                             onClick={(e) => { e.stopPropagation(); handleFavorite(item); }} 
@@ -460,11 +478,33 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                           </Typography>
                         </Box>
                       </Box>
-                      <Typography variant="body1" color="text.secondary" sx={{ mb: 2, fontSize: '1.15rem', fontWeight: 400 }}>
+                      <Typography 
+                        variant="body1" 
+                        color="text.secondary" 
+                        sx={{ 
+                          mb: 2, 
+                          fontSize: '1rem', 
+                          fontWeight: 400,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                        }}
+                      >
                         {item.explanation}
-                      </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mt: 2, gap: 3 }}>
-                        <Box sx={{ width: 140, height: 90, borderRadius: 3, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+                      </Typography>                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mt: 'auto', gap: { xs: 2, sm: 3 } }}>
+                        <Box sx={{ 
+                          width: { xs: 100, sm: 120, md: 140 }, 
+                          height: { xs: 70, sm: 80, md: 90 }, 
+                          borderRadius: 3, 
+                          overflow: 'hidden', 
+                          flexShrink: 0, 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          background: '#fff' 
+                        }}>
                           <img
                             src={item.imageUrl ? `http://localhost:3001/uploads/${item.imageUrl}` : '/images/food-bg.jpg'}
                             alt={item.productName}
@@ -481,11 +521,33 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                               e.target.src = '/images/food-bg.jpg';
                             }}
                           />
-                        </Box>
-                        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', height: '100%' }}>
-                          <Typography variant="h3" sx={{ color: '#222', fontWeight: 700, fontSize: '2rem', mb: 1 }}>
-                            ₺ {Number(item.price).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </Typography>
+                        </Box><Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', height: '100%' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', mb: 1 }}>
+                            <Typography 
+                              variant="h6" 
+                              sx={{ 
+                                color: '#222', 
+                                fontWeight: 700, 
+                                fontSize: '1.5rem', 
+                                lineHeight: 1,
+                                mr: 0.5,
+                                mt: '-2px'
+                              }}
+                            >
+                              ₺
+                            </Typography>
+                            <Typography 
+                              variant="h3" 
+                              sx={{ 
+                                color: '#222', 
+                                fontWeight: 700, 
+                                fontSize: '2rem', 
+                                lineHeight: 1
+                              }}
+                            >
+                              {Number(item.price).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                            </Typography>
+                          </Box>
                           <Box sx={{ 
                             display: 'flex', 
                             alignItems: 'center', 
@@ -497,20 +559,20 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                             justifyContent: 'center', 
                             background: '#fff',
                             filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
-                          }}>
-                            <Button 
+                          }}>                            <Button 
                               variant="text" 
                               sx={{ 
-                                minWidth: 0, 
+                                minWidth: 32, 
+                                width: 32,
+                                height: 32,
                                 color: (cartItems.find(i => i.id === item.id)?.quantity || 0) === 0 ? '#ccc' : '#ff8800', 
-                                fontSize: '2rem', 
+                                fontSize: '1.8rem', 
                                 fontWeight: 700, 
                                 p: 0, 
                                 lineHeight: 1, 
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                verticalAlign: 'middle',
                               }} 
                               onClick={() => {
                                 const quantity = cartItems.find(i => i.id === item.id)?.quantity || 0;
@@ -530,12 +592,15 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                             <Typography 
                               variant="h5" 
                               sx={{ 
-                                mx: 1.5, 
+                                mx: 1, 
                                 color: '#ff8800', 
                                 fontWeight: 700, 
-                                fontSize: '2rem', 
-                                minWidth: 24, 
-                                textAlign: 'center' 
+                                fontSize: '1.5rem', 
+                                width: 30, 
+                                textAlign: 'center',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                               }}
                             >
                               {cartItems.find(i => i.id === item.id)?.quantity || 0}
@@ -543,12 +608,17 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
                             <Button 
                               variant="text" 
                               sx={{ 
-                                minWidth: 0, 
+                                minWidth: 32, 
+                                width: 32,
+                                height: 32,
                                 color: '#ff8800', 
-                                fontSize: '2rem', 
+                                fontSize: '1.8rem', 
                                 fontWeight: 700, 
                                 p: 0, 
-                                lineHeight: 1 
+                                lineHeight: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                               }} 
                               onClick={() => {
                                 if (businessIsOpen) {
