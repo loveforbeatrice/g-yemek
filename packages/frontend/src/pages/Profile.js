@@ -11,7 +11,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Paper
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
@@ -158,99 +159,87 @@ function Profile() {
       {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}
       {errorMsg && <Alert severity="error" sx={{ mb: 2 }}>{errorMsg}</Alert>}
 
-      <Stack spacing={3} mb={4}>
-        {/* Name */}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: { xs: 2, sm: 3 }, py: { xs: 0.5, sm: 1 } }}>
-          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>{t('fullName')}:</Typography>
-          {editField === 'name' ? (
-            <>
-              <TextField size="small" value={editValue} onChange={handleEditChange} autoFocus />
-              <IconButton color="success" onClick={handleEditSave}><CheckIcon /></IconButton>
-              <IconButton color="error" onClick={handleEditCancel}><CloseIcon /></IconButton>
-            </>
-          ) : (
-            <>
-              <Typography sx={{ flex: 1 }}>{user.name}</Typography>
-              <IconButton onClick={() => handleEditClick('name')}><EditIcon /></IconButton>
-            </>
-          )}
-        </Box>
-        {/* Email */}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: { xs: 2, sm: 3 }, py: { xs: 0.5, sm: 1 } }}>
-          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>{t('email')}:</Typography>
-          {editField === 'email' ? (
-            <>
-              <TextField size="small" value={editValue} onChange={handleEditChange} autoFocus />
-              <IconButton color="success" onClick={handleEditSave}><CheckIcon /></IconButton>
-              <IconButton color="error" onClick={handleEditCancel}><CloseIcon /></IconButton>
-            </>
-          ) : (
-            <>
-              <Typography sx={{ flex: 1 }}>{user.email}</Typography>
-              <IconButton onClick={() => handleEditClick('email')}><EditIcon /></IconButton>
-            </>
-          )}
-        </Box>
-        {/* Phone */}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: { xs: 2, sm: 3 }, py: { xs: 0.5, sm: 1 } }}>
-          <Typography sx={{ minWidth: 90, fontWeight: 500 }}>{t('phone')}:</Typography>
-          {editField === 'phone' ? (
-            <>
-              <TextField size="small" value={editValue} onChange={handleEditChange} autoFocus />
-              <IconButton color="success" onClick={handleEditSave}><CheckIcon /></IconButton>
-              <IconButton color="error" onClick={handleEditCancel}><CloseIcon /></IconButton>
-            </>
-          ) : (
-            <>
-              <Typography sx={{ flex: 1 }}>{user.phone}</Typography>
-              <IconButton onClick={() => handleEditClick('phone')}><EditIcon /></IconButton>
-            </>
-          )}
-        </Box>
-      </Stack>
+      {/* Kişisel Bilgiler Widget */}
+      <Paper elevation={2} sx={{ bgcolor: '#fff', p: 3, mb: 4, border: '1px solid #ff8800' }}>
+        <Stack spacing={3}>
+          {/* Name */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography sx={{ minWidth: 90, fontWeight: 500 }}>{t('fullName')}:</Typography>
+            {editField === 'name' ? (
+              <>
+                <TextField size="small" value={editValue} onChange={handleEditChange} autoFocus />
+                <IconButton color="success" onClick={handleEditSave}><CheckIcon /></IconButton>
+                <IconButton color="error" onClick={handleEditCancel}><CloseIcon /></IconButton>
+              </>
+            ) : (
+              <>
+                <Typography sx={{ flex: 1 }}>{user.name}</Typography>
+                <IconButton onClick={() => handleEditClick('name')}><EditIcon /></IconButton>
+              </>
+            )}
+          </Box>
+          <Divider sx={{ my: 0.5, borderColor: '#e0e0e0' }} />
+          {/* Phone */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography sx={{ minWidth: 90, fontWeight: 500 }}>{t('phone')}:</Typography>
+            {editField === 'phone' ? (
+              <>
+                <TextField size="small" value={editValue} onChange={handleEditChange} autoFocus />
+                <IconButton color="success" onClick={handleEditSave}><CheckIcon /></IconButton>
+                <IconButton color="error" onClick={handleEditCancel}><CloseIcon /></IconButton>
+              </>
+            ) : (
+              <>
+                <Typography sx={{ flex: 1 }}>{user.phone}</Typography>
+                <IconButton onClick={() => handleEditClick('phone')}><EditIcon /></IconButton>
+              </>
+            )}
+          </Box>
+        </Stack>
+      </Paper>
 
-      <Divider sx={{ my: 4 }} />
-
-      {/* Şifre değiştirme alanı */}
-      <Typography variant="h5" fontWeight="bold" sx={{ mb: 2, fontFamily: 'Alata, sans-serif' }}>
-        {t('changePassword')}
-      </Typography>
-      {pwSuccess && <Alert severity="success" sx={{ mb: 2 }}>{pwSuccess}</Alert>}
-      {pwError && <Alert severity="error" sx={{ mb: 2 }}>{pwError}</Alert>}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
-        <TextField
-          label={t('currentPassword')}
-          name="currentPassword"
-          type="password"
-          value={pwForm.currentPassword}
-          onChange={handlePwInput}
-          fullWidth
-        />
-        <TextField
-          label={t('newPassword')}
-          name="newPassword"
-          type="password"
-          value={pwForm.newPassword}
-          onChange={handlePwInput}
-          fullWidth
-        />
-        <TextField
-          label={t('confirmNewPassword')}
-          name="confirmPassword"
-          type="password"
-          value={pwForm.confirmPassword}
-          onChange={handlePwInput}
-          fullWidth
-        />
-        <Button
-          variant="contained"
-          sx={{ bgcolor: '#ff8800', '&:hover': { bgcolor: '#ff6600' }, fontWeight: 'bold', fontSize: '1.1rem', borderRadius: 2 }}
-          onClick={handleChangePassword}
-          disabled={pwLoading}
-        >
-          {pwLoading ? t('changing') : t('changePassword')}
-        </Button>
-      </Box>
+      {/* Şifre Değiştir Widget */}
+      <Paper elevation={2} sx={{ bgcolor: '#fff', p: 3, mb: 4, border: '1px solid #ff8800' }}>
+        <Typography variant="h5" fontWeight="bold" sx={{ mb: 2, fontFamily: 'Alata, sans-serif' }}>
+          {t('changePassword')}
+        </Typography>
+        {pwSuccess && <Alert severity="success" sx={{ mb: 2 }}>{pwSuccess}</Alert>}
+        {pwError && <Alert severity="error" sx={{ mb: 2 }}>{pwError}</Alert>}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            label={t('currentPassword')}
+            name="currentPassword"
+            type="password"
+            value={pwForm.currentPassword}
+            onChange={handlePwInput}
+            fullWidth
+          />
+          <TextField
+            label={t('newPassword')}
+            name="newPassword"
+            type="password"
+            value={pwForm.newPassword}
+            onChange={handlePwInput}
+            fullWidth
+          />
+          <TextField
+            label={t('confirmNewPassword')}
+            name="confirmPassword"
+            type="password"
+            value={pwForm.confirmPassword}
+            onChange={handlePwInput}
+            fullWidth
+          />
+          <Button
+            variant="contained"
+            sx={{ bgcolor: '#ff8800', '&:hover': { bgcolor: '#ff6600' }, fontWeight: 'bold', fontSize: '1.1rem', borderRadius: 2 }}
+            onClick={handleChangePassword}
+            disabled={pwLoading}
+          >
+            {pwLoading ? t('changing') : t('changePassword')}
+          </Button>
+        </Box>
+      </Paper>
 
       {/* Hesap silme alanı */}
       <Divider sx={{ my: 3 }} />

@@ -12,7 +12,8 @@ import {
   Stack,
   CircularProgress,
   Alert,
-  IconButton
+  IconButton,
+  Paper
 } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 import FlagIcon from '@mui/icons-material/Flag';
@@ -117,8 +118,9 @@ function Settings() {
           {t('settings')}
         </Typography>
       </Box>
-      {/* Notifications Section */}
-      <Box sx={{ width: '100%', maxWidth: 480, mb: 4, px: { xs: 0.5, sm: 0 } }}>        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif', fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
+      {/* Bildirimler Widget */}
+      <Paper elevation={2} sx={{ width: '100%', maxWidth: 480, mb: 4, p: 3, border: '1px solid #ff8800', bgcolor: '#fff' }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif', fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
           {t('notifications')}
         </Typography>
         {notifLoading ? (
@@ -185,9 +187,10 @@ function Settings() {
           </Stack>
         )}
         {notifError && <Alert severity="error" sx={{ mt: 2 }}>{notifError}</Alert>}
-      </Box>
-      {/* Language Section */}
-      <Box sx={{ width: '100%', maxWidth: 480, mb: 4, px: { xs: 0.5, sm: 0 } }}>        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif', fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
+      </Paper>
+      {/* Dil Widget */}
+      <Paper elevation={2} sx={{ width: '100%', maxWidth: 480, mb: 4, p: 3, border: '1px solid #ff8800', bgcolor: '#fff' }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif', fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
           {t('language')}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -239,9 +242,10 @@ function Settings() {
             </Select>
           </FormControl>
         </Box>
-      </Box>
-      {/* Theme Section */}
-      <Box sx={{ width: '100%', maxWidth: 480, mb: 4, px: { xs: 0.5, sm: 0 } }}>        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif', fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
+      </Paper>
+      {/* Tema Widget */}
+      <Paper elevation={2} sx={{ width: '100%', maxWidth: 480, mb: 4, p: 3, border: '1px solid #ff8800', bgcolor: '#fff' }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#222', fontFamily: 'Alata, sans-serif', fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
           {t('theme')}
         </Typography>
         <FormControl sx={{ width: '100%' }}>
@@ -290,7 +294,7 @@ function Settings() {
           label={<Typography sx={{ fontWeight: 400, fontSize: '1.1rem', color: '#222' }}>{t('useDeviceTheme')}</Typography>}
           sx={{ mt: 1, ml: 0 }}
         />
-      </Box>
+      </Paper>
     </Box>
   );
 }

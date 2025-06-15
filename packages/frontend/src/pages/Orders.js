@@ -119,14 +119,9 @@ function Orders({ addToCart }) {
                       <Divider sx={{ mb: 1 }} />
                       {businessOrders.map(order => (
                         <Box key={order.id} sx={{ display: 'flex', alignItems: 'center', mb: 1.2 }}>
-                          <Box
-                            component="img"
-                            src={order.menuItem?.imageUrl || '/images/food-bg.jpg'}
-                            alt={order.menuItem?.productName}
-                            sx={{ width: 44, height: 44, borderRadius: 1, objectFit: 'cover', mr: 1.2 }}
-                          />
                           <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{order.menuItem?.productName}</Typography>                            <Typography variant="caption" color="text.secondary">{order.quantity} {t('orders.pieces')}</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{order.menuItem?.productName}</Typography>
+                            <Typography variant="caption" color="text.secondary">{order.quantity} {t('orders.pieces')}</Typography>
                             {order.note && (
                               <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block' }}>{t('orders.note')}: {order.note}</Typography>
                             )}
