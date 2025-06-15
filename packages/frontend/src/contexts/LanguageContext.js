@@ -13,9 +13,15 @@ export const useLanguage = () => {
 const translations = {
   tr: {
     // Auth & Login
-    welcome: 'HOŞGELDİNİZ',
-    gülbahce: 'GÜLBAHÇE\'NİN 1 NUMARALI',
-    foodPlatform: 'YEMEK SİPARİŞ PLATFORMUNA',
+    welcome: 'GÜLBAHÇE\'NİN 1 NUMARALI',
+    gülbahce: 'YEMEK SİPARİŞ PLATFORMUNA',
+    foodPlatform: 'HOŞ GELDİNİZ',    welcomeTo: 'HOŞ GELDİNİZ', 
+    businessPortalLine1: 'GÜLBAHÇE YEMEK', // Üç satırlı başlık - satır 1 
+    businessPortalLine2: 'İŞLETME PORTALINA', // Üç satırlı başlık - satır 2
+    businessPortalLine3: 'HOŞ GELDİNİZ', // Üç satırlı başlık - satır 3
+    gülbahceYemek: 'GÜLBAHÇE YEMEK',
+    ifYouDontHaveAccount: 'Hesabınız Yoksa',
+    notABusiness: 'İşletme Değil misiniz?',
     signIn: 'GİRİŞ YAP',
     signUp: 'KAYIT OL',
     alreadyHaveAccount: 'Zaten Hesabınız Var Mı?',
@@ -264,15 +270,22 @@ const translations = {
       ordersNotConfirmed: 'Siparişler onaylanamadı.',
       orderRejected: 'Sipariş reddedildi.',
       orderNotRejected: 'Sipariş reddedilemedi.',
+      ordersDelivered: 'Siparişler teslim edildi olarak işaretlendi.',
+      ordersNotDelivered: 'Siparişler teslim edilemedi.',
       customer: 'Müşteri',
       note: 'Not',
       total: 'Toplam',
       confirm: 'ONAYLA',
       reject: 'REDDET',
-      rejectConfirm: 'Reddetmek istediğinizden emin misiniz?',
+      rejectConfirm: 'Siparişi Reddet',
+      rejectWarning: 'Bu siparişi reddetmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
       yes: 'Evet',
       no: 'Hayır',
-      noActiveOrders: 'Aktif sipariş yok.'
+      noIdleOrders: 'Bekleyen sipariş yok.',
+      noAwaitingDelivery: 'Teslim bekleyen sipariş yok.',
+      idleOrders: 'Bekleyen Siparişler',
+      awaitingDelivery: 'Teslim Bekleyenler',
+      markAsDelivered: 'Teslim Edildi'
     },
       // Business Performance Page
     businessPerformance: {
@@ -312,12 +325,11 @@ const translations = {
     businessOrderHistory: {
       title: 'SİPARİŞ GEÇMİŞİ',
       loadError: 'Sipariş geçmişi yüklenemedi.',
-      delivered: 'Siparişler teslim edildi olarak işaretlendi.',
-      notDelivered: 'Siparişler teslim edilemedi.',
+      delivered: 'Teslim Edildi',
+      pending: 'Beklemede',
       noHistory: 'Geçmiş sipariş yok.',
       note: 'Not',
-      total: 'Toplam',
-      done: 'Teslim Edildi'
+      total: 'Toplam'
     },
     
     // Business Layout (Sidebar Menu)
@@ -342,7 +354,13 @@ const translations = {
     // Auth & Login
     welcome: 'WELCOME TO',
     gülbahce: 'GÜLBAHÇE\'S #1',
-    foodPlatform: 'FOOD ORDERING PLATFORM',
+    foodPlatform: 'FOOD ORDERING PLATFORM',    welcomeTo: 'WELCOME TO',
+    businessPortalLine1: 'WELCOME TO', // Üç satırlı başlık - satır 1
+    businessPortalLine2: 'GÜLBAHÇE YEMEK', // Üç satırlı başlık - satır 2
+    businessPortalLine3: 'BUSINESS PORTAL', // Üç satırlı başlık - satır 3
+    gülbahceYemek: 'GÜLBAHÇE YEMEK',
+    ifYouDontHaveAccount: 'If You Don\'t Have An Account',
+    notABusiness: 'Not A Business?',
     signIn: 'SIGN IN',
     signUp: 'SIGN UP',
     alreadyHaveAccount: 'Already Have An Account?',
@@ -583,23 +601,29 @@ const translations = {
     // Business Orders Page
     businessOrders: {
       title: 'ORDERS',
-      loadError: 'Orders could not be loaded.',
+      loadError: 'Failed to load orders.',
       ordersConfirmed: 'Orders confirmed.',
-      ordersNotConfirmed: 'Orders could not be confirmed.',
+      ordersNotConfirmed: 'Failed to confirm orders.',
       orderRejected: 'Order rejected.',
-      orderNotRejected: 'Order could not be rejected.',
+      orderNotRejected: 'Failed to reject order.',
+      ordersDelivered: 'Orders marked as delivered.',
+      ordersNotDelivered: 'Failed to mark orders as delivered.',
       customer: 'Customer',
       note: 'Note',
       total: 'Total',
       confirm: 'CONFIRM',
       reject: 'REJECT',
-      rejectConfirm: 'Are you sure you want to reject?',
+      rejectConfirm: 'Reject Order',
+      rejectWarning: 'Are you sure you want to reject this order? This action cannot be undone.',
       yes: 'Yes',
       no: 'No',
-      noActiveOrders: 'No active orders.'
+      noIdleOrders: 'No pending orders.',
+      noAwaitingDelivery: 'No orders awaiting delivery.',
+      idleOrders: 'Pending Orders',
+      awaitingDelivery: 'Awaiting Delivery',
+      markAsDelivered: 'Mark as Delivered'
     },
-    
-    // Business Performance Page
+      // Business Performance Page
     businessPerformance: {
       title: 'Performance Analytics',
       subtitle: 'Business Performance Dashboard',
@@ -621,7 +645,8 @@ const translations = {
       highestRevenue: 'Highest Revenue',
       sales: 'Sales',
       noProductData: 'No product sales data available',
-      favoritesAnalysis: 'Favorites Analysis',      noFavoritesData: 'No favorites data available'
+      favoritesAnalysis: 'Favorites Analysis',
+      noFavoritesData: 'No favorites data available'
     },
     
     // Address Form Dialog
@@ -635,13 +660,12 @@ const translations = {
     // Business Order History Page
     businessOrderHistory: {
       title: 'ORDER HISTORY',
-      loadError: 'Order history could not be loaded.',
-      delivered: 'Orders marked as delivered.',
-      notDelivered: 'Orders could not be delivered.',
+      loadError: 'Failed to load order history.',
+      delivered: 'Delivered',
+      pending: 'Pending',
       noHistory: 'No order history.',
       note: 'Note',
-      total: 'Total',
-      done: 'Done'
+      total: 'Total'
     },
     
     // Business Layout (Sidebar Menu)
@@ -654,13 +678,12 @@ const translations = {
       exit: 'Exit',
       businessName: 'Business Name'
     },
-    
-    // Restaurant Status Widget
+      // Restaurant Status Widget
     restaurantStatus: {
       open: 'OPEN',
       closed: 'CLOSED',
-      clickToClose: 'Click to change CLOSED',
-      clickToOpen: 'Click to change OPEN'
+      clickToClose: 'Click to close',
+      clickToOpen: 'Click to open'
     }
   }
 };

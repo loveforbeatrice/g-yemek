@@ -73,6 +73,11 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+  min_basket_total: {
+    type: DataTypes.NUMERIC(10,2),
+    defaultValue: 0,
+    allowNull: false,
+  },
 }, {
   tableName: 'users',
   timestamps: true,

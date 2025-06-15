@@ -24,6 +24,12 @@ module.exports = {
       allowNull: false,
       defaultValue: false,
     });
+
+    await queryInterface.addColumn('users', 'min_basket_total', {
+      type: Sequelize.NUMERIC(10,2),
+      defaultValue: 0,
+      allowNull: false
+    });
   },
 
   down: async (queryInterface, Sequelize) => {
@@ -31,5 +37,6 @@ module.exports = {
     await queryInterface.removeColumn('users', 'closingTime');
     await queryInterface.removeColumn('users', 'imageUrl');
     await queryInterface.removeColumn('users', 'isOpen');
+    await queryInterface.removeColumn('users', 'min_basket_total');
   }
 };

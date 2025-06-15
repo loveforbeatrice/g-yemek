@@ -41,7 +41,8 @@ function BusinessSettings() {
     name: '',
     openingTime: '09:00',
     closingTime: '22:00',
-    imageUrl: ''
+    imageUrl: '',
+    min_basket_total: 0
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -69,6 +70,8 @@ function BusinessSettings() {
   const [deleteError, setDeleteError] = useState('');
   const [deleteSuccess, setDeleteSuccess] = useState('');
 
+  const [minSepetTutari, setMinSepetTutari] = useState(businessData.min_basket_total || 0);
+
   // Fetch business settings
   useEffect(() => {
     const fetchBusinessSettings = async () => {
@@ -82,8 +85,10 @@ function BusinessSettings() {
           name: business.name || '',
           openingTime: business.openingTime || '09:00',
           closingTime: business.closingTime || '22:00',
-          imageUrl: business.imageUrl || ''
+          imageUrl: business.imageUrl || '',
+          min_basket_total: business.min_basket_total || 0
         });
+        setMinSepetTutari(business.min_basket_total || 0);
         
         // Convert time strings to Date objects for TimePicker
         if (business.openingTime) {
@@ -134,16 +139,12 @@ function BusinessSettings() {
       setSaving(true);
       const token = localStorage.getItem('token');
       
-      await axios.put('http://localhost:3001/api/business/settings', 
-        {
-          name: businessData.name,
-          openingTime: businessData.openingTime,
-          closingTime: businessData.closingTime
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      await axios.put('http://localhost:3001/api/business/settings', {
+        ...businessData,
+        min_basket_total: parseFloat(minSepetTutari)
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       
       setSnackbar({
         open: true,
@@ -442,6 +443,33 @@ function BusinessSettings() {
                   </LocalizationProvider>
                 </CardContent>
               </Card>            </Grid>
+              {/* Şifre değiştirme alanından önce min sepet tutarı alanı */}
+            <Grid item xs={12}>
+              <Card sx={{ mb: 3, borderRadius: 2, border: '2px solid #80cbc4' }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: '#333' }}>
+                    {t('minBasketTotal')}
+                  </Typography>
+                  <TextField
+                    label="Minimum Sepet Tutarı (₺)"
+                    type="number"
+                    value={minSepetTutari}
+                    onChange={e => setMinSepetTutari(e.target.value)}
+                    fullWidth
+                    sx={{ mb: 2 }}
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ fontWeight: 'bold', borderRadius: 2 }}
+                    onClick={handleSaveSettings}
+                    disabled={saving}
+                  >
+                    Kaydet
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
               {/* Change Password Section */}
             <Grid item xs={12}>
               <Card sx={{ borderRadius: 2, border: '2px solid #80cbc4' }}>

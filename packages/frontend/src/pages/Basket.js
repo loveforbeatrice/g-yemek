@@ -24,6 +24,8 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
   const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' });
   const [successModal, setSuccessModal] = React.useState(false);
   const [privacyOpen, setPrivacyOpen] = React.useState(false);
+  const [minSepetTutari, setMinSepetTutari] = React.useState(0);
+  const [businessName, setBusinessName] = React.useState('');
 
   React.useEffect(() => {
     const fetchAddresses = async () => {
@@ -43,6 +45,21 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
     };
     fetchAddresses();
   }, []);
+
+  React.useEffect(() => {
+    if (cartItems.length > 0) {
+      setBusinessName(cartItems[0].businessName);
+      // İşletme bilgilerini çek
+      axios.get('http://localhost:3001/api/auth/businesses').then(res => {
+        const business = res.data.businesses.find(b => b.name === cartItems[0].businessName);
+        if (business && business.min_basket_total !== undefined) {
+          setMinSepetTutari(Number(business.min_basket_total));
+        }
+      });
+    } else {
+      setMinSepetTutari(0);
+    }
+  }, [cartItems]);
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => total + Number(item.price) * item.quantity, 0);
@@ -708,31 +725,20 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                   
                   <Button
                     variant="contained"
+                    color="primary"
                     fullWidth
-                    sx={{ 
-                      bgcolor: '#ff8800', 
-                      color: 'white',
-                      fontWeight: 'bold',
-                      borderRadius: '50px',
-                      py: 1.5,
-                      fontSize: '1rem',
-                      letterSpacing: '1px',
-                      boxShadow: '0 6px 12px rgba(255, 136, 0, 0.3)',
-                      '&:hover': { 
-                        bgcolor: '#e67a00',
-                        boxShadow: '0 8px 16px rgba(255, 136, 0, 0.4)',
-                        transform: 'translateY(-2px)'
-                      },
-                      '&:active': {
-                        transform: 'translateY(0)',
-                        boxShadow: '0 4px 8px rgba(255, 136, 0, 0.3)'
-                      },
-                      transition: 'all 0.3s ease'
-                    }}
+                    size="large"
+                    sx={{ mt: 2, fontWeight: 'bold', fontSize: '1.1rem', borderRadius: '12px', py: 1.5 }}
+                    disabled={calculateTotal() + 10 < minSepetTutari}
                     onClick={handlePlaceOrder}
                   >
-                    PLACE ORDER
+                    {calculateTotal() + 10 < minSepetTutari ? `Minimum sepet tutarı: ₺${minSepetTutari}` : t('placeOrder')}
                   </Button>
+                  {calculateTotal() + 10 < minSepetTutari && (
+                    <Alert severity="warning" sx={{ mt: 2, fontFamily: 'Alata, sans-serif' }}>
+                      Sipariş verebilmek için minimum sepet tutarı ₺{minSepetTutari} olmalıdır.
+                    </Alert>
+                  )}
                   
                   <Typography variant="caption" sx={{ 
                     display: 'block',

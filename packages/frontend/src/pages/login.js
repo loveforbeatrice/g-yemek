@@ -100,18 +100,20 @@ const Login = () => {
       }));
     }
   };
-
   const handleFlip = (type) => {
-    // Önce form tipini ayarla
+    console.log('handleFlip called with type:', type, 'current formType:', formType);
+    // Signup için mevcut formType'ı koru, sadece business-signup için değiştir
     if (type === 'business-signup') {
       setFormType('business');
-    } else {
+    } else if (type !== 'signup') {
       setFormType(type);
     }
+    // signup ise formType'ı değiştirme, mevcut seçimi koru
     
     // Flip animasyonu için timeout ekleyelim
     setTimeout(() => {
       setIsFlipped(true);
+      console.log('After flip - formType:', formType, 'isFlipped: true');
     }, 50);
   };
 
@@ -121,15 +123,31 @@ const Login = () => {
       [field]: !prev[field]
     }));
   };
-
   const handleSignIn = async (e) => {
     e.preventDefault();
+    console.log('Sign in attempt with formType:', formType); // Debug log
+    
     try {
       // Backend'e login isteği gönder
       const response = await axios.post('http://localhost:3001/api/auth/login', {
         phone: formData.phone,
         password: formData.password
       });
+      
+      // Kullanıcı tipini kontrol et
+      const userType = response.data.user.isBusiness ? 'business' : 'user';
+      console.log('User type from server:', userType, 'Expected formType:', formType); // Debug log
+      
+      // Yanlış portalda giriş yapılmaya çalışılıyorsa engelle
+      if (userType !== formType) {
+        showSnackbar(
+          userType === 'business' 
+            ? 'Bu hesap bir işletme hesabıdır. Lütfen işletme girişi yapın.' 
+            : 'Bu hesap bir kullanıcı hesabıdır. Lütfen normal giriş yapın.',
+          'error'
+        );
+        return;
+      }
       
       // Token'ı localStorage'a kaydet
       localStorage.setItem('token', response.data.token);
@@ -158,8 +176,9 @@ const Login = () => {
       showSnackbar(t('loginFailed') + ': ' + (error.response?.data?.message || t('loginFailed')), 'error');
     }
   };
-
   const handleSendOtp = async () => {
+    console.log('handleSendOtp called with formType:', formType); // Debug log
+    
     if (!formData.name || !formData.phone || !formData.password || !formData.confirmPassword) {
       showSnackbar(t('fillAllFields'), 'error');
       return;
@@ -246,9 +265,10 @@ const Login = () => {
       if (prevInput) prevInput.focus();
     }
   };
-
   const handleVerifyAndCreateAccount = async (e) => {
     e.preventDefault();
+    console.log('Creating account with formType:', formType, 'isBusiness will be:', formType === 'business'); // Debug log
+    
     const { name, phone, password, confirmPassword } = formData;
 
     if (!modalOtp.join('') || modalOtp.join('').length !== 6) {
@@ -298,24 +318,22 @@ const Login = () => {
         name={field}
         value={formData[field]}
         onChange={handleInputChange}
-      />
-      <button
+      />      <button
         type="button"
-        className="password-toggle"
+        className="password-toggle-btn"
         onClick={() => togglePasswordVisibility(field)}
+        aria-label={showPassword[field] ? "Şifreyi gizle" : "Şifreyi göster"}
       >
-        {showPassword[field] ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+        {showPassword[field] ? <VisibilityOffIcon style={{ fontSize: '20px' }} /> : <VisibilityIcon style={{ fontSize: '20px' }} />}
       </button>
     </div>
   );
-
   const renderForm = () => {
     if (formType === 'business' && !isFlipped) {
       return (
         <form onSubmit={handleSignIn}>
           <h1 className="signin-title">{t('signIn')}</h1>
-          <p className="subtitle business-subtitle">{t('business')}</p>
-          <input 
+          <p className="subtitle business-subtitle">{t('business')}</p>          <input 
             type="text" 
             placeholder={t('phoneNumberMinimal')} 
             className="input-field" 
@@ -323,16 +341,14 @@ const Login = () => {
             value={formData.phone}
             onChange={handleInputChange}
           />
-          {renderPasswordInput(t('password'), "password")}
-          <button type="submit" className="btn-blue">{t('signIn')}</button>
+          {renderPasswordInput(t('password'), "password")}<button type="submit" className="btn-blue">{t('signIn')}</button>
           <a href="#" className="forgot-link" onClick={(e) => { e.preventDefault(); handleForgotPasswordOpen(); }}>{t('forgotPassword')}</a>
         </form>
       );
     } else if (formType === 'business' && isFlipped) {
       return (
         <form onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }}>
-          <h1 className="signin-title">{t('signUp')}</h1>
-          <input 
+          <h1 className="signin-title">{t('signUp')}</h1>          <input 
             type="text" 
             placeholder={t('businessName')} 
             className="input-field" 
@@ -358,8 +374,7 @@ const Login = () => {
     } else if (isFlipped) {
       return (
         <form onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }}>
-          <h1 className="signin-title">{t('signUp')}</h1>
-          <input 
+          <h1 className="signin-title">{t('signUp')}</h1>          <input 
             type="text" 
             placeholder={t('fullName')} 
             className="input-field" 
@@ -383,10 +398,9 @@ const Login = () => {
         </form>
       );
     } else {
-      return (
-        <form onSubmit={handleSignIn}>
+      return (        <form onSubmit={handleSignIn}>
           <h1 className="signin-title">{t('signIn')}</h1>
-          <p className="subtitle user-subtitle">Gülbahçe Yemek</p>
+          <p className="subtitle user-subtitle">{t('gülbahceYemek')}</p>
           <input 
             type="text" 
             placeholder={t('phoneNumberMinimal')} 
@@ -395,8 +409,7 @@ const Login = () => {
             value={formData.phone}
             onChange={handleInputChange}
           />
-          {renderPasswordInput(t('password'), "password")}
-          <button type="submit" className="btn-orange">{t('signIn')}</button>
+          {renderPasswordInput(t('password'), "password")}          <button type="submit" className="btn-orange">{t('signIn')}</button>
           <a href="#" className="forgot-link" onClick={(e) => { e.preventDefault(); handleForgotPasswordOpen(); }}>{t('forgotPassword')}</a>
         </form>
       );
@@ -638,12 +651,11 @@ const Login = () => {
 
   return (
     <div className="login-page">
-      {/* Language Toggle Button */}
-      <Box sx={{ 
+      {/* Language Toggle Button */}      <Box sx={{ 
         position: 'absolute', 
         top: 20, 
         right: 20, 
-        zIndex: 1000
+        zIndex: 9999 // Dil seçicisinin z-index'ini artır
       }}>
         <FormControl size="small">
           <Select
@@ -663,8 +675,7 @@ const Login = () => {
                   </>
                 )}
               </Box>
-            )}
-            sx={{ 
+            )}            sx={{ 
               bgcolor: 'rgba(255, 255, 255, 0.9)',
               backdropFilter: 'blur(10px)',
               border: '1px solid rgba(255, 136, 0, 0.3)',
@@ -673,6 +684,7 @@ const Login = () => {
               height: 36,
               fontSize: '0.9rem',
               fontWeight: 'bold',
+              zIndex: 9999, // Dropdown için yüksek z-index
               '& .MuiSelect-select': {
                 py: 0.5,
                 px: 1.5,
@@ -685,6 +697,13 @@ const Login = () => {
               },
               '&:hover': {
                 bgcolor: 'rgba(255, 136, 0, 0.1)'
+              }
+            }}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  zIndex: 9999 // Dropdown menü için yüksek z-index
+                }
               }
             }}
           >
@@ -883,8 +902,8 @@ const Login = () => {
             </form>
           </div>
         </div>
-      )}
-      <div className={`login-card-container ${formType === 'business' ? 'business-mode' : ''}`}>
+      )}      {/* Desktop Card Layout */}
+      <div className={`login-card-container desktop-layout ${formType === 'business' ? 'business-mode' : ''}`}>
         <div className={`left-card ${leftCardFlipped ? 'flipped' : ''}`}>
           <div className="left-card-front">
             <h2 className="left-heading">{t('welcome')}</h2>
@@ -915,12 +934,12 @@ const Login = () => {
             >
               {t('businessPortal')}
             </button>
-          </div>
-          <div className="left-card-back">
-            <h2 className="left-heading">WELCOME TO</h2>
-            <h2 className="left-heading">BUSINESS PORTAL</h2>
-            <h2 className="left-heading">GÜLBAHÇE YEMEK</h2>
-            <p className="account-warning">{isFlipped ? 'Already Have An Account?' : 'If You Don\'t Have An Account'}</p>
+          </div>          
+          <div className="left-card-back">            
+            <h2 className="left-heading">{t('businessPortalLine1')}</h2>
+            <h2 className="left-heading">{t('businessPortalLine2')}</h2>
+            <h2 className="left-heading">{t('businessPortalLine3')}</h2>
+            <p className="account-warning">{isFlipped ? t('alreadyHaveAccount') : t('ifYouDontHaveAccount')}</p>
             <button 
               type="button"
               className="btn-blue" 
@@ -935,16 +954,16 @@ const Login = () => {
                 }
               }}
             >
-              {isFlipped ? 'SIGN IN' : 'SIGN UP'}
+              {isFlipped ? t('signIn') : t('signUp')}
             </button>
-            <p className="or-text">— or —</p>
-            <p className="business-text">Not A Business?</p>
+            <p className="or-text">{t('or')}</p>
+            <p className="business-text">{t('notABusiness')}</p>
             <button 
               type="button"
               className="btn-orange" 
               onClick={switchToUser}
             >
-              USER PORTAL
+              {t('userPortal')}
             </button>
           </div>
         </div>
@@ -954,6 +973,64 @@ const Login = () => {
           </div>
           <div className="right-card-back">
             {renderForm()}
+          </div>
+        </div>
+      </div>      {/* Mobile Layout */}
+      <div className={`mobile-login-container ${formType === 'business' ? 'business-theme' : ''}`}>{/* Mobile Tab Buttons */}        <div className="mobile-tab-container">          <button 
+            className={`mobile-tab ${formType === 'user' ? 'active' : ''}`}
+            onClick={() => {
+              console.log('Switching to user portal, current formType:', formType, 'isFlipped:', isFlipped);
+              setFormType('user');
+              setLeftCardFlipped(false);
+              // isFlipped durumunu koru - kayıt formundaysa kayıt formunda kal
+              // setIsFlipped(false); // Bu satırı kaldırıyoruz
+              resetForm();
+            }}
+          >
+            {t('userPortal')}
+          </button>
+          <button 
+            className={`mobile-tab ${formType === 'business' ? 'active' : ''}`}
+            onClick={() => {
+              console.log('Switching to business portal, current formType:', formType, 'isFlipped:', isFlipped);
+              setFormType('business');
+              setLeftCardFlipped(true);
+              // isFlipped durumunu koru - kayıt formundaysa kayıt formunda kal
+              // setIsFlipped(false); // Bu satırı kaldırıyoruz
+              resetForm();
+            }}
+          >
+            {t('businessPortal')}
+          </button>
+        </div>{/* Mobile Form Container */}
+        <div className="mobile-form-container">          <div className="mobile-header">
+            <h1 className="mobile-title">
+              {isFlipped ? t('signUp') : t('signIn')}
+            </h1>
+            <p className="mobile-subtitle">{t('gülbahceYemek')}</p>
+          </div>
+          
+          <div className="mobile-form-content">
+            {renderForm()}
+          </div>          <div className="mobile-toggle-section">            <p className="mobile-toggle-text">
+              {isFlipped ? t('alreadyHaveAccount') : t('dontHaveAccount')}
+            </p>            <button 
+              type="button"
+              className="mobile-toggle-btn" 
+              onClick={() => {
+                console.log('Toggle clicked, current state - formType:', formType, 'isFlipped:', isFlipped);
+                if (isFlipped) {
+                  resetForm();
+                  setTimeout(() => setIsFlipped(false), 50);
+                } else {
+                  resetForm();
+                  console.log('Calling handleFlip with signup, formType should remain:', formType);
+                  handleFlip('signup');
+                }
+              }}
+            >
+              {isFlipped ? t('signIn') : t('signUp')}
+            </button>
           </div>
         </div>
       </div>

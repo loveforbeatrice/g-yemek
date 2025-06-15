@@ -481,6 +481,28 @@ p.subtitle.business-subtitle {
   box-sizing: border-box;
 }
 
+/* Şifre göster/gizle butonu için yeni stil */
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: color 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #ff8800;
+}
+
 /* Sign Up formu için password container */
 .right-card-back .password-input-container {
   max-width: 95%;
@@ -505,6 +527,7 @@ p.subtitle.business-subtitle {
   max-width: 100%;
   margin: 0;
   box-sizing: border-box;
+  padding: 15px 45px 15px 18px; /* sağ tarafta buton için yer bırakıldı */
 }
 
 .right-card-back .password-input-container .input-field {
@@ -512,30 +535,14 @@ p.subtitle.business-subtitle {
   max-width: 100%;
   margin: 0;
   box-sizing: border-box;
-  padding: 15px 18px;
+  padding: 15px 45px 15px 18px; /* sağ tarafta buton için yer bırakıldı */
   border: 2px solid rgba(255, 136, 0, 0.3);
   border-radius: 12px;
   font-size: 1rem;
   background-color: white;
 }
 
-.password-toggle {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  color: #666;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
-}
-
-.password-toggle:hover {
-  opacity: 1;
-}
+/* Şifre göster/gizle butonu için eski stil kaldırıldı */
 
 /* Forgot password */
 .forgot-link {
@@ -845,4 +852,487 @@ p.subtitle.business-subtitle {
   margin-top: 0.5rem;
   font-size: 0.9rem;
   color: #8a2be2;
+}
+
+/* Mobile Layout Styles */
+.mobile-login-container {
+  display: none;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto; /* Normal margin'e geri döndür */
+  padding: 20px;
+  background: rgba(254, 243, 226, 0.95);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  min-height: 580px;
+}
+
+.desktop-layout {
+  display: flex;
+}
+
+/* Mobile Tab Container */
+.mobile-tab-container {
+  display: flex;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  padding: 6px;
+  margin-bottom: 30px;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-tab {
+  flex: 1;
+  padding: 14px 16px;
+  border: none;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Alata', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobile-tab.active {
+  background: #ff8800 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(255, 136, 0, 0.4);
+  transform: translateY(-1px);
+  font-weight: 800 !important;
+}
+
+.mobile-tab:hover:not(.active) {
+  background: rgba(255, 136, 0, 0.1);
+  color: #ff8800;
+}
+
+/* Mobile Form Container */
+.mobile-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mobile-header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.mobile-title {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #9d8df1;
+  margin: 0 0 8px 0;
+  font-family: 'Alata', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mobile-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0;
+  font-style: italic;
+  font-family: 'Alata', sans-serif;
+  font-weight: 400;
+}
+
+/* ========================================
+   MOBİL FORM SPACING AYARLARI - TÜM ARALIKLAR BURADA
+   ======================================== */
+
+/* Ana form container aralığı */
+.mobile-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Form content genel aralığı */
+}
+
+/* Form içindeki input'lar arası aralık */
+.mobile-form-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Input'lar arası ana aralık - BURADAN DEĞİŞTİR */
+}
+
+/* Password input container margin'leri */
+.mobile-form-content .password-input-container {
+  position: relative;
+  width: 100%;
+  margin: 0 !important; /* Password container ekstra margin'i - BURADAN DEĞİŞTİR */
+  padding: 0; /* Password container ekstra padding'i - BURADAN DEĞİŞTİR */
+}
+
+/* Password input'ların kendisi */
+.mobile-form-content .password-input-container input {
+  width: 100%;
+  padding-right: 50px;
+  margin: 0; /* Password input ekstra margin'i - BURADAN DEĞİŞTİR */
+}
+
+/* Normal input'ların margin/padding'i */
+.mobile-form-content .input-field {
+  width: 100%;
+  padding: 14px 16px; /* Input içi padding */
+  border: 2px solid rgba(255, 136, 0, 0.3);
+  border-radius: 12px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  font-family: 'Alata', sans-serif;
+  margin: 0; /* Input'ların ekstra margin'i - BURADAN DEĞİŞTİR */
+}
+
+/* ======================================== */
+
+/* Mobile Form Content - Genel Stil */
+.mobile-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Tüm form içeriği için genel aralık */
+}
+
+/* Mobil başlık stilleri */
+.mobile-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #9d8df1;
+  margin: 0;
+  text-align: center;
+  position: relative;
+}
+
+/* Mobil alt başlık stilleri */
+.mobile-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Mobil form alanları için stiller */
+.mobile-form-content .input-field {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid rgba(255, 136, 0, 0.3);
+  border-radius: 12px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  font-family: 'Alata', sans-serif;
+}
+
+/* Mobil form alanları odaklandığında */
+.mobile-form-content .input-field:focus {
+  outline: none;
+  border-color: #ff8800;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(255, 136, 0, 0.1);
+}
+
+/* Mobil butonlar için stiller */
+.mobile-form-content .btn-orange,
+.mobile-form-content .btn-blue {
+  width: 100%;
+  padding: 16px;
+  background: #ff8800;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Alata', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(255, 136, 0, 0.3);
+}
+
+/* Mobil butonlar için hover efektleri */
+.mobile-form-content .btn-orange:hover,
+.mobile-form-content .btn-blue:hover {
+  background: #e67700;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 136, 0, 0.4);
+}
+
+/* Mobil forgot link stilleri */
+.mobile-form-content .forgot-link {
+  text-align: center;
+  color: #9d8df1;
+  text-decoration: none;
+  font-size: 14px;
+  font-family: 'Alata', sans-serif;
+}
+
+/* Mobil forgot link hover efekti */
+.mobile-form-content .forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* Mobil form içerikleri için genel stil ayarları */
+.mobile-form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Tüm form içerikleri için aralık */
+}
+
+/* Mobil form başlıkları için stil ayarları */
+.mobile-header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* Mobil form içerik alanları için stil ayarları */
+.mobile-form-content .input-field {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid rgba(255, 136, 0, 0.3);
+  border-radius: 12px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  font-family: 'Alata', sans-serif;
+}
+
+/* Mobil form içerik alanları odaklandığında */
+.mobile-form-content .input-field:focus {
+  outline: none;
+  border-color: #ff8800;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(255, 136, 0, 0.1);
+}
+
+/* Mobil butonlar için stil ayarları */
+.mobile-form-content .btn-orange,
+.mobile-form-content .btn-blue {
+  width: 100%;
+  padding: 16px;
+  background: #ff8800;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Alata', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(255, 136, 0, 0.3);
+}
+
+/* Mobil butonlar için hover efektleri */
+.mobile-form-content .btn-orange:hover,
+.mobile-form-content .btn-blue:hover {
+  background: #e67700;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 136, 0, 0.4);
+}
+
+/* Mobil forgot link stilleri */
+.mobile-form-content .forgot-link {
+  text-align: center;
+  color: #9d8df1;
+  text-decoration: none;
+  font-size: 14px;
+  font-family: 'Alata', sans-serif;
+}
+
+.mobile-form-content .forgot-link:hover {
+  text-decoration: underline;
+}
+
+.mobile-form-content .signin-title {
+  display: none;
+}
+
+.mobile-form-content .subtitle {
+  display: none;
+}
+
+/* Mobile Toggle Section */
+.mobile-toggle-section {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 136, 0, 0.2);
+}
+
+.mobile-toggle-text {
+  color: #666;
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-family: 'Alata', sans-serif;
+}
+
+.mobile-toggle-btn {
+  background: #9d8df1;
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 25px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Alata', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(157, 141, 241, 0.3);
+}
+
+.mobile-toggle-btn:hover {
+  background: #8b7ae6;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(157, 141, 241, 0.4);
+}
+
+/* Mobile Password Input Container */
+.mobile-form-content .password-input-container {
+  position: relative;
+  width: 100%;
+  margin: 0 !important; /* Override genel margin ayarını */
+  padding: 0;
+}
+
+.mobile-form-content .password-input-container input {
+  width: 100%;
+  padding-right: 50px;
+  margin: 0;
+}
+
+.mobile-form-content .password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .desktop-layout {
+    display: none;
+  }
+  
+  .mobile-login-container {
+    display: block;
+  }
+  
+  .login-page {
+    padding: 20px 16px;
+    min-height: 100vh;
+    align-items: flex-start;
+    padding-top: 80px; /* Dil seçicisi için daha fazla boşluk */
+  }
+  
+  /* Adjust modal for mobile */
+  .modal-overlay {
+    padding: 20px;
+  }
+  
+  .modal-content {
+    width: 100%;
+    max-width: 350px;
+    padding: 2rem 1.5rem;
+    margin: 0 auto;
+  }
+  
+  .otp-input-container {
+    gap: 8px;
+  }
+  
+  .otp-input {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-login-container {
+    margin: 0 10px;
+    padding: 16px;
+    min-height: 520px;
+  }
+  
+  .mobile-title {
+    font-size: 1.9rem;
+  }
+  
+  .mobile-subtitle {
+    font-size: 1rem;
+  }
+  
+  .mobile-form-content .input-field {
+    padding: 12px 14px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .mobile-form-content .btn-orange {
+    padding: 14px;
+    font-size: 15px;
+  }
+  
+  .mobile-form-content .btn-blue {
+    padding: 14px;
+    font-size: 15px;
+  }
+  
+  .mobile-tab {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  
+  .mobile-toggle-btn {
+    padding: 10px 28px;
+    font-size: 14px;
+  }
+}
+
+/* Business Theme - Turkuaz Colors */
+.mobile-login-container.business-theme .mobile-tab.active {
+  background: #00b8a3 !important; /* Turkuaz */
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(0, 184, 163, 0.4);
+  transform: translateY(-1px);
+  font-weight: 800 !important;
+}
+
+.mobile-login-container.business-theme .mobile-tab:hover:not(.active) {
+  background: rgba(0, 184, 163, 0.1);
+  color: #00b8a3;
+}
+
+.mobile-login-container.business-theme .mobile-form-content .btn-orange,
+.mobile-login-container.business-theme .mobile-form-content .btn-blue {
+  background: #00b8a3 !important; /* Turkuaz */
+  box-shadow: 0 4px 12px rgba(0, 184, 163, 0.3);
+}
+
+.mobile-login-container.business-theme .mobile-form-content .btn-orange:hover,
+.mobile-login_container.business-theme .mobile-form-content .btn-blue:hover {
+  background: #009688 !important; /* Darker turkuaz */
+  box-shadow: 0 6px 16px rgba(0, 184, 163, 0.4);
+}
+
+.mobile-login-container.business-theme .mobile-toggle-btn {
+  background: #9d8df1 !important; /* Keep toggle button purple */
 }
