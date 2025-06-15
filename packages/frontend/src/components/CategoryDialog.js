@@ -18,8 +18,10 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function CategoryDialog({ open, handleClose }) {
+  const { t } = useLanguage();
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
@@ -138,7 +140,7 @@ function CategoryDialog({ open, handleClose }) {
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Manage Categories</DialogTitle>
+      <DialogTitle>{t('manageCategoriesTitle')}</DialogTitle>
       <DialogContent>
         {loading && categories.length === 0 ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
@@ -155,7 +157,7 @@ function CategoryDialog({ open, handleClose }) {
             {/* Add new category */}
             <Box sx={{ display: 'flex', mb: 2, mt: 1 }}>
               <TextField
-                label="New Category"
+                label={t('newCategory')}
                 variant="outlined"
                 fullWidth
                 value={newCategory}
@@ -170,7 +172,7 @@ function CategoryDialog({ open, handleClose }) {
                 sx={{ ml: 1 }}
                 disabled={!newCategory.trim() || loading}
               >
-                Add
+                {t('add')}
               </Button>
             </Box>
             
@@ -251,7 +253,7 @@ function CategoryDialog({ open, handleClose }) {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary" disabled={loading}>
-          Close
+          {t('close')}
         </Button>
       </DialogActions>
     </Dialog>

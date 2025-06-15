@@ -801,7 +801,7 @@ function Header({ cartItems, resetCart }) {
         {/* Bildirim Başlığı */}
         <Box sx={{ px: 2, py: 2, borderBottom: '1px solid #f0f0f0', textAlign: 'center' }}>
           <Typography sx={{ fontWeight: 'bold', color: '#9d8df1', fontSize: '1.3rem', fontFamily: '"Alata", sans-serif' }}>
-            Bildirimler
+            {t('notificationsTitle')}
           </Typography>
         </Box>
         
@@ -848,7 +848,7 @@ function Header({ cartItems, resetCart }) {
         ) : (
           <Box sx={{ p: 3, textAlign: 'center' }}>
             <Typography sx={{ color: '#666', fontSize: '1rem', fontFamily: '"Alata", sans-serif' }}>
-              Bildirim bulunmuyor
+              {t('noNotifications')}
             </Typography>
           </Box>
         )}

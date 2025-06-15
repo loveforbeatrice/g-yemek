@@ -14,8 +14,10 @@ import CategoryDialog from '../components/CategoryDialog';
 import BusinessLayout from '../components/BusinessLayout';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function BusinessMenu() {
+  const { t } = useLanguage();
   const [menuItems, setMenuItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -177,7 +179,7 @@ function BusinessMenu() {
           startIcon={<CategoryIcon />}
           onClick={() => setOpenCategoryDialog(true)}
         >
-          Manage Categories
+          {t('manageCategories')}
         </Button>
         <Button
           variant="contained"
@@ -185,7 +187,7 @@ function BusinessMenu() {
           startIcon={<AddIcon />}
           onClick={() => handleOpenDialog()}
         >
-          Add new products
+          {t('addNewProduct')}
         </Button>
       </Box>
       {error && (<Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>)}

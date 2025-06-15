@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Grid, Card, CardContent, Typography, Box, Button, IconButton, Snackbar, Alert } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import axios from 'axios';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const FavoritesPage = ({ cartItems, addToCart, removeFromCart }) => {
+  const { t, language } = useLanguage();
   const [favoriteItems, setFavoriteItems] = useState([]);
   const [businessMap, setBusinessMap] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -72,7 +74,7 @@ const FavoritesPage = ({ cartItems, addToCart, removeFromCart }) => {
   return (
     <Box sx={{ width: '100%', maxWidth: '1400px', mx: 'auto', px: 4, background: '#fef3e2', borderRadius: 3, minHeight: '100vh', mt: 4, pb: 6 }}>
       <Typography variant="h2" align="center" fontWeight="bold" sx={{ mb: 3, fontFamily: 'Alata, sans-serif' }}>
-        MY FAVORITES
+        {language === 'tr' ? 'FAVORİLERİM' : 'MY FAVORITES'}
       </Typography>
 
       <Grid container columnSpacing={6} rowSpacing={3}>

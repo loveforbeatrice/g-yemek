@@ -287,7 +287,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                       }}
                     >
                       <ShoppingBasketIcon fontSize="small" sx={{ color: '#ff8800' }} />
-                      Your Order Items
+                      {t('yourOrderItems')}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography 
@@ -302,14 +302,14 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                           fontWeight: 'bold'  
                         }}
                       >
-                        {cartItems.length} items
+                        {cartItems.length} {t('items')}
                       </Typography>
                       <Button
                         variant="outlined"
                         sx={{
-                          borderRadius: 5,
                           borderColor: '#ff8800',
                           color: '#ff8800',
+                          borderRadius: '5px',
                           fontWeight: 'bold',
                           px: 2,
                           py: 0.5,
@@ -325,7 +325,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                         }}
                         onClick={handleClearCart}
                       >
-                        Sepeti Boşalt
+                        {t('clearCart')}
                       </Button>
                     </Box>
                   </Box>
@@ -452,7 +452,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                             width: 'max-content'
                           }}
                         >
-                          Remove
+                          {t('remove')}
                         </Button>
                       </Box>
                     </Box>
@@ -481,18 +481,18 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                     color: '#333',
                     fontFamily: '"Alata", sans-serif'
                   }}>
-                    Special Instructions
+                    {t('specialInstructions')}
                   </Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontFamily: '"Alata", sans-serif' }}>
-                  Let us know if you have specific preparation preferences or allergies.
+                  {t('specialInstructionsDesc')}
                 </Typography>
                 <TextField
                   fullWidth
                   multiline
                   rows={3}
                   variant="outlined"
-                  placeholder="E.g., Extra spicy, no onions, allergen concerns, etc..."
+                  placeholder={t('specialInstructionsPlaceholder')}
                   value={orderNote}
                   onChange={handleOrderNoteChange}
                   sx={{
@@ -540,12 +540,12 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                     color: '#333',
                     fontFamily: '"Alata", sans-serif'
                   }}>
-                    Delivery Address
+                    {t('deliveryAddress')}
                   </Typography>
                 </Box>
 
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontFamily: '"Alata", sans-serif' }}>
-                  Select where you want your order to be delivered.
+                  {t('deliveryAddressDesc')}
                 </Typography>
 
                 <FormControl fullWidth variant="outlined">
@@ -577,10 +577,10 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                       <MenuItem value="" disabled>
                         <Box sx={{ p: 1 }}>
                           <Typography sx={{ fontWeight: 'bold', color: '#666', fontFamily: '"Alata", sans-serif' }}>
-                            No addresses found
+                            {t('noAddressesFound')}
                           </Typography>
                           <Typography sx={{ color: '#888', fontSize: '0.85rem', fontFamily: '"Alata", sans-serif' }}>
-                            You can add one from the Addresses page.
+                            {t('addAddressFromAddressesPage')}
                           </Typography>
                         </Box>
                       </MenuItem>
@@ -636,7 +636,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                   component="a"
                   href="/addresses"
                 >
-                  Manage Addresses
+                  {t('manageAddresses')}
                 </Button>
               </Paper>
             </Box>
@@ -668,7 +668,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                       fontWeight: 'bold', 
                       color: '#333' 
                     }}>
-                      Order Summary
+                      {t('orderSummary')}
                     </Typography>
                   </Box>
                   
@@ -687,7 +687,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                         color: '#555'
                       }}>
                         <ShoppingBasketIcon fontSize="small" sx={{ color: '#777' }} />
-                        Subtotal
+                        {t('subtotal')}
                       </Typography>
                       <Typography sx={{ 
                         fontFamily: '"Alata", sans-serif',
@@ -704,7 +704,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                         color: '#555'
                       }}>
                         <LocalShippingIcon fontSize="small" sx={{ color: '#777' }} />
-                        Delivery Fee
+                        {t('deliveryFee')}
                       </Typography>
                       <Typography sx={{ 
                         fontFamily: '"Alata", sans-serif',
@@ -760,7 +760,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                       fontWeight: 'bold',
                       color: '#333'
                     }}>
-                      Total
+                      {t('total')}
                     </Typography>
                     <Typography variant="h6" sx={{ 
                       fontFamily: '"Alata", sans-serif', 

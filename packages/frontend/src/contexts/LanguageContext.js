@@ -234,6 +234,10 @@ const translations = {
     orderSuccess: 'Sipariş Başarılı',
     orderSuccessMessage: 'Siparişiniz başarıyla alındı!',
     orderMinimumBasketWarning: 'Sipariş verebilmek için minimum sepet tutarı ₺{minTotal} olmalıdır.',
+    clearCart: 'SEPETİ BOŞALT',
+    specialInstructionsDesc: 'Hazırlık tercihleriniz veya alerjileriniz varsa belirtin.',
+    specialInstructionsPlaceholder: 'Örn: Çok acılı, soğansız, alerji uyarısı vb...',
+    items: 'Ürün',
     
     // Orders Page
     orders: {
@@ -361,7 +365,27 @@ const translations = {
       closed: 'KAPALI',
       clickToClose: 'Kapatmak için tıklayın',
       clickToOpen: 'Açmak için tıklayın'
-    }
+    },
+    yourOrderItems: "Sipariş Ürünleriniz",
+    items: "Ürün",
+    specialInstructions: "Özel Talimatlar",
+    specialInstructionsDesc: "Hazırlık tercihleriniz veya alerjileriniz varsa belirtin.",
+    specialInstructionsPlaceholder: "Örn: Çok acılı, soğansız, alerji uyarısı vb...",
+    deliveryAddress: "Teslimat Adresi",
+    deliveryAddressDesc: "Siparişinizin teslim edileceği adresi seçin.",
+    noAddressesFound: "Adres bulunamadı",
+    addAddressFromAddressesPage: "Adresler sayfasından yeni adres ekleyebilirsiniz.",
+    manageAddresses: "Adresleri Yönet",
+    placeOrder: "Siparişi Tamamla",
+    remove: "Kaldır",
+    noNotifications: "Bildirim bulunmuyor",
+    notificationsTitle: "Bildirimler",
+    manageCategories: "Kategorileri Yönet",
+    addNewProduct: "Yeni Ürün Ekle",
+    manageCategoriesTitle: "Kategorileri Yönet",
+    newCategory: "Yeni Kategori",
+    add: "Ekle",
+    close: "Kapat"
   },  en: {
     // Auth & Login
     welcome: 'WELCOME TO',
@@ -540,7 +564,7 @@ const translations = {
     info: 'Info',
     quantity: 'Quantity',
     price: 'Price',
-    total: 'Total',
+    total: 'Toplam',
     search: 'Search',
     home: 'Home',
     logout: 'Logout',
@@ -581,6 +605,11 @@ const translations = {
     completeOrder: 'Complete Order',
     orderSuccess: 'Order Successful',
     orderSuccessMessage: 'Your order has been successfully placed!',
+    orderMinimumBasketWarning: 'To place an order, the minimum basket total must be ₺{minTotal}.',
+    clearCart: 'CLEAR CART',
+    specialInstructionsDesc: 'Let us know if you have specific preparation preferences or allergies.',
+    specialInstructionsPlaceholder: 'E.g., Extra spicy, no onions, allergen concerns, etc...',
+    items: 'Items',
     
     // Orders Page
     orders: {
@@ -591,7 +620,7 @@ const translations = {
       unknownBusiness: 'Unknown Business',
       pieces: 'pcs',
       note: 'Note',
-      total: 'Total',
+      total: 'Toplam',
       addAllToCart: 'Add All to Cart'
     },
     
@@ -623,7 +652,7 @@ const translations = {
       ordersNotDelivered: 'Failed to mark orders as delivered.',
       customer: 'Customer',
       note: 'Note',
-      total: 'Total',
+      total: 'Toplam',
       confirm: 'CONFIRM',
       reject: 'REJECT',
       rejectConfirm: 'Reject Order',
@@ -688,7 +717,7 @@ const translations = {
       pending: 'Pending',
       noHistory: 'No order history.',
       note: 'Note',
-      total: 'Total'
+      total: 'Toplam'
     },
     
     // Business Layout (Sidebar Menu)
@@ -707,7 +736,17 @@ const translations = {
       closed: 'CLOSED',
       clickToClose: 'Click to close',
       clickToOpen: 'Click to open'
-    }
+    },
+    noNotifications: "No notifications",
+    notificationsTitle: "Notifications",
+    manageCategories: "Manage Categories",
+    addNewProduct: "Add New Product",
+    manageCategoriesTitle: "Manage Categories",
+    newCategory: "New Category",
+    add: "Add",
+    close: "Close",
+    specialInstructions: "Special Instructions",
+    yourOrderItems: "Your Order Items"
   }
 };
 
