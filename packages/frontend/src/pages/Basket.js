@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Typography, Box, Card, CardContent, CardMedia, IconButton, Button, Divider, TextField, Paper, Alert, MenuItem, Select, FormControl, Snackbar, Modal, Backdrop, Fade } from '@mui/material';
+import { Container, Typography, Box, Card, CardContent, CardMedia, IconButton, Button, Divider, TextField, Paper, Alert, MenuItem, Select, FormControl, Snackbar, Modal, Backdrop, Fade, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -26,6 +26,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
   const [privacyOpen, setPrivacyOpen] = React.useState(false);
   const [minSepetTutari, setMinSepetTutari] = React.useState(0);
   const [businessName, setBusinessName] = React.useState('');
+  const [clearCartDialogOpen, setClearCartDialogOpen] = React.useState(false);
 
   React.useEffect(() => {
     const fetchAddresses = async () => {
@@ -143,6 +144,19 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to place your order!', severity: 'error' });
     }
+  };
+
+  const handleClearCart = () => {
+    setClearCartDialogOpen(true);
+  };
+
+  const handleClearCartConfirm = () => {
+    resetCart && resetCart();
+    setClearCartDialogOpen(false);
+  };
+
+  const handleClearCartCancel = () => {
+    setClearCartDialogOpen(false);
   };
 
   return (
@@ -309,7 +323,7 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                             color: '#e67a00',
                           }
                         }}
-                        onClick={resetCart}
+                        onClick={handleClearCart}
                       >
                         Sepeti Boşalt
                       </Button>
@@ -938,6 +952,73 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
           </Box>
         </Fade>
       </Modal>
+
+      {/* Clear Cart Confirmation Dialog */}
+      <Dialog
+        open={clearCartDialogOpen}
+        onClose={handleClearCartCancel}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            border: '2px solid #ff8800',
+            fontFamily: '"Alata", sans-serif',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          textAlign: 'center', 
+          color: '#9d8df1', 
+          fontSize: '1.3rem',
+          fontWeight: 'bold',
+          fontFamily: '"Alata", sans-serif'
+        }}>
+          Sepeti Boşalt
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ 
+            textAlign: 'center',
+            color: '#666',
+            fontSize: '1.1rem',
+            fontFamily: '"Alata", sans-serif'
+          }}>
+            Sepetinizi boşaltmak istediğinize emin misiniz?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ 
+          justifyContent: 'center',
+          gap: 2,
+          pb: 3
+        }}>
+          <Button
+            onClick={handleClearCartCancel}
+            sx={{
+              color: '#666',
+              fontSize: '1.1rem',
+              fontFamily: '"Alata", sans-serif',
+              '&:hover': {
+                backgroundColor: '#f5f5f5'
+              }
+            }}
+          >
+            İptal
+          </Button>
+          <Button
+            onClick={handleClearCartConfirm}
+            variant="contained"
+            sx={{
+              backgroundColor: '#ff8800',
+              color: 'white',
+              fontSize: '1.1rem',
+              fontFamily: '"Alata", sans-serif',
+              '&:hover': {
+                backgroundColor: '#e67a00'
+              }
+            }}
+          >
+            Sepeti Boşalt
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

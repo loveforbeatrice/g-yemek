@@ -224,7 +224,7 @@ function App() {
           } />
           <Route path="/orders" element={
             <Layout isAuthenticated={isAuthenticated} cartItems={cartItems} resetCart={resetCart}>
-              <Orders addToCart={addToCart} />
+              <Orders addToCart={addToCart} cartItems={cartItems} />
             </Layout>
           } />
           <Route path="/restaurants" element={

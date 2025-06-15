@@ -128,7 +128,15 @@ const FavoritesPage = ({ cartItems, addToCart, removeFromCart }) => {
                       <Box sx={{ display: 'flex', alignItems: 'center', border: '2px solid #9d8df1', borderRadius: '30px', px: 2, py: 0.5, minWidth: 100, justifyContent: 'center', background: '#fff' }}>
                         <Button 
                           variant="text" 
-                          sx={{ minWidth: 0, color: '#ff8800', fontSize: '2rem', fontWeight: 700, p: 0, lineHeight: 1 }} 
+                          disabled={(cartItems.find(i => i.id === item.id)?.quantity || 0) === 0}
+                          sx={{ 
+                            minWidth: 0, 
+                            color: (cartItems.find(i => i.id === item.id)?.quantity || 0) === 0 ? '#ccc' : '#ff8800', 
+                            fontSize: '2rem', 
+                            fontWeight: 700, 
+                            p: 0, 
+                            lineHeight: 1 
+                          }} 
                           onClick={() => removeFromCart(item.id)}
                         >
                           –
@@ -140,6 +148,17 @@ const FavoritesPage = ({ cartItems, addToCart, removeFromCart }) => {
                           variant="text" 
                           sx={{ minWidth: 0, color: '#ff8800', fontSize: '2rem', fontWeight: 700, p: 0, lineHeight: 1 }} 
                           onClick={() => {
+                            if (cartItems.length > 0) {
+                              const firstItem = cartItems[0];
+                              if (firstItem.businessName !== item.businessName) {
+                                setSnackbar({
+                                  open: true,
+                                  message: 'Sepetinizde başka bir işletmenin ürünü bulunmaktadır. Önce sepetinizi boşaltın.',
+                                  severity: 'error'
+                                });
+                                return;
+                              }
+                            }
                             addToCart({ ...item, businessId: businessMap[item.businessName] });
                             setSnackbar({ 
                               open: true, 

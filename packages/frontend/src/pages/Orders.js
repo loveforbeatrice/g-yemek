@@ -18,7 +18,7 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 
-function Orders({ addToCart }) {
+function Orders({ addToCart, cartItems }) {
   const [orders, setOrders] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,15 +44,33 @@ function Orders({ addToCart }) {
   }, []);
 
   const handleAddGroupToCart = (orderGroup) => {
+    // Sepette başka bir işletmenin ürünü var mı kontrol et
+    if (cartItems.length > 0) {
+      const firstItem = cartItems[0];
+      const firstBusinessName = firstItem.businessName;
+      const newBusinessName = orderGroup[0]?.business?.name;
+
+      if (firstBusinessName && newBusinessName && firstBusinessName !== newBusinessName) {
+        setSnackbar({
+          open: true,
+          message: 'Sepetinizde başka bir işletmenin ürünü bulunmaktadır. Önce sepetinizi boşaltın.',
+          severity: 'error'
+        });
+        return;
+      }
+    }
+
     orderGroup.forEach(order => {
       for (let i = 0; i < order.quantity; i++) {
-        addToCart({ ...order.menuItem, businessId: order.business?.id });
+        addToCart({ 
+          ...order.menuItem, 
+          businessId: order.business?.id,
+          businessName: order.business?.name 
+        });
       }
     });
     setSnackbar({ open: true, message: t('orders.addedToCart'), severity: 'success' });
   };
-
-  const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
 
   if (loading) {
     return (
@@ -151,11 +169,26 @@ function Orders({ addToCart }) {
       )}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={2000}
-        onClose={handleSnackbarClose}
-        message={snackbar.message}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      />
+      >
+        <Alert 
+          severity={snackbar.severity} 
+          sx={{ 
+            width: '100%',
+            border: '1px solid #ff8800',
+            bgcolor: '#fff8f0',
+            color: '#ff6d00',
+            fontFamily: '"Alata", sans-serif',
+            fontWeight: 'bold',
+            fontSize: '1rem',
+            '& .MuiAlert-icon': { color: '#4CAF50' }
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

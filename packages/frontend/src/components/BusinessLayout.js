@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, Container, Paper, IconButton, Drawer, useMediaQuery, useTheme, AppBar, Toolbar } from '@mui/material';
+import { Box, Typography, Button, Container, Paper, IconButton, Drawer, useMediaQuery, useTheme, AppBar, Toolbar, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import HistoryIcon from '@mui/icons-material/History';
@@ -18,16 +18,27 @@ function BusinessLayout({ children }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const { t } = useLanguage();
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const handleLogout = () => {
+    setLogoutDialogOpen(true);
+  };
+
+  const handleLogoutConfirm = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    setLogoutDialogOpen(false);
     navigate('/login');
   };
+
+  const handleLogoutCancel = () => {
+    setLogoutDialogOpen(false);
+  };
+
   const menuItems = [
     { label: t('businessLayout.orders'), icon: <ShoppingBasketIcon />, path: '/business-orders' },
     { label: t('businessLayout.orderHistory'), icon: <HistoryIcon />, path: '/business-order-history' },
@@ -298,6 +309,73 @@ function BusinessLayout({ children }) {
           {children}
         </Container>
       </Box>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog
+        open={logoutDialogOpen}
+        onClose={handleLogoutCancel}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            border: '2px solid #ff8800',
+            fontFamily: '"Alata", sans-serif',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          textAlign: 'center', 
+          color: '#9d8df1', 
+          fontSize: '1.3rem',
+          fontWeight: 'bold',
+          fontFamily: '"Alata", sans-serif'
+        }}>
+          Çıkış Onayı
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ 
+            textAlign: 'center',
+            color: '#666',
+            fontSize: '1.1rem',
+            fontFamily: '"Alata", sans-serif'
+          }}>
+            Çıkış yapmak istediğinize emin misiniz?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ 
+          justifyContent: 'center',
+          gap: 2,
+          pb: 3
+        }}>
+          <Button
+            onClick={handleLogoutCancel}
+            sx={{
+              color: '#666',
+              fontSize: '1.1rem',
+              fontFamily: '"Alata", sans-serif',
+              '&:hover': {
+                backgroundColor: '#f5f5f5'
+              }
+            }}
+          >
+            İptal
+          </Button>
+          <Button
+            onClick={handleLogoutConfirm}
+            variant="contained"
+            sx={{
+              backgroundColor: '#ff8800',
+              color: 'white',
+              fontSize: '1.1rem',
+              fontFamily: '"Alata", sans-serif',
+              '&:hover': {
+                backgroundColor: '#e67a00'
+              }
+            }}
+          >
+            Çıkış Yap
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

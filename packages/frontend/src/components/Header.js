@@ -12,7 +12,11 @@ import {
   Button,
   Backdrop,
   Drawer,
-  Badge
+  Badge,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -45,6 +49,7 @@ function Header({ cartItems, resetCart }) {
   // Rating Dialog states
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   // Fetch notifications from the backend
   const fetchNotifications = async () => {
@@ -272,16 +277,22 @@ function Header({ cartItems, resetCart }) {
   };
 
   const handleLogout = () => {
-    // Çıkış işlemleri
+    setLogoutDialogOpen(true);
+    handleProfileClose();
+  };
+
+  const handleLogoutConfirm = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
     resetCart && resetCart();
     console.log('Çıkış yapıldı');
-    handleProfileClose();
-    
-    // Login sayfasına yönlendir
+    setLogoutDialogOpen(false);
     navigate('/login');
+  };
+
+  const handleLogoutCancel = () => {
+    setLogoutDialogOpen(false);
   };
 
   const cartCount = cartItems?.reduce((sum, item) => sum + item.quantity, 0);
@@ -849,6 +860,73 @@ function Header({ cartItems, resetCart }) {
         handleClose={handleRatingDialogClose}
         orderData={selectedOrder}
       />
+      
+      {/* Logout Confirmation Dialog */}
+      <Dialog
+        open={logoutDialogOpen}
+        onClose={handleLogoutCancel}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            border: '2px solid #ff8800',
+            fontFamily: '"Alata", sans-serif',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          textAlign: 'center', 
+          color: '#9d8df1', 
+          fontSize: '1.3rem',
+          fontWeight: 'bold',
+          fontFamily: '"Alata", sans-serif'
+        }}>
+          Çıkış Onayı
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ 
+            textAlign: 'center',
+            color: '#666',
+            fontSize: '1.1rem',
+            fontFamily: '"Alata", sans-serif'
+          }}>
+            Çıkış yapmak istediğinize emin misiniz?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ 
+          justifyContent: 'center',
+          gap: 2,
+          pb: 3
+        }}>
+          <Button
+            onClick={handleLogoutCancel}
+            sx={{
+              color: '#666',
+              fontSize: '1.1rem',
+              fontFamily: '"Alata", sans-serif',
+              '&:hover': {
+                backgroundColor: '#f5f5f5'
+              }
+            }}
+          >
+            İptal
+          </Button>
+          <Button
+            onClick={handleLogoutConfirm}
+            variant="contained"
+            sx={{
+              backgroundColor: '#ff8800',
+              color: 'white',
+              fontSize: '1.1rem',
+              fontFamily: '"Alata", sans-serif',
+              '&:hover': {
+                backgroundColor: '#e67a00'
+              }
+            }}
+          >
+            Çıkış Yap
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
