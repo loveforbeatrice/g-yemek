@@ -445,9 +445,14 @@ function BusinessOrders() {
         ref={audioRef} 
         src="/sounds/order-notification.mp3" 
         preload="auto"
-      />
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <ResponsivePageTitle>{t('businessOrders.title')}</ResponsivePageTitle>
+      />        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <ResponsivePageTitle 
+          sx={{ 
+            fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.75rem' } 
+          }}
+        >
+          {t('businessOrders.title')}
+        </ResponsivePageTitle>
         
         {/* Butonlar gizlendi ama işlevsellik korundu - gizli elemanlar ile */}
         <Box sx={{ display: 'none' }}>
@@ -470,26 +475,126 @@ function BusinessOrders() {
           }, [])}
         </Box>
       </Box>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="order status tabs">
-          <Tab 
-            label={
-              <Badge badgeContent={orderCounts.idleOrders} color="primary">
-                {t('businessOrders.idleOrders')}
-              </Badge>
-            } 
-          />
-          <Tab 
-            label={
-              <Badge badgeContent={orderCounts.awaitingDelivery} color="primary">
-                {t('businessOrders.awaitingDelivery')}
-              </Badge>
-            } 
-          />
-        </Tabs>
-      </Box>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}        <Box sx={{ mb: 3, maxWidth: '100%', overflowX: 'hidden' }}>          <Tabs 
+            value={activeTab} 
+            onChange={handleTabChange} 
+            aria-label="order status tabs"
+            variant="standard"
+            sx={{
+              '& .MuiTabs-flexContainer': {
+                borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+              },
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+                fontWeight: 500,
+                color: 'text.primary',
+                opacity: 0.7,
+                '&.Mui-selected': {
+                  fontWeight: 700,
+                  color: '#ff8800',
+                  opacity: 1
+                },
+                minWidth: 0,
+                py: 1.5,
+                px: { xs: 1, sm: 2, md: 3 },
+                height: 'auto',
+                minHeight: { xs: '60px', sm: '56px' }
+              }
+            }}
+            TabIndicatorProps={{
+              style: {
+                backgroundColor: '#ff8800',
+                height: 3
+              }
+            }}
+          >
+            <Tab 
+              label={
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 1
+                  }}
+                >
+                  <Box sx={{ 
+                    maxWidth: '100%', 
+                    textAlign: 'center',
+                    whiteSpace: 'nowrap',
+                    lineHeight: 1.3
+                  }}>
+                    {t('businessOrders.idleOrders')}
+                  </Box>
+                  {orderCounts.idleOrders > 0 && (
+                    <Box 
+                      component="span" 
+                      sx={{ 
+                        display: 'inline-flex',
+                        bgcolor: '#ff8800',
+                        color: 'white',
+                        borderRadius: '12px',
+                        minWidth: '22px',
+                        height: '22px',
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: 1,
+                        px: 1
+                      }}
+                    >
+                      {orderCounts.idleOrders}
+                    </Box>
+                  )}
+                </Box>
+              } 
+            />
+            <Tab 
+              label={
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 1
+                  }}
+                >
+                  <Box sx={{ 
+                    maxWidth: '100%', 
+                    textAlign: 'center',
+                    whiteSpace: 'nowrap',
+                    lineHeight: 1.3
+                  }}>
+                    {t('businessOrders.awaitingDelivery')}
+                  </Box>
+                  {orderCounts.awaitingDelivery > 0 && (
+                    <Box 
+                      component="span" 
+                      sx={{ 
+                        display: 'inline-flex',
+                        bgcolor: '#ff8800',
+                        color: 'white',
+                        borderRadius: '12px',
+                        minWidth: '22px',
+                        height: '22px',
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: 1,
+                        px: 1
+                      }}
+                    >
+                      {orderCounts.awaitingDelivery}
+                    </Box>
+                  )}
+                </Box>
+              } 
+            />
+          </Tabs>
+        </Box>
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 6 }}><Typography>{t('loading')}</Typography></Box>
