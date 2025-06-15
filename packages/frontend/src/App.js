@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useSearchParams } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box } from '@mui/material';
@@ -70,6 +70,21 @@ const Layout = ({ children, isAuthenticated, cartItems, resetCart }) => {
       </Box>
     </Box>
   );
+};
+
+// URL parametresi değişikliklerini izleyen yardımcı bileşen
+const URLParameterListener = ({ setSelectedBusiness }) => {
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  
+  useEffect(() => {
+    const restaurantParam = searchParams.get('restaurant');
+    if (restaurantParam) {
+      setSelectedBusiness(restaurantParam);
+    }
+  }, [location.search, searchParams, setSelectedBusiness]);
+  
+  return null;
 };
 
 function App() {
@@ -163,6 +178,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
+        <URLParameterListener setSelectedBusiness={setSelectedBusiness} />
         <Routes>
           {/* Varsayılan olarak login sayfasına yönlendir */}
           <Route path="/" element={<Login />} />

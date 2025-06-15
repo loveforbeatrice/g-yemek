@@ -27,11 +27,31 @@ const RestaurantStatusWidget = () => {
         });
         
         const { business } = response.data;
-        setBusinessData({
+        console.log('Business data loaded from API:', business);
+        
+        // Compare with localStorage data
+        const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+        console.log('Business data from localStorage:', {
+          isOpen: localUser.isOpen,
+          openingTime: localUser.openingTime,
+          closingTime: localUser.closingTime
+        });
+        
+        // Always use API data as the source of truth
+        const updatedBusinessData = {
           isOpen: business.isOpen || false,
           openingTime: business.openingTime || '09:00',
           closingTime: business.closingTime || '22:00'
-        });
+        };
+        
+        setBusinessData(updatedBusinessData);
+        
+        // If local storage is different from API, update localStorage
+        if (localUser.isOpen !== business.isOpen) {
+          console.log('Updating localStorage with current business status from API');
+          const updatedUser = { ...localUser, isOpen: business.isOpen };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
       } catch (err) {
         console.error('Business data fetch error:', err);
       } finally {
@@ -47,7 +67,7 @@ const RestaurantStatusWidget = () => {
       const token = localStorage.getItem('token');
       const newStatus = !businessData.isOpen;
       
-      await axios.put('http://localhost:3001/api/business/settings', 
+      const response = await axios.put('http://localhost:3001/api/business/settings', 
         {
           isOpen: newStatus
         },
@@ -56,7 +76,16 @@ const RestaurantStatusWidget = () => {
         }
       );
       
+      // Update local state
       setBusinessData(prev => ({ ...prev, isOpen: newStatus }));
+      
+      // Update the user data in localStorage to reflect the new status
+      if (response.data && response.data.business) {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const updatedUser = { ...user, isOpen: newStatus };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        console.log('Business status updated in localStorage:', newStatus);
+      }
     } catch (err) {
       console.error('Status update error:', err);
     } finally {
@@ -83,7 +112,8 @@ const RestaurantStatusWidget = () => {
       sx={{ 
         p: 1.5, 
         borderRadius: 1,
-        height: 110, // Sabit yükseklik belirliyoruz
+        height: 110, // Sabit yükseklik
+        width: '100%', // Tam genişlik
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -96,6 +126,9 @@ const RestaurantStatusWidget = () => {
         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         position: 'relative',
         overflow: 'hidden',
+        maxWidth: '100%', // Maksimum genişlik kısıtlaması
+        boxSizing: 'border-box', // Border ve padding'i genişliğe dahil et
+        minWidth: 0, // Flexbox içinde doğru boyutlandırma için gerekli
         transform: updating ? 'scale(0.98)' : 'scale(1)',
         '&:hover': {
           opacity: updating ? 1 : 0.9,
@@ -238,25 +271,31 @@ const RestaurantStatusWidget = () => {
           transform: updating ? 'translateY(-2px)' : 'translateY(0)',
           opacity: updating ? 0.7 : 1,
           color: 'white',
-          textShadow: businessData.isOpen 
-            ? '1px 1px 3px rgba(0,0,0,0.3)' // İnce gölge 
-            : '1px 1px 3px rgba(0,0,0,0.3)' // Aynı gölge her iki durum için
+          textShadow: '1px 1px 3px rgba(0,0,0,0.3)', // Aynı gölge her iki durum için
+          maxWidth: '100%', // Maksimum genişlik
+          whiteSpace: 'nowrap', // Metni tek satırda tut
+          overflow: 'hidden', // Taşan metni gizle
+          textOverflow: 'ellipsis' // Taşan metin için üç nokta göster
         }}
       >
         {businessData.isOpen ? t('restaurantStatus.open') : t('restaurantStatus.closed')}
       </Typography>
-      
       <Typography 
         variant="caption"
         sx={{ 
-          fontSize: '0.7rem', // Daha küçük font boyutu
-          fontWeight: '400', // Daha ince font ağırlığı
-          opacity: updating ? 0.4 : 0.7, // Daha düşük opaklık - gri tonu etkisi için
+          fontSize: '0.65rem', // Daha küçük font boyutu
+          fontWeight: '400', // İnce font ağırlığı
+          opacity: updating ? 0.4 : 0.7, // Opaklık - gri tonu etkisi için
           transition: 'all 0.3s ease',
           transform: updating ? 'translateY(2px)' : 'translateY(0)',
-          color: 'rgba(255,255,255,0.75)', // Daha gri tonda
-          textShadow: 'none', // Gölge kaldırıldı daha temiz bir görünüm için
-          letterSpacing: '0.2px' // Hafif letter spacing
+          color: 'rgba(255,255,255,0.75)', // Gri tonda
+          letterSpacing: '0.2px', // Hafif letter spacing
+          maxWidth: '100%', // Maksimum genişlik
+          overflow: 'hidden', // Taşan metni gizle
+          whiteSpace: 'nowrap', // Metni tek satırda tut
+          textOverflow: 'ellipsis', // Taşan metin için üç nokta göster
+          padding: '0 4px', // Sağdan soldan ufak padding
+          boxSizing: 'border-box' // Box model'i düzgün hesapla
         }}
       >
         {businessData.isOpen ? t('restaurantStatus.clickToClose') : t('restaurantStatus.clickToOpen')}

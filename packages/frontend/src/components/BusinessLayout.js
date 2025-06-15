@@ -118,9 +118,17 @@ function BusinessLayout({ children }) {
           </Button>
         ))}
       </Box>
-      
-      {/* Restaurant Status Widget - Exit butonunun üstünde */}
-      <Box sx={{ px: 2, mb: 2 }}>
+        {/* Restaurant Status Widget - Exit butonunun üstünde */}
+      <Box sx={{ 
+        px: 2, 
+        mb: 2,
+        width: '100%', // Tam genişlik
+        boxSizing: 'border-box',
+        ...(isMobile && {
+          px: 4, // Mobil görünümde diğer butonlarla aynı padding
+          mb: 4 // Mobil görünümde butonlarla aynı alt boşluk (margin-bottom)
+        })
+      }}>
         <RestaurantStatusWidget />
       </Box>
       

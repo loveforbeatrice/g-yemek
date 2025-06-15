@@ -216,11 +216,22 @@ function BusinessOrders() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
-  
-  // Ses ayarını localStorage'a kaydet
+    // Ses ayarını localStorage'a kaydet
   useEffect(() => {
     localStorage.setItem('orderSoundEnabled', soundEnabled ? 'true' : 'false');
-  }, [soundEnabled]);  // Sayfa yüklendiğinde ses özelliğini hazırla
+  }, [soundEnabled]);
+  
+  // Diğer sekmelerden gelen ses ayarı değişikliklerini izle
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      if (event.key === 'orderSoundEnabled') {
+        setSoundEnabled(event.newValue === 'true');
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);// Sayfa yüklendiğinde ses özelliğini hazırla
   useEffect(() => {
     // Ses API'sini başlatma
     if (!audioRef.current) return;
@@ -435,45 +446,28 @@ function BusinessOrders() {
         src="/sounds/order-notification.mp3" 
         preload="auto"
       />
-      
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <ResponsivePageTitle>{t('businessOrders.title')}</ResponsivePageTitle>
         
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Tooltip title="Siparişleri yenile">
-            <IconButton onClick={handleRefresh} sx={{ mr: 1 }}>
-              <RefreshIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={soundEnabled ? "Bildirimleri sessize al" : "Sesli bildirimleri aç"}>
-            <IconButton 
-              onClick={handleSoundToggle} 
-              color={soundEnabled ? "primary" : "default"}
-              sx={{ mr: 1 }}
-            >
-              {soundEnabled ? <VolumeUpIcon /> : <VolumeMuteIcon />}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Ses bildirimini test et">
-            <Button 
-              variant="outlined" 
-              size="small" 
-              onClick={testSound} 
-              sx={{ 
-                mr: 1,
-                bgcolor: soundEnabled ? 'rgba(255, 136, 0, 0.08)' : 'transparent',
-                borderColor: soundEnabled ? '#ff8800' : 'rgba(0, 0, 0, 0.23)',
-                color: soundEnabled ? '#ff8800' : 'rgba(0, 0, 0, 0.38)',
-                '&:hover': {
-                  bgcolor: soundEnabled ? 'rgba(255, 136, 0, 0.15)' : 'transparent',
-                }
-              }}
-              startIcon={soundEnabled ? <VolumeUpIcon fontSize="small" /> : <VolumeMuteIcon fontSize="small" />}
-              disabled={!soundEnabled}
-            >
-              BİLDİRİMİ TEST ET
-            </Button>
-          </Tooltip>
+        {/* Butonlar gizlendi ama işlevsellik korundu - gizli elemanlar ile */}
+        <Box sx={{ display: 'none' }}>
+          <IconButton onClick={handleRefresh}>
+            <RefreshIcon />
+          </IconButton>
+          <IconButton onClick={handleSoundToggle}>
+            <VolumeUpIcon />
+          </IconButton>
+          <Button onClick={testSound}>Test</Button>
+        </Box>
+        
+        {/* 5 dakikada bir otomatik yenileme için timer ekle */}
+        <Box sx={{ display: 'none' }}>
+          {useEffect(() => {
+            const timer = setInterval(() => {
+              handleRefresh();
+            }, 300000); // 5 dakikada bir
+            return () => clearInterval(timer);
+          }, [])}
         </Box>
       </Box>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}

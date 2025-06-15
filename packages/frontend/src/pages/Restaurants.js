@@ -137,7 +137,8 @@ function Restaurants({ onSelectBusiness }) {
               }}
               onClick={() => {
                 onSelectBusiness(business.name);
-                navigate('/menu');
+                // Restoran adını URL parametresi olarak ekleyerek yönlendirme
+                navigate(`/menu?restaurant=${encodeURIComponent(business.name)}`);
               }}
             >
               {/* Add CLOSED overlay when restaurant is closed */}
@@ -352,4 +353,4 @@ function Restaurants({ onSelectBusiness }) {
   );
 }
 
-export default Restaurants; 
+export default Restaurants;

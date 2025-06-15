@@ -6,9 +6,19 @@ import TuneIcon from '@mui/icons-material/Tune';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
 import axios from 'axios';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSearchParams, useNavigate } from 'react-router-dom'; // URL parametresi için gerekli hook
 
-function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
+function Menu({ businessName: propBusinessName, cartItems, addToCart, removeFromCart }) {
   const { t } = useLanguage();
+  const [searchParams] = useSearchParams(); // URL parametrelerini okuma
+  const navigate = useNavigate();
+  
+  // URL parametresinden veya prop'tan restoran adını al
+  const [businessName, setBusinessName] = useState(() => {
+    const urlRestaurant = searchParams.get('restaurant');
+    return urlRestaurant || propBusinessName;
+  });
+  
   const [menuItems, setMenuItems] = useState([]);
   const [search, setSearch] = useState('');
   const [favorites, setFavorites] = useState({});
@@ -62,6 +72,14 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
     setFilters(defaultFilters);
     handleClose();
   };
+
+  // URL parametresindeki değişiklikleri izle
+  useEffect(() => {
+    const restaurantParam = searchParams.get('restaurant');
+    if (restaurantParam) {
+      setBusinessName(restaurantParam);
+    }
+  }, [searchParams]);
 
   // İşletme listesini çek ve eşlemesini hazırla
   useEffect(() => {
@@ -671,4 +689,4 @@ function Menu({ businessName, cartItems, addToCart, removeFromCart }) {
   );
 }
 
-export default Menu; 
+export default Menu;

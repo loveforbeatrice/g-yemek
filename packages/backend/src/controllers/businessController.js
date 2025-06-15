@@ -27,16 +27,26 @@ const isWithinBusinessHours = (openingTime, closingTime) => {
 exports.getBusinessSettings = async (req, res) => {
   try {
     const userId = req.user.id;
+    console.log(`Getting business settings for user ID: ${userId}`);
 
     const user = await User.findByPk(userId);
 
     if (!user) {
+      console.log(`User with ID ${userId} not found`);
       return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
     }
 
     if (!user.isBusiness) {
+      console.log(`User ${userId} is not a business account`);
       return res.status(403).json({ message: 'Bu işlem için işletme hesabı gereklidir' });
     }
+
+    console.log(`Business data for user ${user.name} (ID: ${userId}):`, {
+      isOpen: user.isOpen,
+      openingTime: user.openingTime,
+      closingTime: user.closingTime,
+      min_basket_total: user.min_basket_total
+    });
 
     // Çalışma saatleri kontrol et ve otomatik güncelle
     if (user.openingTime && user.closingTime) {
@@ -44,6 +54,7 @@ exports.getBusinessSettings = async (req, res) => {
       
       // Eğer çalışma saatlerindeyse otomatik aç, değilse kapat
       if (user.isOpen !== shouldBeOpen) {
+        console.log(`Auto-updating business status based on hours: ${shouldBeOpen ? 'open' : 'closed'}`);
         await user.update({ isOpen: shouldBeOpen });
         console.log(`Restaurant ${user.name} automatically ${shouldBeOpen ? 'opened' : 'closed'} based on business hours`);
       }
@@ -51,6 +62,7 @@ exports.getBusinessSettings = async (req, res) => {
 
     // Hassas bilgileri çıkar
     const { password, resetPasswordToken, resetPasswordExpire, ...businessData } = user.toJSON();
+    console.log(`Returning business settings for ${user.name} (isOpen: ${businessData.isOpen})`);
 
     return res.status(200).json({
       business: businessData
@@ -65,6 +77,8 @@ exports.updateBusinessSettings = async (req, res) => {
   try {
     const userId = req.user.id;
     const { name, openingTime, closingTime, isOpen, min_basket_total } = req.body;
+
+    console.log(`Update business settings request for user ID ${userId}:`, req.body);
 
     const user = await User.findByPk(userId);
 
@@ -84,7 +98,12 @@ exports.updateBusinessSettings = async (req, res) => {
     if (isOpen !== undefined) updateData.isOpen = isOpen;
     if (min_basket_total !== undefined) updateData.min_basket_total = min_basket_total;
 
+    console.log(`Updating business settings for user ${user.name} (ID: ${userId})`, updateData);
+
     await user.update(updateData);
+
+    // Log the update success
+    console.log(`Business settings updated successfully for user ${user.name} (ID: ${userId}). isOpen now: ${user.isOpen}`);
 
     // Güncellenmiş kullanıcı bilgilerini geri döndür
     const { password, resetPasswordToken, resetPasswordExpire, ...updatedUserData } = user.toJSON();
