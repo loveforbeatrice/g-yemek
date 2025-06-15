@@ -4,6 +4,7 @@ const Order = require('../models/Order');
 const MenuItem = require('../models/MenuItem');
 const User = require('../models/User');
 const { protect, isBusiness } = require('../middleware/authMiddleware');
+const { createNotification } = require('../controllers/notificationController');
 
 // POST /api/orders - Sipariş oluştur (çoklu ürün destekler)
 router.post('/', async (req, res) => {
@@ -13,7 +14,7 @@ router.post('/', async (req, res) => {
     if (!userId || !orders || !Array.isArray(orders) || orders.length === 0 || !address) {
       return res.status(400).json({ message: 'Eksik sipariş verisi' });
     }
-    // Sepetteki tüm ürünler aynı işletmeden mi kontrol et
+    // Sepetteki tüm ürünler aynı işletmeden mı kontrol et
     const businessId = orders[0].businessId;
     const business = await User.findByPk(businessId);
     if (!business || !business.isBusiness) {
@@ -104,12 +105,33 @@ router.get('/business', protect, isBusiness, async (req, res) => {
 // PATCH /api/orders/:id/accept - Siparişi onayla
 router.patch('/:id/accept', protect, isBusiness, async (req, res) => {
   try {
-    const order = await Order.findByPk(req.params.id);
+    const order = await Order.findByPk(req.params.id, {
+      include: [
+        { model: MenuItem, as: 'menuItem' },
+        { model: User, as: 'business', attributes: ['id', 'name', 'phone'] }
+      ]
+    });
+    
     if (!order || order.businessId !== req.user.id) {
       return res.status(404).json({ message: 'Sipariş bulunamadı' });
     }
+    
     order.isAccepted = true;
     await order.save();
+    
+    // Create notification for the user
+    await createNotification(
+      order.userId,
+      'order_accepted',
+      `${order.business.name} siparişinizi onayladı.`,
+      {
+        orderId: order.id,
+        businessId: order.businessId,
+        businessName: order.business.name,
+        menuItemName: order.menuItem.name
+      }
+    );
+    
     res.json(order);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -119,12 +141,33 @@ router.patch('/:id/accept', protect, isBusiness, async (req, res) => {
 // PATCH /api/orders/:id/reject - Siparişi reddet
 router.patch('/:id/reject', protect, isBusiness, async (req, res) => {
   try {
-    const order = await Order.findByPk(req.params.id);
+    const order = await Order.findByPk(req.params.id, {
+      include: [
+        { model: MenuItem, as: 'menuItem' },
+        { model: User, as: 'business', attributes: ['id', 'name', 'phone'] }
+      ]
+    });
+    
     if (!order || order.businessId !== req.user.id) {
       return res.status(404).json({ message: 'Sipariş bulunamadı' });
     }
+    
     order.isAccepted = false;
     await order.save();
+    
+    // Create notification for the user
+    await createNotification(
+      order.userId,
+      'order_rejected',
+      `${order.business.name} siparişinizi reddetti.`,
+      {
+        orderId: order.id,
+        businessId: order.businessId,
+        businessName: order.business.name,
+        menuItemName: order.menuItem.name
+      }
+    );
+    
     res.json(order);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -252,17 +295,41 @@ router.get('/business/counts', protect, isBusiness, async (req, res) => {
 // PATCH /api/orders/:id/done - Siparişi teslim edildi olarak işaretle
 router.patch('/:id/done', protect, isBusiness, async (req, res) => {
   try {
-    const order = await Order.findByPk(req.params.id);
+    const order = await Order.findByPk(req.params.id, {
+      include: [
+        { model: MenuItem, as: 'menuItem' },
+        { model: User, as: 'business', attributes: ['id', 'name', 'phone'] }
+      ]
+    });
+    
     if (!order || order.businessId !== req.user.id) {
       return res.status(404).json({ message: 'Sipariş bulunamadı' });
     }
+    
     order.isCompleted = true;
     order.isDelivered = true;
     await order.save();
+    
+    // Create delivery notification with rating request
+    await createNotification(
+      order.userId,
+      'order_delivered',
+      `${order.business.name}'dan siparişiniz teslim edildi. Lütfen deneyiminizi değerlendirin.`,
+      {
+        orderId: order.id,
+        businessId: order.businessId,
+        businessName: order.business.name,
+        menuItemId: order.productId,
+        menuItemName: order.menuItem.name,
+        requiresRating: true,
+        isRated: false
+      }
+    );
+    
     res.json(order);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-module.exports = router; 
+module.exports = router;

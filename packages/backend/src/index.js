@@ -46,6 +46,8 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/business', require('./routes/business'));
 app.use('/api/categories', require('./routes/categories'));
 app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/ratings', require('./routes/ratings'));
 
 // Database connection and server start
 async function startServer() {
@@ -65,4 +67,4 @@ async function startServer() {
   }
 }
 
-startServer(); 
+startServer();

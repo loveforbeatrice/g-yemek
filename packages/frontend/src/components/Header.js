@@ -19,6 +19,8 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useLanguage } from '../contexts/LanguageContext';
+import axios from 'axios';
+import RatingDialog from './RatingDialog';
 
 function Header({ cartItems, resetCart }) {
   const { t } = useLanguage();
@@ -37,10 +39,124 @@ function Header({ cartItems, resetCart }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
   const notificationOpen = Boolean(notificationAnchorEl);
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: 'Siparişiniz hazırlanıyor!', time: '5 dk önce' },
-    { id: 2, message: 'Yeni kampanya: %20 indirim!', time: '1 saat önce' }
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  
+  // Rating Dialog states
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // Fetch notifications from the backend
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await axios.get('/api/notifications', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      setNotifications(response.data);
+      setUnreadCount(response.data.filter(notif => !notif.read).length);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  // Format notification time
+  const formatTimeAgo = (timestamp) => {
+    const now = new Date();
+    const notifDate = new Date(timestamp);
+    const diffMs = now - notifDate;
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'şimdi';
+    if (diffMins < 60) return `${diffMins} dk önce`;
+    
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} saat önce`;
+    
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays} gün önce`;
+    
+    return notifDate.toLocaleDateString('tr-TR');
+  };
+
+  // Mark notification as read
+  const markAsRead = async (notificationId, notificationData) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      await axios.patch(`/api/notifications/${notificationId}/read`, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      // Update the UI to show the notification as read
+      setNotifications(notifications.map(n => 
+        n.id === notificationId ? { ...n, read: true } : n
+      ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+      
+      // If it's a delivered order notification that needs rating
+      if (notificationData && notificationData.requiresRating && !notificationData.isRated) {
+        setSelectedOrder({
+          orderId: notificationData.orderId,
+          businessId: notificationData.businessId,
+          businessName: notificationData.businessName,
+          menuItemId: notificationData.menuItemId,
+          menuItemName: notificationData.menuItemName
+        });
+        setRatingDialogOpen(true);
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+  
+  // Handle notification click
+  const handleNotificationClick = (event) => {
+    setNotificationAnchorEl(event.currentTarget);
+    setBackdropOpen(true);
+  };
+
+  const handleNotificationClose = () => {
+    setNotificationAnchorEl(null);
+    setBackdropOpen(false);
+  };
+
+  const handleClickNotification = (notification) => {
+    // Mark notification as read
+    markAsRead(notification.id, notification.data);
+    
+    // Navigate based on notification type
+    switch(notification.type) {
+      case 'order_accepted':
+        navigate('/orders');
+        break;
+      case 'order_rejected':
+        navigate('/orders');
+        break;
+      case 'order_delivered':
+        // The rating dialog will be opened in markAsRead if needed
+        navigate('/orders');
+        break;
+      default:
+        break;
+    }
+    
+    handleNotificationClose();
+  };
+
+  // Handle rating dialog close
+  const handleRatingDialogClose = () => {
+    setRatingDialogOpen(false);
+    setSelectedOrder(null);
+  };
   
   // Sayfa yüklenirken localStorage'dan kullanıcı bilgilerini al ve aktif sekmeyi belirle
   useEffect(() => {
@@ -53,7 +169,20 @@ function Header({ cartItems, resetCart }) {
       }
     }
     
-    // Aktif sekmeyi belirle
+    // Initialize notifications when component mounts
+    fetchNotifications();
+    
+    // Set up polling for notifications every 30 seconds
+    const notificationInterval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+    
+    // Clean up the interval on unmount
+    return () => clearInterval(notificationInterval);
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Aktif sekmeyi belirle
+  useEffect(() => {
     if (location === '/' || location === '/menu') {
       setActiveTab('menu');    } else if (location === '/basket') {
       setActiveTab('cart');
@@ -63,6 +192,19 @@ function Header({ cartItems, resetCart }) {
       setActiveTab('profile');
     }
   }, [location]);
+
+  // Fetch notifications when the component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      
+      // Set up polling for notifications (every 30 seconds)
+      const interval = setInterval(fetchNotifications, 30000);
+      
+      // Clear interval on unmount
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   // Sayfa yönlendirme fonksiyonları
   const goToMenu = () => {
@@ -142,16 +284,6 @@ function Header({ cartItems, resetCart }) {
     navigate('/login');
   };
 
-  const handleNotificationClick = (event) => {
-    setNotificationAnchorEl(event.currentTarget);
-    setBackdropOpen(true);
-  };
-
-  const handleNotificationClose = () => {
-    setNotificationAnchorEl(null);
-    setBackdropOpen(false);
-  };
-
   const cartCount = cartItems?.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -161,9 +293,8 @@ function Header({ cartItems, resetCart }) {
         <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, mb: 2, position: 'relative' }}>
           <img src="/images/logo.png" alt="Yemek Logo" style={{ height: 60 }} />
           {/* Mobilde sağ üstte bildirim ikonu */}
-          <Box sx={{ position: 'absolute', right: 12, top: 0, zIndex: 1201 }}>
-            <IconButton color="inherit" onClick={handleNotificationClick}>
-              <Badge badgeContent={notifications.length} color="error">
+          <Box sx={{ position: 'absolute', right: 12, top: 0, zIndex: 1201 }}>              <IconButton color="inherit" onClick={handleNotificationClick}>
+              <Badge badgeContent={unreadCount} color="error">
                 <NotificationsIcon sx={{ color: notificationOpen ? '#ff8800' : '#9d8df1', fontSize: 28 }} />
               </Badge>
             </IconButton>
@@ -206,13 +337,12 @@ function Header({ cartItems, resetCart }) {
 
             {/* Sağ taraftaki ikonlar */}
             <Box sx={{ display: 'flex', gap: 2 }}>
-              {/* Bildirim İkonu */}
-              <IconButton 
+              {/* Bildirim İkonu */}              <IconButton 
                 color="inherit" 
                 onClick={handleNotificationClick}
                 sx={{ position: 'relative' }}
               >
-                <Badge badgeContent={notifications.length} color="error">
+                <Badge badgeContent={unreadCount} color="error">
                   <Box sx={{ 
                     backgroundColor: notificationOpen ? '#ff8800' : 'white', 
                     borderRadius: '50%', 
@@ -611,13 +741,11 @@ function Header({ cartItems, resetCart }) {
           </Box>
         </Drawer>
       )}
-      {/* Bildirim Menüsü */}
-      <Menu
+      {/* Bildirim Menüsü */}      <Menu
         id="notification-menu"
         anchorEl={notificationAnchorEl}
         open={notificationOpen}
         onClose={handleNotificationClose}
-        onClick={handleNotificationClose}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right',
@@ -629,14 +757,20 @@ function Header({ cartItems, resetCart }) {
         PaperProps={{
           elevation: 0,
           sx: {
-            overflow: 'visible',
+            overflow: 'hidden',
             filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.1))',
             mt: 1.5,
             borderRadius: '20px',
             width: 300,
+            maxWidth: '95vw',
             border: '2px solid #ff8800',
             fontFamily: '"Alata", sans-serif',
             zIndex: 3,
+            '& .MuiList-root': {
+              padding: 0,
+              maxHeight: '65vh',
+              overflow: 'auto',
+            },
             '&::before': {
               content: '""',
               display: 'block',
@@ -662,21 +796,32 @@ function Header({ cartItems, resetCart }) {
         
         {/* Bildirim Listesi */}
         {notifications.length > 0 ? (
-          notifications.map((notification) => (
-            <MenuItem key={notification.id} sx={{
-              display: 'block',
-              py: 1.5,
-              px: 2,
-              borderBottom: '1px solid #f0f0f0',
-              '&:hover': {
-                bgcolor: 'rgba(255,136,0,0.05)'
-              }
-            }}>
-              <Typography sx={{ 
+          notifications.map((notification) => (            <MenuItem 
+              key={notification.id} 
+              onClick={() => handleClickNotification(notification)}
+              sx={{
+                display: 'block',
+                py: 1.5,
+                px: 2,
+                borderBottom: '1px solid #f0f0f0',
+                backgroundColor: notification.read ? 'transparent' : 'rgba(157, 141, 241, 0.08)',
+                width: '100%',
+                maxWidth: '100%',
+                boxSizing: 'border-box',
+                '&:hover': {
+                  bgcolor: 'rgba(255,136,0,0.05)'
+                }
+              }}
+            >              <Typography sx={{ 
                 color: '#333',
                 fontSize: '0.95rem',
                 fontFamily: '"Alata", sans-serif',
-                mb: 0.5
+                mb: 0.5,
+                fontWeight: notification.read ? 400 : 700,
+                wordBreak: 'break-word',
+                whiteSpace: 'normal',
+                overflowWrap: 'break-word',
+                maxWidth: '100%'
               }}>
                 {notification.message}
               </Typography>
@@ -685,7 +830,7 @@ function Header({ cartItems, resetCart }) {
                 fontSize: '0.8rem',
                 fontFamily: '"Alata", sans-serif'
               }}>
-                {notification.time}
+                {formatTimeAgo(notification.createdAt)}
               </Typography>
             </MenuItem>
           ))
@@ -697,6 +842,13 @@ function Header({ cartItems, resetCart }) {
           </Box>
         )}
       </Menu>
+      
+      {/* Rating Dialog */}
+      <RatingDialog
+        open={ratingDialogOpen}
+        handleClose={handleRatingDialogClose}
+        orderData={selectedOrder}
+      />
     </>
   );
 }

@@ -72,9 +72,18 @@ const User = sequelize.define('User', {
   allowPromotionNotifications: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
-  },
-  min_basket_total: {
+  },  min_basket_total: {
     type: DataTypes.NUMERIC(10,2),
+    defaultValue: 0,
+    allowNull: false,
+  },
+  averageRating: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0,
+    allowNull: false,
+  },
+  totalRatings: {
+    type: DataTypes.INTEGER,
     defaultValue: 0,
     allowNull: false,
   },

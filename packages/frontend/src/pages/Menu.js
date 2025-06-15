@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Card, CardContent, Typography, Box, Button, IconButton, TextField, Chip, Snackbar, Alert, Popover, MenuItem, Divider } from '@mui/material';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import { Grid, Card, CardContent, Typography, Box, Button, IconButton, TextField, Chip, Snackbar, Alert, Popover, MenuItem, Divider, Dialog, DialogTitle, DialogContent, List, ListItem, ListItemText, CircularProgress } from '@mui/material';
+import FavoriteRounded from '@mui/icons-material/FavoriteRounded';
+import FavoriteBorderRounded from '@mui/icons-material/FavoriteBorderRounded';
+import StarRounded from '@mui/icons-material/StarRounded';
+import RateReviewRounded from '@mui/icons-material/RateReviewRounded';
+import CloseIcon from '@mui/icons-material/Close';
 import TuneIcon from '@mui/icons-material/Tune';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
 import axios from 'axios';
@@ -32,6 +35,66 @@ function Menu({ businessName: propBusinessName, cartItems, addToCart, removeFrom
     maxPrice: ''
   });
   
+  // Yorum dialog'u için state ve fonksiyonlar
+  const [commentDialog, setCommentDialog] = useState({
+    open: false,
+    menuItemId: null,
+    loading: false,
+    comments: []
+  });
+
+  // Yorumları açmak için fonksiyon
+  const handleOpenComments = async (menuItemId) => {
+    setCommentDialog({
+      ...commentDialog,
+      open: true,
+      menuItemId,
+      loading: true,
+      comments: []
+    });
+    
+    try {
+      // Fetch ratings/comments for this menu item
+      const response = await axios.get(`/api/ratings/menuItem/${menuItemId}`);
+      if (response.data && response.data.success) {
+        setCommentDialog({
+          ...commentDialog,
+          open: true,
+          menuItemId,
+          loading: false,
+          comments: response.data.ratings || []
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching item comments:', error);
+      setCommentDialog({
+        ...commentDialog,
+        open: true,
+        menuItemId,
+        loading: false,
+        comments: []
+      });
+    }
+  };
+
+  // Yorum dialog'unu kapatmak için fonksiyon
+  const handleCloseComments = () => {
+    setCommentDialog({
+      ...commentDialog,
+      open: false
+    });
+  };
+
+  // Tarih formatı için fonksiyon
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('tr-TR', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
   const [tempFilters, setTempFilters] = useState({ ...filters });
   const [openFilter, setOpenFilter] = useState(false);
   const [openSort, setOpenSort] = useState(false);
@@ -457,43 +520,86 @@ function Menu({ businessName: propBusinessName, cartItems, addToCart, removeFrom
                       flexDirection: 'column', 
                       height: '100%',
                       '&:last-child': { pb: { xs: 2, sm: 3 } }
-                    }}><Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%', mb: 1 }}>
-                        <Box sx={{ maxWidth: 'calc(100% - 50px)' }}>
-                          <Typography 
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%', mb: 1 }}>
+                        <Box sx={{ maxWidth: 'calc(100% - 180px)' }}>                          <Typography 
                             variant="h3" 
                             fontWeight="bold" 
                             sx={{ 
                               fontFamily: 'Alata, sans-serif', 
-                              fontSize: '2rem', 
-                              lineHeight: 1.2,
+                              fontSize: '1.6rem', 
+                              lineHeight: 1.1,
                               mb: 0.5,
                               wordBreak: 'break-word',
-                              overflowWrap: 'break-word'
+                              overflowWrap: 'break-word',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 1,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'normal'
                             }}
                           >
                             {item.productName}
                           </Typography>
                         </Box>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 36 }}>
-                          <IconButton 
-                            onClick={(e) => { e.stopPropagation(); handleFavorite(item); }} 
-                            sx={{ 
-                              p: 0.5, 
-                              color: favorites[item.id] ? '#ff6d00' : '#aaa',
-                              filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
-                            }}
-                          >
-                            {favorites[item.id] ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-                          </IconButton>
-                          <Typography sx={{ 
-                            color: '#ff8800', 
-                            fontWeight: 600, 
-                            fontSize: '1.1rem', 
-                            mt: -0.5,
-                            filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
-                          }}>
-                            {typeof favoriteCounts[item.id] === 'number' ? favoriteCounts[item.id] : 0}
-                          </Typography>
+                        
+                        {/* İkonların ve sayıların hepsi yan yana */}
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 3 }}>                          {/* Yorum ikonu ve sayısı */}
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <IconButton 
+                              disableRipple
+                              onClick={(e) => { e.stopPropagation(); handleOpenComments(item.id); }}
+                              sx={{ p: 0 }}
+                            >
+                              <RateReviewRounded sx={{ color: '#aaa', fontSize: '1.8rem' }} />
+                            </IconButton>                            <Typography variant="caption" sx={{ 
+                              color: '#aaa', 
+                              fontWeight: 'bold', 
+                              fontSize: '0.8rem',
+                              mt: 0.1
+                            }}>
+                              {item.commentCount || 0}
+                            </Typography>
+                          </Box>                          {/* Yıldız ve puan */}
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <Box sx={{ height: '1.7rem', display: 'flex', alignItems: 'center' }}>
+                              <StarRounded sx={{ color: '#FF8800', fontSize: '1.8rem' }} />
+                            </Box>
+                            <Typography variant="caption" sx={{ 
+                              fontWeight: 'bold',
+                              color: '#333',
+                              fontSize: '0.8rem',
+                              mt: 0.1
+                            }}>
+                              {(item.averageRating || 0).toFixed(1)}
+                            </Typography>
+                          </Box>
+                          
+                          {/* Kalp ikonu ve sayı */}
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <IconButton 
+                              onClick={(e) => { e.stopPropagation(); handleFavorite(item); }} 
+                              disableRipple
+                              sx={{ 
+                                p: 0, 
+                                color: favorites[item.id] ? '#ff6d00' : '#aaa',
+                                filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
+                              }}
+                            >                              {favorites[item.id] ? 
+                                <FavoriteRounded sx={{ fontSize: '1.8rem' }} /> : 
+                                <FavoriteBorderRounded sx={{ fontSize: '1.8rem' }} />
+                              }
+                            </IconButton>                            <Typography sx={{ 
+                              color: '#ff8800', 
+                              fontWeight: 'bold', 
+                              fontSize: '0.8rem',
+                              filter: !businessIsOpen ? 'grayscale(100%)' : 'none',
+                              mt: 0.1
+                            }}>
+                              {typeof favoriteCounts[item.id] === 'number' ? favoriteCounts[item.id] : 0}
+                            </Typography>
+                          </Box>
                         </Box>
                       </Box>
                       <Typography 
@@ -565,15 +671,15 @@ function Menu({ businessName: propBusinessName, cartItems, addToCart, removeFrom
                             >
                               {Number(item.price).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                             </Typography>
-                          </Box>
-                          <Box sx={{ 
+                          </Box>                          <Box sx={{ 
                             display: 'flex', 
                             alignItems: 'center', 
                             border: '2px solid #9d8df1', 
                             borderRadius: '30px', 
                             px: 2, 
-                            py: 0.5, 
-                            minWidth: 100, 
+                            py: 0, 
+                            minWidth: 100,
+                            height: 40, 
                             justifyContent: 'center', 
                             background: '#fff',
                             filter: !businessIsOpen ? 'grayscale(100%)' : 'none'
@@ -591,7 +697,7 @@ function Menu({ businessName: propBusinessName, cartItems, addToCart, removeFrom
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                              }} 
+                              }}
                               onClick={() => {
                                 const quantity = cartItems.find(i => i.id === item.id)?.quantity || 0;
                                 if (quantity === 0) {
@@ -637,7 +743,7 @@ function Menu({ businessName: propBusinessName, cartItems, addToCart, removeFrom
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                              }} 
+                              }}
                               onClick={() => {
                                 if (businessIsOpen) {
                                   handleAddToCart(item);
@@ -663,6 +769,7 @@ function Menu({ businessName: propBusinessName, cartItems, addToCart, removeFrom
           ))
         )}
       </Grid>
+      
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -685,6 +792,68 @@ function Menu({ businessName: propBusinessName, cartItems, addToCart, removeFrom
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* Comments Dialog */}
+      <Dialog 
+        open={commentDialog.open} 
+        onClose={handleCloseComments}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: '"Alata", sans-serif' }}>
+          {t('Yorumlar')}
+          <IconButton onClick={handleCloseComments} size="small">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {commentDialog.loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+              <CircularProgress sx={{ color: '#ff8800' }} />
+            </Box>
+          ) : commentDialog.comments.length > 0 ? (
+            <List>
+              {commentDialog.comments.map((comment, index) => (
+                <React.Fragment key={comment.id || index}>
+                  <ListItem alignItems="flex-start">
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>                          <Typography component="span" variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                            {comment.user?.name || t('Anonim')}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <StarRounded sx={{ color: '#ff8800', fontSize: '1.8 rem', mr: 0.5 }} />
+                            <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#ff8800' }}>
+                              {comment.foodRating?.toFixed(1)}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      }
+                      secondary={
+                        <>
+                          <Typography component="span" variant="body2" color="text.primary" sx={{ mt: 0.5, display: 'block' }}>
+                            {comment.comment || t('Yorum yapılmamış')}
+                          </Typography>
+                          <Typography component="div" variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                            {formatDate(comment.createdAt)}
+                          </Typography>
+                        </>
+                      }
+                    />
+                  </ListItem>
+                  {index < commentDialog.comments.length - 1 && <Divider component="li" />}
+                </React.Fragment>
+              ))}
+            </List>
+          ) : (
+            <Box sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="body1" sx={{ color: '#666' }}>
+                {t('Bu ürün için henüz yorum yok')}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

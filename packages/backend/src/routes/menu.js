@@ -3,6 +3,8 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const MenuItem = require('../models/MenuItem');
+const Rating = require('../models/Rating');
+const sequelize = require('../config/database');
 const { Op } = require('sequelize');
 const { protect, isBusiness } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
@@ -16,9 +18,65 @@ router.get('/', async (req, res) => {
     if (businessName) {
       where.businessName = { [Op.iLike]: businessName };
     }
+    
+    // Tüm menü öğelerini getir
     const menuItems = await MenuItem.findAll({ where });
-    res.json(menuItems);
+    
+    // Tüm menü öğeleri için ortalama puanları al
+    const ratingAverages = await Rating.findAll({
+      attributes: [
+        'menuItemId',
+        [sequelize.fn('AVG', sequelize.col('foodRating')), 'averageRating'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'ratingCount']
+      ],
+      group: ['menuItemId']
+    });
+    
+    // Get comment counts for all menu items
+    const commentCounts = await Rating.findAll({
+      attributes: [
+        'menuItemId',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'commentCount']
+      ],
+      where: {
+        comment: {
+          [Op.not]: null,
+          [Op.ne]: ''
+        }
+      },
+      group: ['menuItemId']
+    });
+    
+    // Her menuItemId için puanların bir haritasını oluştur
+    const ratingsMap = {};
+    ratingAverages.forEach(rating => {
+      ratingsMap[rating.menuItemId] = {
+        averageRating: parseFloat(rating.dataValues.averageRating).toFixed(1),
+        ratingCount: parseInt(rating.dataValues.ratingCount)
+      };
+    });
+    
+    // Create a map of comment counts by menuItemId
+    const commentsMap = {};
+    commentCounts.forEach(count => {
+      commentsMap[count.menuItemId] = parseInt(count.dataValues.commentCount);
+    });
+    
+    // Puanları menü öğelerine ekle
+    const menuItemsWithRatings = menuItems.map(item => {
+      const itemData = item.toJSON();
+      const ratingData = ratingsMap[item.id] || { averageRating: 0, ratingCount: 0 };
+      return {
+        ...itemData,
+        averageRating: parseFloat(ratingData.averageRating),
+        ratingCount: ratingData.ratingCount,
+        commentCount: commentsMap[item.id] || 0
+      };
+    });
+    
+    res.json(menuItemsWithRatings);
   } catch (error) {
+    console.error('Puanlarla birlikte menü öğeleri alınırken hata:', error);
     res.status(500).json({ message: error.message });
   }
 });

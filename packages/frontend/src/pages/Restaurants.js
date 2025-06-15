@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Grid, Card, CardContent, Typography, CardMedia, Box, CircularProgress, TextField, InputAdornment, Snackbar, Alert } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import StarIcon from '@mui/icons-material/Star';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import RestaurantRating from '../components/RestaurantRating';
 
 function Restaurants({ onSelectBusiness }) {
   const { t } = useLanguage();
@@ -24,15 +24,14 @@ function Restaurants({ onSelectBusiness }) {
       try {
         const response = await axios.get('http://localhost:3001/api/auth/businesses');
         // Resim URL'lerini doğru şekilde oluştur
-        const withMockData = response.data.businesses.map((b, i) => ({
+        const formattedBusinesses = response.data.businesses.map((b) => ({
           ...b,
           imageUrl: b.imageUrl 
             ? `http://localhost:3001/uploads/${b.imageUrl}` 
             : '/images/food-bg.jpg', // Varsayılan resim
-          rating: b.rating || (Math.round((Math.random() * 2 + 3) * 10) / 10), // 3.0-5.0 arası
           isOpen: b.isOpen !== undefined ? b.isOpen : true // Make sure isOpen is defined, default to true
         }));
-        setBusinesses(withMockData);
+        setBusinesses(formattedBusinesses);
       } catch (err) {
         setError(t('restaurantsNotLoaded'));
       } finally {
@@ -274,11 +273,9 @@ function Restaurants({ onSelectBusiness }) {
                   <Typography variant="h6" fontWeight="bold" sx={{ color: '#222' }}>
                     {business.name}
                   </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <StarIcon sx={{ color: '#ff8800', fontSize: 22 }} />
-                    <Typography variant="body2" sx={{ color: '#ff8800', fontWeight: 600, fontSize: '1.1rem' }}>
-                      {business.rating ? business.rating : '4.5'}/5
-                    </Typography>
+                  {/* Rating */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <RestaurantRating businessId={business.id} />
                   </Box>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1.05rem', fontWeight: 500 }}>
