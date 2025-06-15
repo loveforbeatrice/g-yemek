@@ -322,8 +322,9 @@ const Login = () => {
         type="button"
         className="password-toggle-btn"
         onClick={() => togglePasswordVisibility(field)}
+        aria-label={showPassword[field] ? "Şifreyi gizle" : "Şifreyi göster"}
       >
-        {showPassword[field] ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+        {showPassword[field] ? <VisibilityOffIcon style={{ fontSize: '20px' }} /> : <VisibilityIcon style={{ fontSize: '20px' }} />}
       </button>
     </div>
   );
