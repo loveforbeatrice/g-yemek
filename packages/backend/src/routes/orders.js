@@ -42,6 +42,17 @@ router.post('/', async (req, res) => {
         })
       )
     );
+    // Bildirim sadece bir kez gönderilsin
+    await createNotification(
+      userId,
+      'order_received',
+      `${business.name} işletmesine ${orders.length} ürün için siparişiniz alındı.`,
+      {
+        businessId: business.id,
+        businessName: business.name,
+        totalItems: orders.length
+      }
+    );
     res.status(201).json(createdOrders);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -119,19 +130,7 @@ router.patch('/:id/accept', protect, isBusiness, async (req, res) => {
     order.isAccepted = true;
     await order.save();
     
-    // Create notification for the user
-    await createNotification(
-      order.userId,
-      'order_accepted',
-      `${order.business.name} siparişinizi onayladı.`,
-      {
-        orderId: order.id,
-        businessId: order.businessId,
-        businessName: order.business.name,
-        menuItemName: order.menuItem.name
-      }
-    );
-    
+    // Artık kullanıcıya bildirim gönderilmiyor
     res.json(order);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -314,13 +313,13 @@ router.patch('/:id/done', protect, isBusiness, async (req, res) => {
     await createNotification(
       order.userId,
       'order_delivered',
-      `${order.business.name}'dan siparişiniz teslim edildi. Lütfen deneyiminizi değerlendirin.`,
+      `${order.business.name}'dan siparişiniz teslim edildi. (${order.menuItem.productName}) Lütfen deneyiminizi değerlendirin.`,
       {
         orderId: order.id,
         businessId: order.businessId,
         businessName: order.business.name,
         menuItemId: order.productId,
-        menuItemName: order.menuItem.name,
+        menuItemName: order.menuItem.productName,
         requiresRating: true,
         isRated: false
       }
