@@ -107,6 +107,7 @@ const translations = {
     changePasswordButton: 'ŞİFREYİ DEĞİŞTİR',
     deleteAccountConfirm: 'Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
     yesDelete: 'Evet, Sil',
+    minBasketTotal: 'Minimum Sepet Tutarı',
     
     // Settings
     notifications: 'Bildirimler',
@@ -232,6 +233,7 @@ const translations = {
     completeOrder: 'Siparişi Tamamla',
     orderSuccess: 'Sipariş Başarılı',
     orderSuccessMessage: 'Siparişiniz başarıyla alındı!',
+    orderMinimumBasketWarning: 'Sipariş verebilmek için minimum sepet tutarı ₺{minTotal} olmalıdır.',
     
     // Orders Page
     orders: {
@@ -453,6 +455,7 @@ const translations = {
     changePasswordButton: 'CHANGE PASSWORD',
     deleteAccountConfirm: 'Are you sure you want to delete your account? This action cannot be undone.',
     yesDelete: 'Yes, Delete',
+    minBasketTotal: 'Minimum Basket Total',
     
     // Settings
     notifications: 'Notifications',

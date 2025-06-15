@@ -46,18 +46,15 @@ exports.getBusinessSettings = async (req, res) => {
       openingTime: user.openingTime,
       closingTime: user.closingTime,
       min_basket_total: user.min_basket_total
-    });
-
-    // Çalışma saatleri kontrol et ve otomatik güncelle
+    });    // Check business hours but don't auto-update
+    // This was causing the manual isOpen toggle to be overwritten
     if (user.openingTime && user.closingTime) {
       const shouldBeOpen = isWithinBusinessHours(user.openingTime, user.closingTime);
+      console.log(`Business hours check: According to hours, restaurant should be ${shouldBeOpen ? 'open' : 'closed'}`);
+      console.log(`Current status is ${user.isOpen ? 'open' : 'closed'} (Manual setting takes precedence)`);
       
-      // Eğer çalışma saatlerindeyse otomatik aç, değilse kapat
-      if (user.isOpen !== shouldBeOpen) {
-        console.log(`Auto-updating business status based on hours: ${shouldBeOpen ? 'open' : 'closed'}`);
-        await user.update({ isOpen: shouldBeOpen });
-        console.log(`Restaurant ${user.name} automatically ${shouldBeOpen ? 'opened' : 'closed'} based on business hours`);
-      }
+      // We are no longer auto-updating to preserve the manual toggle
+      // Instead, we just log the information for debugging purposes
     }
 
     // Hassas bilgileri çıkar
@@ -83,19 +80,32 @@ exports.updateBusinessSettings = async (req, res) => {
     const user = await User.findByPk(userId);
 
     if (!user) {
+      console.log(`User with ID ${userId} not found`);
       return res.status(404).json({ message: 'Kullanıcı bulunamadı' });
     }
 
     if (!user.isBusiness) {
+      console.log(`User ${userId} is not a business account`);
       return res.status(403).json({ message: 'Bu işlem için işletme hesabı gereklidir' });
     }
+
+    console.log(`Before update - Current business settings for ${user.name} (ID: ${userId}):`, {
+      name: user.name,
+      isOpen: user.isOpen,
+      openingTime: user.openingTime, 
+      closingTime: user.closingTime,
+      min_basket_total: user.min_basket_total
+    });
 
     // Sadece gönderilen alanları güncelle
     const updateData = {};
     if (name) updateData.name = name;
     if (openingTime) updateData.openingTime = openingTime;
     if (closingTime) updateData.closingTime = closingTime;
-    if (isOpen !== undefined) updateData.isOpen = isOpen;
+    if (isOpen !== undefined) {
+      console.log(`Updating isOpen status from ${user.isOpen} to ${isOpen}`);
+      updateData.isOpen = isOpen;
+    }
     if (min_basket_total !== undefined) updateData.min_basket_total = min_basket_total;
 
     console.log(`Updating business settings for user ${user.name} (ID: ${userId})`, updateData);

@@ -16,6 +16,7 @@ const RestaurantStatusWidget = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const { t } = useLanguage();
+
   // Fetch business data
   useEffect(() => {
     const fetchBusinessData = async () => {
@@ -27,7 +28,8 @@ const RestaurantStatusWidget = () => {
         
         const { business } = response.data;
         console.log('Business data loaded from API:', business);
-          // Get user data from localStorage
+        
+        // Get user data from localStorage
         const localUser = JSON.parse(localStorage.getItem('user') || '{}');
         console.log('Business data from localStorage:', {
           isOpen: localUser.isOpen,
@@ -36,14 +38,11 @@ const RestaurantStatusWidget = () => {
         });
         
         // Always use API data as the source of truth
-        // Make sure we're explicitly setting isOpen from the business object, not relying on undefined checks
         const updatedBusinessData = {
-          isOpen: typeof business.isOpen === 'boolean' ? business.isOpen : false,
+          isOpen: business.isOpen !== undefined ? business.isOpen : false,
           openingTime: business.openingTime || '09:00',
           closingTime: business.closingTime || '22:00'
         };
-        
-        console.log('Setting business state with API data:', updatedBusinessData);
         
         setBusinessData(updatedBusinessData);
         
@@ -55,29 +54,19 @@ const RestaurantStatusWidget = () => {
         }
       } catch (err) {
         console.error('Business data fetch error:', err);
-          // If API fails, try to get status from localStorage
+        
+        // If API fails, try to get status from localStorage
         try {
           const localUser = JSON.parse(localStorage.getItem('user') || '{}');
-          if (localUser && typeof localUser.isOpen === 'boolean') {
+          if (localUser && localUser.isOpen !== undefined) {
             console.log('Using business status from localStorage:', localUser.isOpen);
             setBusinessData(prev => ({
               ...prev,
               isOpen: localUser.isOpen
             }));
-          } else {
-            console.log('No valid isOpen status in localStorage, defaulting to false');
-            setBusinessData(prev => ({
-              ...prev,
-              isOpen: false
-            }));
           }
         } catch (localErr) {
           console.error('Error reading from localStorage:', localErr);
-          // Set a default state if everything fails
-          setBusinessData(prev => ({
-            ...prev,
-            isOpen: false
-          }));
         }
       } finally {
         setLoading(false);
@@ -104,22 +93,19 @@ const RestaurantStatusWidget = () => {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-        if (response.data && response.data.business) {
-        // Update the API confirmed status - make sure we're getting a boolean
-        const updatedIsOpen = typeof response.data.business.isOpen === 'boolean' 
-          ? response.data.business.isOpen 
-          : newStatus;
-          
-        console.log('API confirmed status update:', updatedIsOpen);
+      
+      if (response.data && response.data.business) {
+        // Update the API confirmed status
+        console.log('API confirmed status update:', response.data.business.isOpen);
         
         // Update local state with the confirmed value from API
-        setBusinessData(prev => ({ ...prev, isOpen: updatedIsOpen }));
+        setBusinessData(prev => ({ ...prev, isOpen: response.data.business.isOpen }));
         
         // Update the user data in localStorage
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const updatedUser = { ...user, isOpen: updatedIsOpen };
+        const updatedUser = { ...user, isOpen: response.data.business.isOpen };
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        console.log('Business status updated in localStorage:', updatedIsOpen);
+        console.log('Business status updated in localStorage:', response.data.business.isOpen);
       } else {
         // Fallback to our expected state if API doesn't return the business data
         console.log('API did not return business data, using local value:', newStatus);
@@ -141,6 +127,7 @@ const RestaurantStatusWidget = () => {
       setUpdating(false);
     }
   };
+
   if (loading) {
     return (
       <Box 
@@ -157,7 +144,8 @@ const RestaurantStatusWidget = () => {
     );
   }
   
-  return (<Box 
+  return (
+    <Box 
       onClick={handleStatusToggle}
       sx={{ 
         p: 1.5, 
@@ -385,7 +373,9 @@ const RestaurantStatusWidget = () => {
             }} 
           />
         </Box>
-      )}      {/* CSS Keyframes for animations */}
+      )}
+      
+      {/* CSS Keyframes for animations */}
       <style>
         {`
         @keyframes fadeIn {

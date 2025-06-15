@@ -145,17 +145,15 @@ function BusinessSettings() {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      setSnackbar({
+        setSnackbar({
         open: true,
-        message: 'İşletme ayarları başarıyla güncellendi',
+        message: t('businessSettingsUpdated'),
         severity: 'success'
       });
     } catch (err) {
-      console.error('Error saving business settings:', err);
-      setSnackbar({
+      console.error('Error saving business settings:', err);      setSnackbar({
         open: true,
-        message: 'İşletme ayarları güncellenirken bir hata oluştu',
+        message: t('settingsLoadError'),
         severity: 'error'
       });
     } finally {
@@ -446,26 +444,24 @@ function BusinessSettings() {
               {/* Şifre değiştirme alanından önce min sepet tutarı alanı */}
             <Grid item xs={12}>
               <Card sx={{ mb: 3, borderRadius: 2, border: '2px solid #80cbc4' }}>
-                <CardContent>
-                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: '#333' }}>
+                <CardContent>                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: '#333' }}>
                     {t('minBasketTotal')}
                   </Typography>
                   <TextField
-                    label="Minimum Sepet Tutarı (₺)"
+                    label={`${t('minBasketTotal')} (₺)`}
                     type="number"
                     value={minSepetTutari}
                     onChange={e => setMinSepetTutari(e.target.value)}
                     fullWidth
                     sx={{ mb: 2 }}
-                  />
-                  <Button
+                  />                  <Button
                     variant="contained"
                     color="primary"
                     sx={{ fontWeight: 'bold', borderRadius: 2 }}
                     onClick={handleSaveSettings}
                     disabled={saving}
                   >
-                    Kaydet
+                    {t('save')}
                   </Button>
                 </CardContent>
               </Card>

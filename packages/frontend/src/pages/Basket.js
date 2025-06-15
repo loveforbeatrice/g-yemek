@@ -766,11 +766,11 @@ function Basket({ cartItems, addToCart, removeFromCart, resetCart }) {
                     disabled={calculateTotal() + 10 < minSepetTutari}
                     onClick={handlePlaceOrder}
                   >
-                    {calculateTotal() + 10 < minSepetTutari ? `Minimum sepet tutarı: ₺${minSepetTutari}` : t('placeOrder')}
+                    {calculateTotal() + 10 < minSepetTutari ? `${t('minBasketTotal')}: ₺${minSepetTutari}` : t('placeOrder')}
                   </Button>
                   {calculateTotal() + 10 < minSepetTutari && (
                     <Alert severity="warning" sx={{ mt: 2, fontFamily: 'Alata, sans-serif' }}>
-                      Sipariş verebilmek için minimum sepet tutarı ₺{minSepetTutari} olmalıdır.
+                      {`${t('orderMinimumBasketWarning', { minTotal: minSepetTutari })}`}
                     </Alert>
                   )}
                   
