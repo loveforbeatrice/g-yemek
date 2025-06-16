@@ -49,6 +49,9 @@ function Restaurants({ onSelectBusiness }) {
     );
   });
 
+  // Alfabetik sıralama uygula
+  const sortedBusinesses = filteredBusinesses.sort((a, b) => a.name.localeCompare(b.name, 'tr-TR', { sensitivity: 'base' }));
+
   if (loading) {
     return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}><CircularProgress /></Box>;
   }
@@ -105,7 +108,7 @@ function Restaurants({ onSelectBusiness }) {
         />
       </Box>
       <Grid container spacing={4}>
-        {filteredBusinesses.map((business) => (
+        {sortedBusinesses.map((business) => (
           <Grid item xs={12} sm={6} md={4} key={business.id}>
             <Card
               sx={{
@@ -323,7 +326,7 @@ function Restaurants({ onSelectBusiness }) {
             </Card>
           </Grid>
         ))}
-        {filteredBusinesses.length === 0 && (
+        {sortedBusinesses.length === 0 && (
           <Grid item xs={12}>
             <Typography align="center" color="text.secondary" sx={{ mt: 6 }}>
               {t('noResultsFound')}
