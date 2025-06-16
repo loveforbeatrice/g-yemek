@@ -90,53 +90,42 @@ function BusinessOrders() {
     try {
       // Sipariş sayılarını al
       const res = await axios.get('http://localhost:3001/api/orders/business/counts', getAuthHeaders());
-      
       // Bekleyen sipariş sayısını kaydet
       const newIdleOrders = res.data.idleOrders;
-      
       // Sipariş sayısı değiştiyse tüm siparişleri al 
       if (newIdleOrders > 0) {
         try {
           // İşlenmemiş siparişleri al
           const ordersResponse = await axios.get('http://localhost:3001/api/orders/business/idle', getAuthHeaders());
           const currentOrders = ordersResponse.data;
-          
           // Yeni siparişleri bul
           const currentOrderIds = new Set(currentOrders.map(order => order.id));
           const newOrders = currentOrders.filter(order => !knownOrderIds.has(order.id));
-          
           // Yeni siparişler varsa ve ses çalma atlanmaması gerekiyorsa ses çal
           const currentTime = Date.now();
           const timeSinceLastNotification = currentTime - lastNotificationTime.current;
-          
           if (newOrders.length > 0 && !skipSoundNotification) {
             // En az 3 saniye geçtiyse bildirim ver (üst üste bildirimleri önle)
             if (timeSinceLastNotification > 3000) {
               console.log(`${newOrders.length} yeni sipariş algılandı`);
-              
               // Bildirim göster
               const message = `Yeni sipariş geldi! Bekleyen siparişler: ${newIdleOrders}`;
-              
               // Ses çal ve bildirim göster
               notifyNewOrder(message);
-              
               // Son bildirim zamanını güncelle
               lastNotificationTime.current = currentTime;
             } else {
               console.log('Kısa süre önce bildirim verildi, tekrar bildirim atlanıyor');
             }
-            
             // Siparişleri UI'da güncelle
-            setOrders(currentOrders);
+            // setOrders(currentOrders); // BUNU KALDIRIYORUM, SADECE fetchOrders orders state'ini güncellesin
           }
-          
           // Bilinen sipariş kimliklerini güncelle
           setKnownOrderIds(currentOrderIds);
         } catch (error) {
           console.error('Siparişleri kontrol ederken hata:', error);
         }
       }
-      
       // Sipariş sayısını güncelle
       setPreviousCount(newIdleOrders);
       setOrderCounts(res.data);
@@ -279,16 +268,12 @@ function BusinessOrders() {
   const handleConfirm = async (orderIds) => {
     try {
       if (!Array.isArray(orderIds)) orderIds = [orderIds];
-      await Promise.all(orderIds.map(orderId =>
-        axios.patch(`http://localhost:3001/api/orders/${orderId}/accept`, {}, getAuthHeaders())
-      ));
+      // Tüm orderId'leri tek bir PATCH isteğiyle gönder
+      await axios.patch(`http://localhost:3001/api/orders/${orderIds[0]}/accept`, { orderIds }, getAuthHeaders());
       setSnackbar({ open: true, message: t('businessOrders.ordersConfirmed'), severity: 'success' });
-      
       // Sipariş onaylama işleminden sonra siparişleri yenile
       fetchOrders();
-      
       // Ses bildirimi olmadan sipariş sayılarını güncelle
-      // true parametresi ses bildirimini geçmek için
       fetchOrderCounts(true);
     } catch (err) {
       console.error('Siparişler onaylanırken hata:', err);

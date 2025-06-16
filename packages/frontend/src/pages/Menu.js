@@ -251,7 +251,12 @@ function Menu({ businessName: propBusinessName, cartItems, addToCart, removeFrom
     });
 
   // Kategorilere göre grupla
-  const categories = Array.from(new Set(menuItems.map(item => item.category || 'Diğer')));
+  let categories = Array.from(new Set(menuItems.map(item => item.category || 'Diğer')));
+  // 'İçecekler' kategorisini en alta taşı
+  categories = categories.filter(cat => cat !== 'İçecekler');
+  if (menuItems.some(item => (item.category || 'Diğer') === 'İçecekler')) {
+    categories.push('İçecekler');
+  }
   const grouped = categories
     .map(cat => ({
       category: cat,

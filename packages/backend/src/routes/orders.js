@@ -5,6 +5,7 @@ const MenuItem = require('../models/MenuItem');
 const User = require('../models/User');
 const { protect, isBusiness } = require('../middleware/authMiddleware');
 const { createNotification } = require('../controllers/notificationController');
+const { Notification } = require('../controllers/notificationController');
 
 // POST /api/orders - Sipariş oluştur (çoklu ürün destekler)
 router.post('/', async (req, res) => {
@@ -46,7 +47,7 @@ router.post('/', async (req, res) => {
     await createNotification(
       userId,
       'order_received',
-      `${business.name} işletmesine ${orders.length} ürün için siparişiniz alındı.`,
+      'Siparişiniz oluşturuldu.',
       {
         businessId: business.id,
         businessName: business.name,
@@ -116,22 +117,39 @@ router.get('/business', protect, isBusiness, async (req, res) => {
 // PATCH /api/orders/:id/accept - Siparişi onayla
 router.patch('/:id/accept', protect, isBusiness, async (req, res) => {
   try {
-    const order = await Order.findByPk(req.params.id, {
-      include: [
-        { model: MenuItem, as: 'menuItem' },
-        { model: User, as: 'business', attributes: ['id', 'name', 'phone'] }
-      ]
-    });
-    
-    if (!order || order.businessId !== req.user.id) {
-      return res.status(404).json({ message: 'Sipariş bulunamadı' });
+    // Eğer frontend'den birden fazla sipariş ID'si geliyorsa (grup onayı)
+    let orderIds = req.body.orderIds || [req.params.id];
+    if (!Array.isArray(orderIds)) orderIds = [orderIds];
+    let notified = false;
+    let results = [];
+    for (const orderId of orderIds) {
+      const order = await Order.findByPk(orderId, {
+        include: [
+          { model: MenuItem, as: 'menuItem' },
+          { model: User, as: 'business', attributes: ['id', 'name', 'phone'] }
+        ]
+      });
+      if (!order || order.businessId !== req.user.id) continue;
+      order.isAccepted = true;
+      await order.save();
+      // Sadece ilk sipariş için notification gönder
+      if (!notified) {
+        await createNotification(
+          order.userId,
+          'order_confirmed',
+          `${order.business.name} siparişinizi onayladı.`,
+          {
+            orderId: order.id,
+            businessId: order.businessId,
+            businessName: order.business.name,
+            menuItemName: order.menuItem.name
+          }
+        );
+        notified = true;
+      }
+      results.push(order);
     }
-    
-    order.isAccepted = true;
-    await order.save();
-    
-    // Artık kullanıcıya bildirim gönderilmiyor
-    res.json(order);
+    res.json(results.length === 1 ? results[0] : results);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
